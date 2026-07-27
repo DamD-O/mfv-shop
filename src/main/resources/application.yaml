@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: MFV
+
+datasource:
+  url: jdbc:mysql://localhost:3306/shop?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+  username: shop_user
+  password: shop7210@
+  driver-class-name: com.mysql.cj.jdbc.Driver
+
+jpa:
+  hibernate:
+    ddl-auto: create # 실행할 때마다 테이블을 지우고 새로 만듭니다 / 데이터 쌓이기 시작하면 update나 validate로 변경
+  show-sql: true
+  properties:
+    hibernate:
+      format_sql: true
+      dialect: org.hibernate.dialect.MySQLDialect
+
+encrypt:
+  key: 1234567890123456
