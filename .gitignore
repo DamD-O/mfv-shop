@@ -37,7 +37,8 @@ out/
 .vscode/
 
 ### 민감정보 ###
-application.yaml       # DB 비밀번호, encrypt.key 들어있음 - 절대 올리면 안 됨
+# DB 비밀번호, encrypt.key 들어있음 - 절대 올리면 안 됨
+application.yaml
 *.env
 
 #log
