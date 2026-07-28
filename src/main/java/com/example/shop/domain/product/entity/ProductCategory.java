@@ -7,7 +7,10 @@ package com.example.shop.domain.product.entity;
 
 public enum ProductCategory
 {
-    MEAT("육류"), FRUIT("과일"), VEGETABLE("채소");
+    MEAT("육류"),
+    FRUIT("과일"),
+    VEGETABLE("채소"),
+    OTHER("기타");
 
     private final String label;
 

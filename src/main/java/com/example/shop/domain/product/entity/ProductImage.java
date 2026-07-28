@@ -5,6 +5,7 @@
  */
 package com.example.shop.domain.product.entity;
 
+import com.example.shop.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "product_image")
-public class ProductImage
+public class ProductImage extends BaseTimeEntity
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,13 +31,14 @@ public class ProductImage
     @Column(name = "image_path", nullable = false)
     private String imagePath;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     public ProductImage(Product product, String imagePath)
     {
         this.product = product;
         this.imagePath = imagePath;
-        this.createdAt = LocalDateTime.now();
+    }
+
+    public void changeImagePath(String imagePath)
+    {
+        this.imagePath = imagePath;
     }
 }

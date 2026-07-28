@@ -22,8 +22,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "product")
-public class Product extends BaseTimeEntity {
-
+public class Product extends BaseTimeEntity
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
@@ -42,25 +42,30 @@ public class Product extends BaseTimeEntity {
     @Column(name = "category", nullable = false, length = 30)
     private ProductCategory category;
 
-    public Product(String name, int price, int stock, ProductCategory category) {
+    public Product(String name, int price, int stock, ProductCategory category)
+    {
         this.name = name;
         this.price = price;
         this.stock = stock;
         this.category = category;
     }
 
-    public void decreaseStock(int quantity) {
-        if (this.stock < quantity) {
+    public void decreaseStock(int quantity)
+    {
+        if (this.stock < quantity)
+        {
             throw new IllegalStateException("재고가 부족합니다.");
         }
         this.stock -= quantity;
     }
 
-    public void increaseStock(int quantity) {
+    public void increaseStock(int quantity)
+    {
         this.stock += quantity;
     }
 
-    public void update(String name, int price, int stock, ProductCategory category) {
+    public void update(String name, int price, int stock, ProductCategory category)
+    {
         this.name = name;
         this.price = price;
         this.stock = stock;
