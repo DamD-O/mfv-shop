@@ -5,17 +5,9 @@
  */
 package com.example.shop.domain.customer.entity;
 
-import com.example.shop.domain.admin.entity.Authority;
-import com.example.shop.global.converter.CryptoConverter;
+import com.example.shop.domain.admin.entity.AuthType;
 import com.example.shop.global.entity.BaseTimeEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,26 +28,23 @@ public class Customer extends BaseTimeEntity
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Convert(converter = CryptoConverter.class)
     @Column(name = "phone", nullable = false)
     private String phone;
 
-    @Convert(converter = CryptoConverter.class)
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Convert(converter = CryptoConverter.class)
     @Column(name = "birth_date", nullable = false)
     private String birthDate;
 
     @Column(name = "point", nullable = true)
     private int point = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "authority_id", nullable = false)
-    private Authority authority;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "authority", nullable = false, length = 20)
+    private AuthType authority;
 
-    public Customer(String customerId, String password, String name, String phone, String email, String birthDate, Authority authority)
+    public Customer(String customerId, String password, String name, String phone, String email, String birthDate, AuthType authority)
     {
         this.customerId = customerId;
         this.password = password;
@@ -64,6 +53,12 @@ public class Customer extends BaseTimeEntity
         this.email = email;
         this.birthDate = birthDate;
         this.authority = authority;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Customer{" + "customerId='" + customerId + '\'' + ", password='" + password + '\'' + ", name='" + name + '\'' + ", phone='" + phone + '\'' + ", email='" + email + '\'' + ", birthDate='" + birthDate + '\'' + ", point=" + point + ", authority=" + authority + '}';
     }
 
     public void changePassword(String encodedPassword)

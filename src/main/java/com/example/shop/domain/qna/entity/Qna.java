@@ -64,6 +64,12 @@ public class Qna extends BaseTimeEntity
         this.status = QnaStatus.WAITING;
     }
 
+    @Override
+    public String toString()
+    {
+        return "Qna{" + "id=" + id + ", product=" + product + ", customer=" + customer + ", content='" + content + '\'' + ", adminAnswer='" + adminAnswer + '\'' + ", status=" + status + '}';
+    }
+
     public void answer(String adminAnswer)
     {
         this.adminAnswer = adminAnswer;

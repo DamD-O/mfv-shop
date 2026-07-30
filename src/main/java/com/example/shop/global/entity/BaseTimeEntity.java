@@ -32,4 +32,10 @@ public abstract class BaseTimeEntity
     {
         return updatedAt;
     }
+
+    @Override
+    public String toString()
+    {
+        return "BaseTimeEntity{" + "createdAt=" + createdAt + ", updatedAt=" + updatedAt + '}';
+    }
 }

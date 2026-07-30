@@ -50,6 +50,12 @@ public class Product extends BaseTimeEntity
         this.category = category;
     }
 
+    @Override
+    public String toString()
+    {
+        return "Product{" + "id=" + id + ", name='" + name + '\'' + ", price=" + price + ", stock=" + stock + ", category=" + category + '}';
+    }
+
     public void decreaseStock(int quantity)
     {
         if (this.stock < quantity)

@@ -11,8 +11,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -35,6 +33,12 @@ public class ProductImage extends BaseTimeEntity
     {
         this.product = product;
         this.imagePath = imagePath;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ProductImage{" + "id=" + id + ", product=" + product + ", imagePath='" + imagePath + '\'' + '}';
     }
 
     public void changeImagePath(String imagePath)

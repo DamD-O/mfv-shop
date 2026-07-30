@@ -60,6 +60,12 @@ public class DeliveryAddress
         this.isDefault = isDefault;
     }
 
+    @Override
+    public String toString()
+    {
+        return "DeliveryAddress{" + "id=" + id + ", customer=" + customer + ", address=" + address + ", addressName='" + addressName + '\'' + ", receiver='" + receiver + '\'' + ", contact='" + contact + '\'' + ", isDefault=" + isDefault + '}';
+    }
+
     public void changeDefault(boolean isDefault)
     {
         this.isDefault = isDefault;

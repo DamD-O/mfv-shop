@@ -46,4 +46,10 @@ public class Address extends BaseTimeEntity
         this.buildingNo = buildingNo;
         this.detailAddress = detailAddress;
     }
+
+    @Override
+    public String toString()
+    {
+        return "Address{" + "id=" + id + ", zipcode='" + zipcode + '\'' + ", roadAddress='" + roadAddress + '\'' + ", buildingNo='" + buildingNo + '\'' + ", detailAddress='" + detailAddress + '\'' + '}';
+    }
 }

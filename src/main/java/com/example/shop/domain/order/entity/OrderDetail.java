@@ -51,6 +51,12 @@ public class OrderDetail
         this.priceAtOrder = priceAtOrder;
     }
 
+    @Override
+    public String toString()
+    {
+        return "OrderDetail{" + "id=" + id + ", orders=" + orders + ", product=" + product + ", quantity=" + quantity + ", priceAtOrder=" + priceAtOrder + '}';
+    }
+
     void assignOrder(Orders orders)
     {
         this.orders = orders;

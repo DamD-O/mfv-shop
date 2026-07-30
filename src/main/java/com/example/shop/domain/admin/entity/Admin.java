@@ -5,16 +5,8 @@
  */
 package com.example.shop.domain.admin.entity;
 
-import com.example.shop.global.converter.CryptoConverter;
 import com.example.shop.global.entity.BaseTimeEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,20 +24,25 @@ public class Admin extends BaseTimeEntity
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Convert(converter = CryptoConverter.class)
     @Column(name = "phone")
     private String phone;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "authority_id", nullable = false)
-    private Authority authority;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "authority", nullable = false, length = 20)
+    private AuthType authority;
 
-    public Admin(String adminId, String password, String phone, Authority authority)
+    public Admin(String adminId, String password, String phone, AuthType authority)
     {
         this.adminId = adminId;
         this.password = password;
         this.phone = phone;
         this.authority = authority;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Admin{" + "adminId='" + adminId + '\'' + ", password='" + password + '\'' + ", phone='" + phone + '\'' + ", authority=" + authority + '}';
     }
 
     public void changePassword(String encodedPassword)

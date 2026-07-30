@@ -33,7 +33,8 @@ public class Review extends BaseTimeEntity
     @JoinColumn(name = "detail_id", nullable = false, unique = true)
     private OrderDetail orderDetail;
 
-    @Column(name = "rating", nullable = false)
+    //평점 1~5점 체크
+    @Column(name = "rating", nullable = false, columnDefinition = "TINYINT CHECK (rating BETWEEN 1 AND 5)")
     private Integer rating;
 
     @Column(name = "content", length = 1000)
@@ -46,6 +47,12 @@ public class Review extends BaseTimeEntity
         this.orderDetail = orderDetail;
         this.rating = rating;
         this.content = content;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Review{" + "id=" + id + ", customer=" + customer + ", orderDetail=" + orderDetail + ", rating=" + rating + ", content='" + content + '\'' + '}';
     }
 
     public void updateContent(Integer rating, String content)

@@ -47,4 +47,10 @@ public class PasswordHistory
         this.oldPassword = oldPassword;
         this.createdAt = LocalDateTime.now();
     }
+
+    @Override
+    public String toString()
+    {
+        return "PasswordHistory{" + "id=" + id + ", customer=" + customer + ", oldPassword='" + oldPassword + '\'' + ", createdAt=" + createdAt + '}';
+    }
 }

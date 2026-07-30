@@ -36,6 +36,12 @@ public class ReviewImage extends BaseTimeEntity
         this.imagePath = imagePath;
     }
 
+    @Override
+    public String toString()
+    {
+        return "ReviewImage{" + "id=" + id + ", review=" + review + ", imagePath='" + imagePath + '\'' + '}';
+    }
+
     public void changeImagePath(String imagePath)
     {
         //이미지 수정
