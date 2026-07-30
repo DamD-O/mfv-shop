@@ -69,6 +69,12 @@ public class Orders extends BaseTimeEntity
         this.orderStatus = OrderStatus.PAYMENT_PENDING;
     }
 
+    @Override
+    public String toString()
+    {
+        return "Orders{" + "id=" + id + ", customer=" + customer + ", deliveryAddress=" + deliveryAddress + ", addressSnapshot='" + addressSnapshot + '\'' + ", totalAmount=" + totalAmount + ", orderStatus=" + orderStatus + ", orderDetails=" + orderDetails + '}';
+    }
+
     public void addOrderDetail(OrderDetail orderDetail)
     {
         this.orderDetails.add(orderDetail);
