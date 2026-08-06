@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @description
  */
 
-public interface DeliveryAddressRepository extends JpaRepository<DeliveryAddress, Long>
-{
+public interface DeliveryAddressRepository extends JpaRepository<DeliveryAddress, Long> {
 
 }

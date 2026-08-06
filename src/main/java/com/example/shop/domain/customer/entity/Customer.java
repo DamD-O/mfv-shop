@@ -16,8 +16,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "customer")
-public class Customer extends BaseTimeEntity
-{
+public class Customer extends BaseTimeEntity {
     @Id
     @Column(name = "customer_id", length = 30)
     private String customerId;

@@ -8,5 +8,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @DATE 2026-07-28
  * @description
  */
-public interface ProductImageRepository extends JpaRepository<ProductImage, Long>
-{}
+public interface ProductImageRepository extends JpaRepository<ProductImage, Long> {}

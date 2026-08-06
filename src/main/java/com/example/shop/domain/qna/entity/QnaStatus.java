@@ -5,8 +5,7 @@
  */
 package com.example.shop.domain.qna.entity;
 
-public enum QnaStatus
-{
+public enum QnaStatus {
     WAITING("답변 대기"),
     ANSWERED("답변 완료");
 

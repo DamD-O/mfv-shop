@@ -9,8 +9,7 @@ import lombok.Getter;
  */
 
 @Getter
-public enum AuthType
-{
+public enum AuthType {
     ADMIN("관리자"),
     USER("사용자");
 

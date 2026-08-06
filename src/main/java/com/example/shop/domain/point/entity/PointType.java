@@ -5,9 +5,9 @@
  */
 package com.example.shop.domain.point.entity;
 
-public enum PointType
-{
-    EARN(""), USE("");
+public enum PointType {
+    EARN(""),
+    USE("");
 
     private final String label;
 

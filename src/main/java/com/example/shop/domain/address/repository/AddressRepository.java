@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * 테이블에 접근, 데이터 관리하는 메서드 제공(findAll, save 등)
  */
 
-public interface AddressRepository extends JpaRepository<Address, Long>
-{
+public interface AddressRepository extends JpaRepository<Address, Long> {
 
 }

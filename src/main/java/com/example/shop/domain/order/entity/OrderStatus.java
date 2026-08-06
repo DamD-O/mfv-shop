@@ -5,8 +5,7 @@
  */
 package com.example.shop.domain.order.entity;
 
-public enum OrderStatus
-{
+public enum OrderStatus {
     PAYMENT_PENDING("결제 대기"),
     PAYMENT_COMPLETE("결제 완료"),
     SHIPPING("배송 중"),

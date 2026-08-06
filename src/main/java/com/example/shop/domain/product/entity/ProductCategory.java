@@ -5,8 +5,7 @@
  */
 package com.example.shop.domain.product.entity;
 
-public enum ProductCategory
-{
+public enum ProductCategory {
     MEAT("육류"),
     FRUIT("과일"),
     VEGETABLE("채소"),

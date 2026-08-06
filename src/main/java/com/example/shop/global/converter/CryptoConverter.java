@@ -16,8 +16,7 @@ import java.util.Base64;
 
 @Component
 @Converter
-public class CryptoConverter implements AttributeConverter<String, String>
-{
+public class CryptoConverter implements AttributeConverter<String, String> {
     private static final String ALGORITHM = "AES/ECB/PKCS5Padding";
 
     //암호화 키 -> application.yaml.encrypt

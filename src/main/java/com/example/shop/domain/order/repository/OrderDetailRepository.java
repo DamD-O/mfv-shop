@@ -8,5 +8,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @DATE 2026-07-28
  * @description
  */
-public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long>
-{}
+public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {}

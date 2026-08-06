@@ -8,5 +8,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @DATE 2026-07-28
  * @description
  */
-public interface ReviewRepository extends JpaRepository<Review, Long>
-{}
+public interface ReviewRepository extends JpaRepository<Review, Long> {}
