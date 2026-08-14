@@ -1,9 +1,10 @@
+package com.example.shop.domain.order.entity;
+
 /**
- * @author yedam
+ * @author madey
  * @date 2026-07-27
  * @description 주문 상태 Enum
  */
-package com.example.shop.domain.order.entity;
 
 public enum OrderStatus {
     PAYMENT_PENDING("결제 대기"),

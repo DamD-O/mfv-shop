@@ -1,9 +1,10 @@
+package com.example.shop.domain.product.entity;
+
 /**
- * @author yedam
+ * @author madey
  * @date 2026-07-27
  * @description 상품 카테고리 Enum (MEAT, FRUIT, VEGETABLE)
  */
-package com.example.shop.domain.product.entity;
 
 public enum ProductCategory {
     MEAT("육류"),

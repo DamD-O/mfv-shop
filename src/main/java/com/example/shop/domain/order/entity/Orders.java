@@ -1,8 +1,3 @@
-/**
- * @author yedam
- * @date 2026-07-27
- * @description 주문 Entity
- */
 package com.example.shop.domain.order.entity;
 
 import com.example.shop.domain.address.entity.DeliveryAddress;
@@ -27,6 +22,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * @author madey
+ * @date 2026-07-27
+ * @description 주문 Entity
+ */
 
 @Entity
 @Getter

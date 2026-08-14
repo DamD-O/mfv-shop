@@ -1,8 +1,3 @@
-/**
- * @author yedam
- * @date 2026-07-27
- * @description 고객 비밀번호 변경 이력 Entity
- */
 package com.example.shop.domain.customer.entity;
 
 import jakarta.persistence.Column;
@@ -19,6 +14,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
+/**
+ * @author madey
+ * @date 2026-07-27
+ * @description 고객 비밀번호 변경 이력 Entity
+ */
 
 @Entity
 @Getter

@@ -3,7 +3,7 @@ package com.example.shop.domain.admin.entity;
 import lombok.Getter;
 
 /**
- * @author yedam
+ * @author madey
  * @DATE 2026-07-29
  * @description 권한 타입 Enum
  */

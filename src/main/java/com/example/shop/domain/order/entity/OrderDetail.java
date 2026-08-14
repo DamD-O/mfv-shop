@@ -1,8 +1,3 @@
-/**
- * @author yedam
- * @date 2026-07-27
- * @description 주문상세 Entity
- */
 package com.example.shop.domain.order.entity;
 
 import com.example.shop.domain.product.entity.Product;
@@ -18,6 +13,12 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+/**
+ * @author madey
+ * @date 2026-07-27
+ * @description 주문상세 Entity
+ */
 
 @Entity
 @Getter

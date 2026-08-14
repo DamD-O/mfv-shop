@@ -1,8 +1,3 @@
-/**
- * @author yedam
- * @date 2026-07-27
- * @description 고객 계정 Entity
- */
 package com.example.shop.domain.customer.entity;
 
 import com.example.shop.domain.admin.entity.AuthType;
@@ -11,6 +6,12 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+/**
+ * @author madey
+ * @date 2026-07-27
+ * @description 고객 계정 Entity
+ */
 
 @Entity
 @Getter

@@ -1,8 +1,3 @@
-/**
- * @author yedam
- * @date 2026-07-27
- * @description 상품 문의/답변 Entity
- */
 package com.example.shop.domain.qna.entity;
 
 import com.example.shop.domain.customer.entity.Customer;
@@ -23,6 +18,12 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+/**
+ * @author madey
+ * @date 2026-07-27
+ * @description 상품 문의/답변 Entity
+ */
 
 @Entity
 @Getter

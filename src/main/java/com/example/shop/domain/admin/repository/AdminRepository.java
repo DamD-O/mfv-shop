@@ -4,7 +4,7 @@ import com.example.shop.domain.admin.entity.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * @author yedam
+ * @author madey
  * @DATE 2026-07-28
  * @description
  */

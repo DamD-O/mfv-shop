@@ -1,9 +1,10 @@
+package com.example.shop.domain.point.entity;
+
 /**
- * @author yedam
+ * @author madey
  * @date 2026-07-27
  * @description 포인트 구분 Enum (적립/사용)
  */
-package com.example.shop.domain.point.entity;
 
 public enum PointType {
     EARN(""),

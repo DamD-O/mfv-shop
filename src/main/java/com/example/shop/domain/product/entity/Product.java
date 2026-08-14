@@ -1,8 +1,3 @@
-/**
- * @author yedam
- * @date 2026-07-27
- * @description 상품 Entity
- */
 package com.example.shop.domain.product.entity;
 
 import com.example.shop.global.entity.BaseTimeEntity;
@@ -17,6 +12,12 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+/**
+ * @author madey
+ * @date 2026-07-27
+ * @description 상품 Entity
+ */
 
 @Entity
 @Getter

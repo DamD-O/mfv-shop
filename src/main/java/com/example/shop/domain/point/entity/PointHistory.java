@@ -1,8 +1,3 @@
-/**
- * @author yedam
- * @date 2026-07-27
- * @description 포인트 적립/사용 이력 Entity
- */
 package com.example.shop.domain.point.entity;
 
 import com.example.shop.domain.customer.entity.Customer;
@@ -23,6 +18,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
+/**
+ * @author madey
+ * @date 2026-07-27
+ * @description 포인트 적립/사용 이력 Entity
+ */
 
 @Entity
 @Getter

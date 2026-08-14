@@ -1,8 +1,3 @@
-/**
- * @author yedam
- * @date 2026-07-27
- * @description 우편번호/도로명주소 등 순수 주소 정보 Entity
- */
 package com.example.shop.domain.address.entity;
 
 import com.example.shop.global.entity.BaseTimeEntity;
@@ -15,6 +10,12 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+/**
+ * @author madey
+ * @date 2026-07-27
+ * @description 우편번호/도로명주소 등 순수 주소 정보 Entity
+ */
 
 @Entity
 @Getter

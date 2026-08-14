@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * @author yedam
+ * @author madey
  * @DATE 2026-07-28
  * @description 리뷰 이미지 Entity
  */
