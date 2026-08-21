@@ -7,6 +7,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 /**
  * @author madey
  * @date 2026-07-27
@@ -35,7 +37,7 @@ public class Customer extends BaseTimeEntity {
     private String email;
 
     @Column(name = "birth_date", nullable = false)
-    private String birthDate;
+    private LocalDate birthDate;
 
     @Column(name = "point", nullable = true)
     private int point = 0;
@@ -44,7 +46,7 @@ public class Customer extends BaseTimeEntity {
     @Column(name = "authority", nullable = false, length = 20)
     private AuthType authority;
 
-    public Customer(String customerId, String password, String name, String phone, String email, String birthDate, AuthType authority)
+    public Customer(String customerId, String password, String name, String phone, String email, LocalDate birthDate, AuthType authority)
     {
         this.customerId = customerId;
         this.password = password;
@@ -53,12 +55,6 @@ public class Customer extends BaseTimeEntity {
         this.email = email;
         this.birthDate = birthDate;
         this.authority = authority;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Customer{" + "customerId='" + customerId + '\'' + ", password='" + password + '\'' + ", name='" + name + '\'' + ", phone='" + phone + '\'' + ", email='" + email + '\'' + ", birthDate='" + birthDate + '\'' + ", point=" + point + ", authority=" + authority + '}';
     }
 
     public void changePassword(String encodedPassword)
