@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author madey
  * @DATE 2026-08-19
- * @description 로그인 없이 접근 시도할 때
+ * @description 미인증 상태로 인증이 필요한 URL에 접근 시, 로그인 페이지 리다이렉트 대신 401 JSON 응답을 반환
  */
 
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {

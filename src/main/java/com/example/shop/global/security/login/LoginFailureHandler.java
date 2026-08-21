@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author madey
  * @DATE 2026-08-18
- * @description 로그인 실패 핸들러
+ * @description 로그인 실패 시 원인별 에러 메시지를 담아 401 응답 반환
  */
 
 public class LoginFailureHandler implements AuthenticationFailureHandler {

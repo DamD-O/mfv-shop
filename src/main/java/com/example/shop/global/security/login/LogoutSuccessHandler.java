@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author madey
  * @DATE 2026-08-19
- * @description 로그아웃 성공 핸들러
+ * @description 로그아웃 성공 시 JSON 응답 반환
  */
 
 public class LogoutSuccessHandler implements org.springframework.security.web.authentication.logout.LogoutSuccessHandler {

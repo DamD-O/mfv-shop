@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author madey
  * @DATE 2026-08-18
- * @description 로그인 성공 핸들러
+ * @description 로그인 성공 시 사용자 권한 정보를 포함한 JSON 응답 반환
  */
 
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
