@@ -1,14 +1,7 @@
 package com.example.shop.domain.product.entity;
 
 import com.example.shop.global.entity.BaseTimeEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,20 +35,24 @@ public class Product extends BaseTimeEntity {
     @Column(name = "category", nullable = false, length = 30)
     private ProductCategory category;
 
-    public Product(String name, int price, int stock, ProductCategory category)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private ProductStatus status = ProductStatus.ON_SALE;
+
+    //상품 단위
+    @Column(name = "unit", nullable = false, length = 20)
+    private String unit;
+
+    public Product(String name, int price, int stock, ProductCategory category, String unit)
     {
         this.name = name;
         this.price = price;
         this.stock = stock;
         this.category = category;
+        this.unit = unit;
     }
 
-    @Override
-    public String toString()
-    {
-        return "Product{" + "id=" + id + ", name='" + name + '\'' + ", price=" + price + ", stock=" + stock + ", category=" + category + '}';
-    }
-
+    //재고 수정
     public void decreaseStock(int quantity)
     {
         if (this.stock < quantity)
@@ -70,11 +67,24 @@ public class Product extends BaseTimeEntity {
         this.stock += quantity;
     }
 
-    public void update(String name, int price, int stock, ProductCategory category)
+    //상품 수정
+    public void update(String name, int price, int stock, ProductCategory category, String unit)
     {
         this.name = name;
         this.price = price;
         this.stock = stock;
         this.category = category;
+        this.unit = unit;
+    }
+
+    //판매 중 / 판매 중지 상태 변경
+    public void stopSale()
+    {
+        this.status = ProductStatus.STOPPED;
+    }
+
+    public void resumeSale()
+    {
+        this.status = ProductStatus.ON_SALE;
     }
 }

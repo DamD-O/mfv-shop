@@ -26,7 +26,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer configure()
     {
-        return (web) -> web.ignoring().requestMatchers("/static/**");
+        return (web) -> web.ignoring().requestMatchers("/", "/*.html", "/css/**", "/js/**", "/images/**", "/assets/**");
     }
 
     //패스워드 인코더
@@ -43,11 +43,13 @@ public class SecurityConfig {
         return http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/customers/signup",
                                                                        "/api/login",
                                                                        "/api/logout",
-                                                                       "/error")
+                                                                       "/error",
+                                                                       "/api/products",
+                                                                       "/api/products/**")
                                                       .permitAll()
-                                                      .requestMatchers("/admin/**")
+                                                      .requestMatchers("/api/admin/**")
                                                       .hasRole("ADMIN") // ROLE_ADMIN 권한 필요
-                                                      .requestMatchers("/customers/**")
+                                                      .requestMatchers("/api/customers/**")
                                                       .hasAnyRole("ADMIN", "USER") // USER 또는 ADMIN 권한 필요
                                                       .anyRequest()
                                                       .authenticated())
