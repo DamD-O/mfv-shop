@@ -5,7 +5,6 @@ import com.example.shop.domain.product.dto.ProductUpdateRequest;
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.entity.ProductCategory;
 import com.example.shop.domain.product.entity.ProductStatus;
-import com.example.shop.domain.product.repository.ProductImageRepository;
 import com.example.shop.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-    private final ProductImageRepository productImgRepository;
 
     //상품 생성
     @Transactional
