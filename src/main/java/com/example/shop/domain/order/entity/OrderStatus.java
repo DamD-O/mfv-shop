@@ -9,6 +9,7 @@ package com.example.shop.domain.order.entity;
 public enum OrderStatus {
     PAYMENT_PENDING("결제 대기"),
     PAYMENT_COMPLETE("결제 완료"),
+    PREPARING("배송준비중"),
     SHIPPING("배송 중"),
     DELIVERED("배송 완료"),
     CANCELED("취소");
