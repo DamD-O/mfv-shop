@@ -40,19 +40,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception
     {
-        return http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/customers/signup",
-                                                                       "/api/login",
-                                                                       "/api/logout",
-                                                                       "/error",
-                                                                       "/api/products",
-                                                                       "/api/products/**")
-                                                      .permitAll()
-                                                      .requestMatchers("/api/admin/**")
-                                                      .hasRole("ADMIN") // ROLE_ADMIN 권한 필요
-                                                      .requestMatchers("/api/customers/**")
-                                                      .hasAnyRole("ADMIN", "USER") // USER 또는 ADMIN 권한 필요
-                                                      .anyRequest()
-                                                      .authenticated())
+        return http.authorizeHttpRequests(
+                           auth -> auth.requestMatchers("/api/customers/signup", "/api/login", "/api/logout", "/error",
+                                                        "/api/products", "/api/products/**")
+                                       .permitAll()
+                                       .requestMatchers("/api/admin/**")
+                                       .hasRole("ADMIN") // ROLE_ADMIN 권한 필요
+                                       .requestMatchers("/api/customers/**")
+                                       .hasAnyRole("ADMIN", "USER") // USER 또는 ADMIN 권한 필요
+                                       .anyRequest()
+                                       .authenticated())
                    .formLogin(formLogin -> formLogin.loginProcessingUrl("/api/login")
                                                     .successHandler(new LoginSuccessHandler())
                                                     .failureHandler(new LoginFailureHandler()))

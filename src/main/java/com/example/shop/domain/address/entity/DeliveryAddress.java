@@ -59,6 +59,17 @@ public class DeliveryAddress {
         this.isDefault = isDefault;
     }
 
+    //주소 수정
+    public void update(String addressName, String receiver, String contact, String zipcode, String roadAddress, String detailAddress)
+    {
+        this.addressName = addressName;
+        this.receiver = receiver;
+        this.contact = contact;
+        this.zipcode = zipcode;
+        this.roadAddress = roadAddress;
+        this.detailAddress = detailAddress;
+    }
+
     public void changeDefault(boolean isDefault)
     {
         this.isDefault = isDefault;
