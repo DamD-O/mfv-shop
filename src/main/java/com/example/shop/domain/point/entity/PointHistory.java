@@ -61,10 +61,4 @@ public class PointHistory {
         this.point = point;
         this.createdAt = LocalDateTime.now();
     }
-
-    @Override
-    public String toString()
-    {
-        return "PointHistory{" + "id=" + id + ", customer=" + customer + ", orders=" + orders + ", type=" + type + ", point=" + point + ", createdAt=" + createdAt + '}';
-    }
 }

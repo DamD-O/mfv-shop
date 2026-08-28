@@ -60,13 +60,17 @@ public class Orders extends BaseTimeEntity {
     @OneToMany(mappedBy = "orders", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
-    public Orders(Customer customer, DeliveryAddress deliveryAddress, String addressSnapshot, int totalAmount)
+    @Column(name = "use_point", nullable = false) //주문시 사용할 포인트
+    private int usePoint;
+
+    public Orders(Customer customer, DeliveryAddress deliveryAddress, String addressSnapshot, int totalAmount, int usePoint)
     {
         this.customer = customer;
         this.deliveryAddress = deliveryAddress;
         this.addressSnapshot = addressSnapshot;
         this.totalAmount = totalAmount;
         this.orderStatus = OrderStatus.PAYMENT_PENDING;
+        this.usePoint = usePoint;
     }
 
     public void addOrderDetail(OrderDetail orderDetail)

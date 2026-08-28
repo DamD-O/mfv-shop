@@ -7,8 +7,8 @@ package com.example.shop.domain.point.entity;
  */
 
 public enum PointType {
-    EARN(""),
-    USE("");
+    EARN("적립"),
+    USE("사용");
 
     private final String label;
 

@@ -10,6 +10,9 @@ import com.example.shop.domain.order.entity.OrderDetail;
 import com.example.shop.domain.order.entity.OrderStatus;
 import com.example.shop.domain.order.entity.Orders;
 import com.example.shop.domain.order.repository.OrdersRepository;
+import com.example.shop.domain.point.entity.PointHistory;
+import com.example.shop.domain.point.entity.PointType;
+import com.example.shop.domain.point.repository.PointHistoryRepository;
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +37,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final DeliveryAddressRepository deliveryAddressRepository;
     private final CustomerRepository customerRepository;
-
-    //todo: 결제 시점 주문 상태 변경 : PAYMENT_COMPLETE
+    private final PointHistoryRepository pointHistoryRepository;
 
     @Transactional
     public Orders createOrders(String customerId, OrderRequest request)
@@ -51,6 +53,7 @@ public class OrderService {
 
         //상품별 재고 차감 및 주문상세 생성
         int totalAmount = 0;
+
         List<OrderDetail> orderDetails = new ArrayList<>();
 
         for (OrderItemRequest item : request.getOrderItemRequest())
@@ -76,7 +79,16 @@ public class OrderService {
             return new RuntimeException("회원 정보를 찾을 수 없으므로, 주문 실패하였습니다.");
         });
 
-        Orders orders = new Orders(customer, address, addressSnapshot, totalAmount);
+        //포인트 사용
+        Integer usePoint = request.getUsePoint() != null ? request.getUsePoint() : 0;
+
+        if (usePoint > customer.getPoint()) throw new RuntimeException("보유 포인트가 부족합니다.");
+
+        if (usePoint > totalAmount) throw new RuntimeException("사용 포인트가 상품 금액을 초과 할 수 없습니다.");
+
+        int finalAmount = totalAmount - usePoint;
+
+        Orders orders = new Orders(customer, address, addressSnapshot, finalAmount, usePoint);
 
         //주문 - 상세주문 매핑
         for (OrderDetail orderDetail : orderDetails)
@@ -145,5 +157,51 @@ public class OrderService {
         }
 
         orders.changeStatus(OrderStatus.CANCELED);
+    }
+
+    //가상 결제 : 포인트 1.5% 적립(소수점 버림), 결제 시뮬레이션: 65%
+    @Transactional
+    public Orders processPayment(String customerId, Long orderId)
+    {
+        Orders orders = ordersRepository.findById(orderId).orElseThrow(() -> {
+            log.warn("결제 실패 - 존재하지 않는 주문 : {}", orderId);
+            return new RuntimeException("결제 실패 - 존재하지 않는 주문입니다.");
+        });
+
+        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 주문만 결제할 수 있습니다.");
+
+        //결제대기만 결제 가능 그외 예외처리
+        if (!orders.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING))
+            throw new RuntimeException("결제 대기 상태의 주문만 결제 가능합니다. \n 주문 상태 : " + orders.getOrderStatus().getLabel());
+
+        // 65% 성공확률
+        boolean isSuccess = Math.random() < 0.65;
+
+        //결제 성공 시 포인트 적립 및 사용, 상태변경 / 결제 실패 시 예외
+        if (isSuccess)
+        {
+            //포인트 사용
+            if (orders.getUsePoint() > 0)
+            {
+                orders.getCustomer().usePoint(orders.getUsePoint());
+                PointHistory usePointHistory = new PointHistory(orders.getCustomer(), orders, PointType.USE, orders.getUsePoint());
+                pointHistoryRepository.save(usePointHistory);
+            }
+
+            //포인트 적립
+            int point = (int) (orders.getTotalAmount() * 0.015);
+            orders.getCustomer().earnPoint(point);
+            PointHistory pointHistory = new PointHistory(orders.getCustomer(), orders, PointType.EARN, point);
+            pointHistoryRepository.save(pointHistory);
+
+            //주문 상태 변경 - 결제 완료
+            orders.changeStatus(OrderStatus.PAYMENT_COMPLETE);
+        }
+        else
+        {
+            throw new RuntimeException("결제에 실패했습니다. 다시 시도해주세요.");
+        }
+
+        return orders;
     }
 }

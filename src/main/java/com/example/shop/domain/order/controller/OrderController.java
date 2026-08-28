@@ -59,4 +59,11 @@ public class OrderController {
     {
         return new OrderResponse(orderService.updateOrderStatus(orderId, request.getOrderStatus()));
     }
+
+    //주문 결제
+    @PostMapping("/customers/orders/{orderId}/payment")
+    public OrderResponse processPayment(@PathVariable Long orderId, Authentication authentication)
+    {
+        return new OrderResponse(orderService.processPayment(authentication.getName(), orderId));
+    }
 }

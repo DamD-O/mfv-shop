@@ -3,6 +3,7 @@ package com.example.shop.domain.order.dto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -25,9 +26,13 @@ public class OrderRequest {
     @Valid //리스트 안의 각 객체도 검증
     private List<OrderItemRequest> orderItemRequest;
 
-    public OrderRequest(Long deliveryId, List<OrderItemRequest> orderItemRequest)
+    @PositiveOrZero(message = "사용 포인트는 0 이상이어야 합니다.")
+    private Integer usePoint; //사용 포인트
+
+    public OrderRequest(Long deliveryId, List<OrderItemRequest> orderItemRequest, Integer usePoint)
     {
         this.deliveryId = deliveryId;
         this.orderItemRequest = orderItemRequest;
+        this.usePoint = usePoint;
     }
 }

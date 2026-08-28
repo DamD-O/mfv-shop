@@ -68,18 +68,19 @@ public class Customer extends BaseTimeEntity {
         this.email = email;
     }
 
-    public void earnPoint(int amount)
+    //포인트 적립
+    public void earnPoint(int point)
     {
-        this.point += amount;
-    } //포인트 적립
+        this.point += point;
+    }
 
-    public void usePoint(int amount)
+    public void usePoint(int point)
     {
         //포인트 사용
-        if (this.point < amount)
+        if (this.point < point)
         {
             throw new IllegalStateException("포인트가 부족합니다.");
         }
-        this.point -= amount;
+        this.point -= point;
     }
 }
