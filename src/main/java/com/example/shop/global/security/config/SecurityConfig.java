@@ -42,7 +42,7 @@ public class SecurityConfig {
     {
         return http.authorizeHttpRequests(
                            auth -> auth.requestMatchers("/api/customers/signup", "/api/login", "/api/logout", "/error",
-                                                        "/api/products", "/api/products/**")
+                                                        "/api/products", "/api/products/**", "/api/qna/**")
                                        .permitAll()
                                        .requestMatchers("/api/admin/**")
                                        .hasRole("ADMIN") // ROLE_ADMIN 권한 필요

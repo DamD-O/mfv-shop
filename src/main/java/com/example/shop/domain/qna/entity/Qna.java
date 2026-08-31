@@ -44,6 +44,9 @@ public class Qna extends BaseTimeEntity {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    @Column(name = "title", nullable = false, length = 100)
+    private String title;
+
     @Lob
     @Column(name = "content", nullable = false)
     private String content;
@@ -56,18 +59,13 @@ public class Qna extends BaseTimeEntity {
     @Column(name = "status", nullable = false, length = 10)
     private QnaStatus status;
 
-    public Qna(Product product, Customer customer, String content)
+    public Qna(Product product, Customer customer, String title, String content)
     {
         this.product = product;
         this.customer = customer;
+        this.title = title;
         this.content = content;
         this.status = QnaStatus.WAITING;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Qna{" + "id=" + id + ", product=" + product + ", customer=" + customer + ", content='" + content + '\'' + ", adminAnswer='" + adminAnswer + '\'' + ", status=" + status + '}';
     }
 
     public void answer(String adminAnswer)
