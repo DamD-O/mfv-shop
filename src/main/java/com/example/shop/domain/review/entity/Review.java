@@ -48,12 +48,6 @@ public class Review extends BaseTimeEntity {
         this.content = content;
     }
 
-    @Override
-    public String toString()
-    {
-        return "Review{" + "id=" + id + ", customer=" + customer + ", orderDetail=" + orderDetail + ", rating=" + rating + ", content='" + content + '\'' + '}';
-    }
-
     public void updateContent(Integer rating, String content)
     {
         //리뷰 수정 메소드

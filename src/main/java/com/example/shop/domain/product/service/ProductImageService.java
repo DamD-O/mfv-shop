@@ -36,8 +36,8 @@ public class ProductImageService {
         // 3. ProductImage 생성해서 저장
         // 4. 리턴
         Product product = productRepository.findById(productId).orElseThrow(() -> {
-            log.warn("이미지 업로드 실패 - 존재하지 않는 productId: {}", productId);
-            return new RuntimeException("해당 상품을 찾을 수 없습니다. 목록을 새로고침 후 다시 시도해주세요.");
+            log.warn("상품 이미지 업로드 실패 - 존재하지 않는 productId: {}", productId);
+            return new RuntimeException("상품 이미지 업로드 실패 - 해당 상품을 찾을 수 없습니다. 목록을 새로고침 후 다시 시도해주세요.");
         });
 
         String imagePath = fileStorageService.store(file, ImageCategory.PRODUCT);
@@ -53,8 +53,8 @@ public class ProductImageService {
         // 2. 그 안의 imagePath로 fileStorageService.delete() 호출
         // 3. productImageRepository.delete()로 DB row 삭제
         ProductImage productImage = productImageRepository.findById(imageId).orElseThrow(() -> {
-            log.warn("이미지 삭제 실패 - imageId: {}", imageId);
-            return new RuntimeException("이미지 삭제 실패 - 존재하지 않는 이미지입니다. 다시 확인 부탁드립니다.");
+            log.warn("상품 이미지 삭제 실패 - imageId: {}", imageId);
+            return new RuntimeException("상품 이미지 삭제 실패 - 존재하지 않는 이미지입니다. 다시 확인 부탁드립니다.");
         });
 
         String filePath = productImage.getImagePath();

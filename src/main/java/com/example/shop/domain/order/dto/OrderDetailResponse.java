@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class OrderDetailResponse {
+    private Long orderDetailId;
     private Long productId;
     private String productName;
     private Integer quantity;
@@ -20,6 +21,7 @@ public class OrderDetailResponse {
 
     public OrderDetailResponse(OrderDetail orderDetail)
     {
+        this.orderDetailId = orderDetail.getId();
         this.productId = orderDetail.getProduct().getId();
         this.productName = orderDetail.getProduct().getName();
         this.quantity = orderDetail.getQuantity();
