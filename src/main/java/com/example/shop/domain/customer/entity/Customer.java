@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @author madey
@@ -46,6 +47,12 @@ public class Customer extends BaseTimeEntity {
     @Column(name = "authority", nullable = false, length = 20)
     private AuthType authority;
 
+    @Column(name = "withdrawn", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean withdrawn = false;
+
+    @Column(name = "withdrawn_at")
+    private LocalDateTime withdrawnAt;
+
     public Customer(String customerId, String password, String name, String phone, String email, LocalDate birthDate, AuthType authority)
     {
         this.customerId = customerId;
@@ -82,5 +89,13 @@ public class Customer extends BaseTimeEntity {
             throw new IllegalStateException("포인트가 부족합니다.");
         }
         this.point -= point;
+    }
+
+    //회원 탈퇴
+    public void setWithdrawn()
+    {
+        this.withdrawn = true;
+        this.withdrawnAt = LocalDateTime.now();
+
     }
 }
