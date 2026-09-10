@@ -5,6 +5,8 @@ import com.example.shop.domain.customer.dto.CustomerSignupResponse;
 import com.example.shop.domain.customer.dto.WithdrawnRequest;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.service.CustomerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
  * @description
  */
 
+@Tag(name = "회원", description = "회원 관련 API")
 @Slf4j
 @RestController
 @RequestMapping("/api/customers")
@@ -25,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerController {
     private final CustomerService customerService;
 
-    //회원가입
+    @Operation(summary = "회원가입")
     @PostMapping("/signup")
     public CustomerSignupResponse signup(@Valid @RequestBody CustomerSignupRequest request)
     {
@@ -33,12 +36,11 @@ public class CustomerController {
         return new CustomerSignupResponse(customer);
     }
 
-    //회원탈퇴
+    @Operation(summary = "회원 탈퇴", description = "탈퇴 여부 및 탈퇴 일시 변경")
     @DeleteMapping("/withdrawn")
     public ResponseEntity<Void> withdrawn(@Valid @RequestBody WithdrawnRequest request, HttpSession session)
     {
         customerService.withdrawn(request, session);
         return ResponseEntity.ok().build();
     }
-
 }
