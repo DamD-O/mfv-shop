@@ -6,6 +6,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author madey
  * @date 2026-07-27
@@ -43,13 +46,31 @@ public class Product extends BaseTimeEntity {
     @Column(name = "unit", nullable = false, length = 20)
     private String unit;
 
-    public Product(String name, int price, int stock, ProductCategory category, String unit)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private final List<ProductImage> productImages = new ArrayList<>();
+
+    // 원산지
+    @Column(name = "origin", length = 100)
+    private String origin;
+
+    // 보관방법
+    @Column(name = "storage_method", length = 200)
+    private String storageMethod;
+
+    // 상품 설명
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    public Product(String name, int price, int stock, ProductCategory category, String unit, String origin, String storageMethod, String description)
     {
         this.name = name;
         this.price = price;
         this.stock = stock;
         this.category = category;
         this.unit = unit;
+        this.origin = origin;
+        this.storageMethod = storageMethod;
+        this.description = description;
     }
 
     //재고 수정
@@ -68,13 +89,16 @@ public class Product extends BaseTimeEntity {
     }
 
     //상품 수정
-    public void update(String name, int price, int stock, ProductCategory category, String unit)
+    public void update(String name, int price, int stock, ProductCategory category, String unit, String origin, String storageMethod, String description)
     {
         this.name = name;
         this.price = price;
         this.stock = stock;
         this.category = category;
         this.unit = unit;
+        this.origin = origin;
+        this.storageMethod = storageMethod;
+        this.description = description;
     }
 
     //판매 중 / 판매 중지 상태 변경

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <title>MFV Main Home</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="assets/img/apple-icon.png">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+
+    <style>
+        .nav-link {
+            color: #198754;
+        }
+    </style>
+</head>
+
+<body>
+<div id="header"></div>
+<!-- Modal -->
+<div class="modal fade bg-white" id="templatemo_search" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="w-100 pt-1 mb-5 text-right">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="" method="post" class="modal-content modal-body border-0 p-0">
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" id="inputModalSearch" name="q" placeholder="Search ...">
+                <button type="submit" class="input-group-text bg-success text-light">
+                    <i class="fa fa-fw fa-search text-white"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Start Banner Hero -->
+<div id="template-mo-zay-hero-carousel" class="carousel slide" data-bs-ride="carousel">
+    <ol class="carousel-indicators">
+        <li data-bs-target="#template-mo-zay-hero-carousel" data-bs-slide-to="0" class="active"></li>
+        <li data-bs-target="#template-mo-zay-hero-carousel" data-bs-slide-to="1"></li>
+        <li data-bs-target="#template-mo-zay-hero-carousel" data-bs-slide-to="2"></li>
+    </ol>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="container">
+                <div class="row p-0">
+                    <div class="col-12">
+                        <img class="img-fluid" src="assets/img/banner_img_01.png" alt="배너이미지01"
+                                style="object-fit: contain; object-position: right;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="container">
+                <div class="row p-0">
+                    <div class="col-12">
+                        <img class="img-fluid" src="assets/img/banner_img_02.png" alt="배너이미지01"
+                                style="object-fit: contain; object-position: right;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="container">
+                <div class="row p-0">
+                    <div class="col-12">
+                        <img class="img-fluid" src="assets/img/banner_img_03.png" alt="배너이미지01"
+                                style="object-fit: contain; object-position: right;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a class="carousel-control-prev text-decoration-none w-auto ps-3" href="#template-mo-zay-hero-carousel" role="button" data-bs-slide="prev">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    <a class="carousel-control-next text-decoration-none w-auto pe-3" href="#template-mo-zay-hero-carousel" role="button" data-bs-slide="next">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+<!-- End Banner Hero -->
+
+<!-- Start 추천 상품 -->
+<section class="bg-white">
+    <div class="container py-5">
+        <div class="row text-center py-3">
+            <div class="col-lg-6 m-auto">
+                <h1 class="h1">오늘의 상품</h1>
+                <p>
+                    신선함과 맛을 제공하겠습니다!
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <ul class="nav nav-tabs justify-content-center mb-4">
+                <li class="nav-item">
+                    <a class="nav-link active" onclick="setActiveTab(this); getProducts()" href="javascript:void(0)">전체</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="setActiveTab(this); getProducts('MEAT')" href="javascript:void(0)">육류</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="setActiveTab(this); getProducts('FRUIT')" href="javascript:void(0)">과일</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="setActiveTab(this); getProducts('VEGETABLE')" href="javascript:void(0)">채소</a>
+                </li>
+            </ul>
+        </div>
+        <div class="row" id="product_cards"></div>
+    </div>
+</section>
+<!-- End Featured Product -->
+
+<div id="footer"></div>
+
+<!-- Start Script -->
+<script src="assets/js/jquery-1.11.0.min.js"></script>
+<script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/templatemo.js"></script>
+<script src="assets/js/custom.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        getProducts();
+    });
+
+    function setActiveTab(element) {
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        element.classList.add('active');
+    }
+
+    async function getProducts(category = '') {
+        try {
+            const url = category ? `/api/products?category=${category}` : '/api/products';
+            const response = await fetch(url);
+            const data = await response.json();
+
+            const container = document.getElementById('product_cards');
+            container.innerHTML = ''; //기존카드 초기화
+
+            if (data.length === 0) {
+                container.innerHTML += `
+                <div class="col-12 col-md-4 mb-4">
+                    <p class="text-dark fw-bold">판매 중인 상품이 없습니다.</p>
+                </div>
+                `;
+                return;
+            }
+
+            //카드 생성
+            data.forEach(product => {
+                const imgTag = product.productImageUrl
+                    ? `<img src="${product.productImageUrl}" class="card-img-top" alt="${product.productName}">` : '';
+                const card = `
+                <div class="col-12 col-md-4 mb-4">
+                <a href="shop-single.html?productId=${product.productId}" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm">
+                           ${imgTag}
+                        <div class="card-body">
+                            <h5>${product.productName}</h5>
+                            <p>${product.unit} 당 ${product.productPrice}원</p>
+                            <p class="${product.productStock > 0 ? 'text-success' : 'text-danger'}">
+                                ${product.productStock > 0 ? '재고 있음' : '품절'}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>`;
+                container.innerHTML += card;
+            });
+
+        } catch (error) {
+            console.error('에러: ', error);
+        }
+
+    }
+</script>
+<script src="js/common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- End Script -->
+</body>
+</html>

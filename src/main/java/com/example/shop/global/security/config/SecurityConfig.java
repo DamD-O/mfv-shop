@@ -41,8 +41,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception
     {
         return http.authorizeHttpRequests(
-                           auth -> auth.requestMatchers("/api/customers/signup", "/api/login", "/api/logout", "/error", "/api/products", "/api/products/**",
-                                                        "/api/qna/**", "/api/ai/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html")
+                           auth -> auth.requestMatchers("/api/customers/signup", "/api/login", "/api/logout", "/error", "/api/products/**", "/api/qna/**",
+                                                        "/api/ai/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/components/**")
                                        .permitAll()
                                        .requestMatchers("/api/admin/**")
                                        .hasRole("ADMIN") // ROLE_ADMIN 권한 필요

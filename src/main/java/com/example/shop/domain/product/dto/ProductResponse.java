@@ -2,6 +2,7 @@ package com.example.shop.domain.product.dto;
 
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.entity.ProductCategory;
+import com.example.shop.domain.product.entity.ProductImage;
 import com.example.shop.domain.product.entity.ProductStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,11 @@ public class ProductResponse {
     private ProductCategory productCategory;
     private ProductStatus productStatus;
     private String unit;
+    private String productImageUrl;
+    private String origin;
+    private String storageMethod;
+    private String description;
+
 
     public ProductResponse(Product product)
     {
@@ -32,5 +38,9 @@ public class ProductResponse {
         this.productCategory = product.getCategory();
         this.productStatus = product.getStatus();
         this.unit = product.getUnit();
+        this.productImageUrl = product.getProductImages().stream().findFirst().map(ProductImage::getImagePath).orElse(null);
+        this.origin = product.getOrigin();
+        this.storageMethod = product.getStorageMethod();
+        this.description = product.getDescription();
     }
 }

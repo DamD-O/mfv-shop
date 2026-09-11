@@ -35,13 +35,25 @@ public class ProductCreateRequest {
     @NotBlank(message = "판매 단위를 입력해주세요.")
     private String unit;
 
-    public ProductCreateRequest(String productName, Integer productPrice, Integer productStock, ProductCategory productCategory, String unit)
+    @NotBlank(message = "원산지를 입력해주세요.")
+    private String origin;
+
+    @NotBlank(message = "보관방법을 입력해주세요.")
+    private String storageMethod;
+
+    @NotBlank(message = "상품 설명을 입력해주세요.")
+    private String description;
+
+    public ProductCreateRequest(String productName, Integer productPrice, Integer productStock, ProductCategory productCategory, String unit, String origin, String storageMethod, String description)
     {
         this.productName = productName;
         this.productPrice = productPrice;
         this.productStock = productStock;
         this.productCategory = productCategory;
         this.unit = unit;
+        this.origin = origin;
+        this.storageMethod = storageMethod;
+        this.description = description;
     }
 
 }

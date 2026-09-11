@@ -28,11 +28,8 @@ public class ProductService {
     @Transactional
     public Product createProduct(ProductCreateRequest request)
     {
-        Product product = new Product(request.getProductName(),
-                                      request.getProductPrice(),
-                                      request.getProductStock(),
-                                      request.getProductCategory(),
-                                      request.getUnit());
+        Product product = new Product(request.getProductName(), request.getProductPrice(), request.getProductStock(), request.getProductCategory(),
+                                      request.getUnit(), request.getOrigin(), request.getStorageMethod(), request.getDescription());
 
         productRepository.save(product);
 
@@ -48,11 +45,8 @@ public class ProductService {
             return new RuntimeException("해당 상품을 찾을 수 없습니다. 목록을 새로고침 후 다시 시도해주세요.");
         });
 
-        product.update(request.getProductName(),
-                       request.getProductPrice(),
-                       request.getProductStock(),
-                       request.getProductCategory(),
-                       request.getUnit());
+        product.update(request.getProductName(), request.getProductPrice(), request.getProductStock(), request.getProductCategory(),
+                       request.getUnit(), request.getOrigin(), request.getStorageMethod(), request.getDescription());
 
         return product;
     }
@@ -76,16 +70,14 @@ public class ProductService {
     public List<Product> getAllProducts(ProductCategory category)
     {
         //카테고리 별 검색
-        if (category == null)
-            return productRepository.findAll();
+        if (category == null) return productRepository.findAll();
 
         return productRepository.findByCategory(category);
     }
 
     public List<Product> getSaleProductList(ProductCategory category)
     {
-        if (category == null)
-            return productRepository.findByStatus(ProductStatus.ON_SALE);
+        if (category == null) return productRepository.findByStatus(ProductStatus.ON_SALE);
 
         return productRepository.findByStatusAndCategory(ProductStatus.ON_SALE, category);
 
