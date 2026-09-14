@@ -16,10 +16,12 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CustomerSignupRequest {
 
-    @NotBlank(message =  "아이디를 입력해주세요.")
+    @NotBlank(message = "아이디를 입력해주세요.")
+    @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]{3,29}$", message = "아이디는 영문으로 시작하는 4~30자의 영문, 숫자 조합이어야 합니다.")
     private String customerId;
 
-    @NotBlank(message =  "비밀번호를 입력해주세요.")
+    @NotBlank(message = "비밀번호를 입력해주세요.")
+    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$", message = "비밀번호는 영문, 숫자, 특수문자(!,@,#,$,%,^,&,*) 포함 8자 이상이어야 합니다.")
     private String password;
 
     @NotBlank(message = "이름을 입력해주세요.")

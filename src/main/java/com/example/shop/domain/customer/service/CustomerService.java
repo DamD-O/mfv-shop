@@ -30,7 +30,6 @@ public class CustomerService {
     public Customer signup(CustomerSignupRequest request)
     {
         //중복 확인 - 아이디, 전화번호, 이메일
-        //todo: 사용자 화면에 오류 메세지 출력 구현
         String userID = request.getCustomerId();
         if (customerRepository.existsById(userID))
         {
