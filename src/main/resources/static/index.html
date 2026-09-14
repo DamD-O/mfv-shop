@@ -96,29 +96,13 @@
     <div class="container py-5">
         <div class="row text-center py-3">
             <div class="col-lg-6 m-auto">
-                <h1 class="h1">오늘의 상품</h1>
-                <p>
-                    신선함과 맛을 제공하겠습니다!
-                </p>
+                <h1 class="h1">오늘의 추천 상품</h1>
             </div>
         </div>
-        <div class="row">
-            <ul class="nav nav-tabs justify-content-center mb-4">
-                <li class="nav-item">
-                    <a class="nav-link active" onclick="setActiveTab(this); getProducts()" href="javascript:void(0)">전체</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" onclick="setActiveTab(this); getProducts('MEAT')" href="javascript:void(0)">육류</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" onclick="setActiveTab(this); getProducts('FRUIT')" href="javascript:void(0)">과일</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" onclick="setActiveTab(this); getProducts('VEGETABLE')" href="javascript:void(0)">채소</a>
-                </li>
-            </ul>
-        </div>
         <div class="row" id="product_cards"></div>
+        <div class="row">
+            <a href="shop.html" class="btn btn-outline-success">전체 상품 보기 →</a>
+        </div>
     </div>
 </section>
 <!-- End Featured Product -->
@@ -131,6 +115,8 @@
 <script src="assets/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/templatemo.js"></script>
 <script src="assets/js/custom.js"></script>
+<script src="js/common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         getProducts();
@@ -143,25 +129,14 @@
         element.classList.add('active');
     }
 
-    async function getProducts(category = '') {
+    async function getProducts() {
         try {
-            const url = category ? `/api/products?category=${category}` : '/api/products';
-            const response = await fetch(url);
+            const response = await fetch('/api/products/random');
             const data = await response.json();
 
             const container = document.getElementById('product_cards');
             container.innerHTML = ''; //기존카드 초기화
 
-            if (data.length === 0) {
-                container.innerHTML += `
-                <div class="col-12 col-md-4 mb-4">
-                    <p class="text-dark fw-bold">판매 중인 상품이 없습니다.</p>
-                </div>
-                `;
-                return;
-            }
-
-            //카드 생성
             data.forEach(product => {
                 const imgTag = product.productImageUrl
                     ? `<img src="${product.productImageUrl}" class="card-img-top" alt="${product.productName}">` : '';
@@ -183,13 +158,10 @@
             });
 
         } catch (error) {
-            console.error('에러: ', error);
+            console.error('error: ', error);
         }
-
     }
 </script>
-<script src="js/common.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- End Script -->
 </body>
 </html>

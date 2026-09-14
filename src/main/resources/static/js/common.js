@@ -51,3 +51,13 @@ async function checkLoginStatus() {
         document.getElementById('my-status').innerText = '로그인'
     }
 }
+
+function search() {
+    const keyword = document.getElementById('search-input').value;
+    if (!keyword) return;
+    window.location.href = `shop.html?keyword=${keyword}`;
+}
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') search();
+});

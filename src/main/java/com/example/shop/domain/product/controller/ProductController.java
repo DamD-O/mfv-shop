@@ -59,9 +59,9 @@ public class ProductController {
 
     @Operation(summary = "판매 중 목록 조회")
     @GetMapping("/products")
-    public List<ProductResponse> getSaleProductList(@RequestParam(required = false) ProductCategory category)
+    public List<ProductResponse> getSaleProductList(@RequestParam(required = false) ProductCategory category, @RequestParam(required = false, defaultValue = "name") String sort)
     {
-        return productService.getSaleProductList(category).stream().map(ProductResponse::new).toList();
+        return productService.getSaleProductList(category, sort).stream().map(ProductResponse::new).toList();
     }
 
     @Operation(summary = "상품 상세 조회")
@@ -69,5 +69,19 @@ public class ProductController {
     public ProductResponse getProductById(@PathVariable Long productId)
     {
         return new ProductResponse(productService.getProduct(productId));
+    }
+
+    @Operation(summary = "랜덤 상품 조회")
+    @GetMapping("/products/random")
+    public List<ProductResponse> getRandomProducts()
+    {
+        return productService.getRandomProducts().stream().map(ProductResponse::new).toList();
+    }
+
+    @Operation(summary = "상품 검색")
+    @GetMapping("/products/search")
+    public List<ProductResponse> getSearchProducts(@RequestParam String keyword)
+    {
+        return productService.searchProducts(keyword).stream().map(ProductResponse::new).toList();
     }
 }

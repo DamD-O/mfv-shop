@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-light shadow">
     <div class="container d-flex justify-content-between align-items-center">
 
-        <a class="navbar-brand text-success logo h3 align-self-center" href="../index.html">
+        <a class="navbar-brand text-success logo h3 align-self-center" href="index.html">
             MFV
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#templatemo_main_nav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -11,31 +11,27 @@
             <div class="flex-fill">
                 <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html">홈</a>
+                        <a class="nav-link" href="index.html">홈</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../shop.html">상품</a>
+                        <a class="nav-link" href="shop.html">상품</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="contact.html">고객센터</a>
+                        <a class="nav-link" href="support.html">고객센터</a>
                     </li>
                 </ul>
             </div>
             <!--검색 영역-->
             <div class="navbar align-self-center d-flex">
-                <div class="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3">
+                <div class="nav-item border border-dark">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="inputMobileSearch" placeholder="Search ...">
-                        <div class="input-group-text">
-                            <i class="fa fa-fw fa-search"></i>
-                        </div>
+                        <input type="text" class="form-control" id="search-input" placeholder="상품 검색...">
+                        <button class="btn btn-light" onclick="search()">
+                            <i class="fa fa-fw fa-search text-dark mr-2"></i>
+                        </button>
                     </div>
                 </div>
-                <!--검색영역-->
-                <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
-                    <i class="fa fa-fw fa-search text-dark mr-2"></i>
-                </a>
-                <a class="nav-icon position-relative text-decoration-none" href="../cart.html">
+                <a class="nav-icon position-relative text-decoration-none" href="cart.html">
                     <i class="fa fa-fw fa-cart-arrow-down text-dark mr-1"></i>
                     <!--카트 상품 개수-->
                 </a>

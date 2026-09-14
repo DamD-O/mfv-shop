@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>MFV - 상품</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+    <link rel="icon" href="assets/img/favicon.ico">
+
+    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+
+    <style>
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+<div id="header"></div>
+<!-- Modal -->
+<div class="modal fade bg-white" id="templatemo_search" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="w-100 pt-1 mb-5 text-right">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="" method="post" class="modal-content modal-body border-0 p-0">
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" id="inputModalSearch" name="q" placeholder="Search ...">
+                <button type="submit" class="input-group-text bg-success text-light">
+                    <i class="fa fa-fw fa-search text-white"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Start Content -->
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-3">
+            <h1 class="h2 pb-4">카테고리</h1>
+            <ul class="list-unstyled templatemo-accordion">
+                <li class="pb-3">
+                    <a class="collapsed d-flex justify-content-between h3 text-decoration-none category-item" id="category-all" href="javascript:void(0)" onclick="setActiveCategory(this); showProducts()">
+                        전체(ALL)
+                    </a>
+                </li>
+                <li class="pb-3">
+                    <a class="collapsed d-flex justify-content-between h3 text-decoration-none category-item" href="javascript:void(0)" onclick="setActiveCategory(this); showProducts('MEAT')">
+                        육류(Meat)
+                    </a>
+                </li>
+                <li class="pb-3">
+                    <a class="collapsed d-flex justify-content-between h3 text-decoration-none category-item" href="javascript:void(0)" onclick="setActiveCategory(this); showProducts('FRUIT')">
+                        과일(Fruit)
+                    </a>
+                </li>
+                <li class="pb-3">
+                    <a class="collapsed d-flex justify-content-between h3 text-decoration-none category-item" href="javascript:void(0)" onclick="setActiveCategory(this); showProducts('VEGETABLE')">
+                        채소(Vegetable)
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-lg-9">
+            <div class="row" style="justify-content: right;">
+                <div class="col-md-3 pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span style="white-space: nowrap;">정렬 기준</span>
+                        <select id="sort" class="form-select w-auto" onchange="showProducts()">
+                            <option value="name">이름순</option>
+                            <option value="priceAsc">가격 낮은 순</option>
+                            <option value="priceDesc">가격 높은 순</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="product_cards"></div>
+        </div>
+        <div div="row">
+            <ul class="pagination pagination-lg justify-content-end">
+                <!--                    페이지-->
+            </ul>
+        </div>
+    </div>
+
+</div>
+</div>
+<!-- End Content -->
+
+<div id="footer"></div>
+
+<!-- Start Script -->
+<script src="assets/js/jquery-1.11.0.min.js"></script>
+<script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/templatemo.js"></script>
+<script src="assets/js/custom.js"></script>
+<script src="js/common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const params = new URLSearchParams(window.location.search);
+        const keyword = params.get('keyword') || '';
+        const category = params.get("category") || '';
+
+        if (keyword)
+            showProducts('', keyword);
+        else if (category)
+            document.querySelector(`[onclick*="${category}"]`).click();
+        else
+            document.getElementById('category-all').click();
+    });
+
+    let currentCategory = '';
+
+    async function showProducts(category = currentCategory, keyword = '') {
+        currentCategory = category; //카테고리 변경 시 저장
+        history.replaceState(null, '', 'shop.html');
+        try {
+            let url;
+
+            if (keyword) {
+                url = `/api/products/search?keyword=${keyword}`;
+            } else {
+                const sort = document.getElementById('sort').value;
+                url = category ? `/api/products?category=${category}&sort=${sort}` : `/api/products?sort=${sort}`;
+            }
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            const container = document.getElementById('product_cards');
+            container.innerHTML = ''; //기존카드 초기화
+
+            if (data.length === 0) {
+                container.innerHTML += `
+                <div class="col-12 col-md-4 mb-4">
+                    <p class="text-dark fw-bold">판매 중인 상품이 없습니다.</p>
+                </div>
+                `;
+                return;
+            }
+
+            //카드 생성
+            data.forEach(product => {
+                const imgTag = product.productImageUrl
+                    ? `<img src="${product.productImageUrl}" class="card-img-top" alt="${product.productName}">` : '';
+                const card = `
+                <div class="col-12 col-md-4 mb-4">
+                <a href="shop-single.html?productId=${product.productId}" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm">
+                           ${imgTag}
+                        <div class="card-body">
+                            <h5>${product.productName}</h5>
+                            <p>${product.unit} 당 ${product.productPrice}원</p>
+                            <p class="${product.productStock > 0 ? 'text-success' : 'text-danger'}">
+                                ${product.productStock > 0 ? '재고 있음' : '품절'}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>`;
+                container.innerHTML += card;
+            });
+
+        } catch (error) {
+            console.error('error: ', error);
+        }
+    }
+
+    function setActiveCategory(element) {
+        document.querySelectorAll('.category-item').forEach(item => {
+            item.classList.remove('text-success', 'fw-bold', 'border-start', 'border-success', 'ps-2');
+        });
+        element.classList.add('text-success', 'fw-bold', 'border-start', 'border-success', 'ps-2');
+    }
+</script>
+<!-- End Script -->
+</body>
+</html>

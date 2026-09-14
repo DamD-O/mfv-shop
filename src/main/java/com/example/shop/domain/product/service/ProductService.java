@@ -8,9 +8,11 @@ import com.example.shop.domain.product.entity.ProductStatus;
 import com.example.shop.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -75,11 +77,18 @@ public class ProductService {
         return productRepository.findByCategory(category);
     }
 
-    public List<Product> getSaleProductList(ProductCategory category)
+    public List<Product> getSaleProductList(ProductCategory category, String sort)
     {
-        if (category == null) return productRepository.findByStatus(ProductStatus.ON_SALE);
+        Sort sorting = switch (sort)
+        {
+            case "priceAsc" -> Sort.by("price").ascending();
+            case "priceDesc" -> Sort.by("price").descending();
+            default -> Sort.by("name").ascending();
+        };
 
-        return productRepository.findByStatusAndCategory(ProductStatus.ON_SALE, category);
+        if (category == null) return productRepository.findByStatus(ProductStatus.ON_SALE, sorting);
+
+        return productRepository.findByStatusAndCategory(ProductStatus.ON_SALE, category, sorting);
 
     }
 
@@ -90,5 +99,19 @@ public class ProductService {
             log.warn("상품 조회 실패 - 존재하지 않는 productId: {}", productId);
             return new RuntimeException("해당 상품을 찾을 수 없습니다.");
         });
+    }
+
+    //최근 등록 상품 조회
+    public List<Product> getRandomProducts()
+    {
+        List<Product> allProducts = productRepository.findByStatus(ProductStatus.ON_SALE);
+        Collections.shuffle(allProducts);
+        return allProducts.stream().limit(6).toList();
+    }
+
+    //상품 검색
+    public List<Product> searchProducts(String keyword)
+    {
+        return productRepository.findByStatusAndNameContaining(ProductStatus.ON_SALE, keyword);
     }
 }
