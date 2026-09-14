@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadHeader();
     await loadFooter();
     checkLoginStatus();
+    updateCartCount();
 });
 
 async function checkLoginStatus() {
@@ -61,3 +62,10 @@ function search() {
 document.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') search();
 });
+
+function updateCartCount() {
+    const cart = JSON.parse(sessionStorage.getItem('cart') || []);
+    const count = cart.length;
+
+    document.getElementById('cart-count').innerText = count > 0 ? count : '';
+}

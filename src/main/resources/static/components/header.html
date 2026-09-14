@@ -23,7 +23,7 @@
             </div>
             <!--검색 영역-->
             <div class="navbar align-self-center d-flex">
-                <div class="nav-item border border-dark">
+                <div class="nav-item border border-dark" style="margin-right: 12px">
                     <div class="input-group">
                         <input type="text" class="form-control" id="search-input" placeholder="상품 검색...">
                         <button class="btn btn-light" onclick="search()">
@@ -33,11 +33,11 @@
                 </div>
                 <a class="nav-icon position-relative text-decoration-none" href="cart.html">
                     <i class="fa fa-fw fa-cart-arrow-down text-dark mr-1"></i>
-                    <!--카트 상품 개수-->
+                    <span id="cart-count" class="position-absolute top-0 ststart-100 translate-middle badge rounded-pill bg-black" style="font-size: 10px;"></span>
                 </a>
                 <a id="myBtn" class="nav-icon position-relative text-decoration-none" href="#">
                     <i class="fa fa-fw fa-user text-dark mr-3"></i>
-                    <span id="my-status" style="font-size: 14px;"></span>
+                    <span id="my-status" style="font-size: 12px;"></span>
                 </a>
             </div>
         </div>
