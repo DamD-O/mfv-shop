@@ -2,7 +2,6 @@ async function loadHeader() {
     const response = await fetch('components/header.html');
     const html = await response.text();
     document.getElementById('header').innerHTML = html;
-    checkLoginStatus(); // 헤더 로드 후 로그인 상태 체크
 }
 
 async function loadFooter() {
@@ -11,10 +10,10 @@ async function loadFooter() {
     document.getElementById('footer').innerHTML = html;
 }
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadHeader();
-    loadFooter();
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadHeader();
+    await loadFooter();
+    checkLoginStatus();
 });
 
 async function checkLoginStatus() {
@@ -22,7 +21,7 @@ async function checkLoginStatus() {
         const myBtn = document.getElementById('myBtn');
         const footerLoginLink = document.getElementById('footer-login-link');
 
-        const response = await fetch('/api/customers/my');
+        const response = await fetch('/api/customers/my', {credentials: 'include'});
         const data = await response.json();
 
         if (response.ok) {
