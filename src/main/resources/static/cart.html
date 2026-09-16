@@ -41,8 +41,9 @@
             </div>
         </div>
         <div class="row py-5">
-            <a href="payment.html" class="btn btn-outline-success" id="payment-btn">구매하기</a>
+            <a class="btn btn-outline-success" id="payment-btn" onclick="goPayment()">구매하기</a>
         </div>
+    </div>
 </section>
 
 <!--END CONTENT-->
@@ -72,11 +73,17 @@
         const container = document.getElementById('cart-items');
         container.innerHTML = '';
 
-        console.log(cart);
-        if (cart) {
+        if (cart.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <p class="fw-bold">장바구니가 비었습니다.</p>
+                    <a href="shop.html" class="btn btn-success mt-3">상품 보러가기</a>
+                </div>
+            `;
+        } else {
             cart.forEach(item => {
                 const img = item.imageUrl ? `
-                            <img src="${item.imageUrl}" class="img-fluid" alt="${item.productName}">` : '';
+                            <img src="${item.imageUrl}" class="img-fluid">` : '<span>상품이미지 없음</span>';
 
                 const info = `
                         <div class="row align-items-center py-3 border-bottom">
@@ -133,9 +140,7 @@
 
         checked.forEach(check => {
             const id = parseInt(check.dataset.productId);
-            cart = cart.filter(item => {
-                item.productId != id;
-            })
+            cart = cart.filter(item => item.productId != id)
         })
 
         sessionStorage.setItem('cart', JSON.stringify(cart));
@@ -151,6 +156,39 @@
         setOrders();
         calcTotal();
         updateCartCount();
+    }
+
+    async function goPayment() {
+        const checked = document.querySelectorAll('.item-check:checked');
+        const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
+
+        if (cart.length === 0) {
+            alert('장바구니에 상품이 없습니다. 상품을 추가해주세요.');
+            return;
+        }
+
+        if (checked.length === 0) {
+            alert('구매할 상품을 선택해주세요.');
+            return;
+        }
+
+        const response = await fetch(`/api/customers/my`, {
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            //선택된 상품만 결제페이지에 넘기기
+            const selectedIds = [...checked].map(check => parseInt(check.dataset.productId));
+            const selectedItems = cart.filter(item => selectedIds.includes(parseInt(item.productId)));
+            sessionStorage.setItem('selectedItems', JSON.stringify(selectedItems));
+
+            console.log('selectedItems', selectedItems);
+
+            window.location.href = 'payment.html';
+        } else {
+            alert('로그인이 필요한 서비스 입니다.');
+            window.location.href = 'login.html';
+        }
     }
 </script>
 <!-- End Script -->

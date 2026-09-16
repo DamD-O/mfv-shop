@@ -88,7 +88,7 @@ public class OrderService {
 
         int finalAmount = totalAmount - usePoint;
 
-        Orders orders = new Orders(customer, address, addressSnapshot, finalAmount, usePoint);
+        Orders orders = new Orders(customer, address, addressSnapshot, finalAmount, usePoint, request.getDeliveryRequest());
 
         //주문 - 상세주문 매핑
         for (OrderDetail orderDetail : orderDetails)

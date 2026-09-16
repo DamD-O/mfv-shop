@@ -64,7 +64,7 @@ document.addEventListener('keydown', function (e) {
 });
 
 function updateCartCount() {
-    const cart = JSON.parse(sessionStorage.getItem('cart') || []);
+    const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
     const count = cart.length;
 
     document.getElementById('cart-count').innerText = count > 0 ? count : '';

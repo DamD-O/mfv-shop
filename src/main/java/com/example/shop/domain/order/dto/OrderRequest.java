@@ -29,10 +29,13 @@ public class OrderRequest {
     @PositiveOrZero(message = "사용 포인트는 0 이상이어야 합니다.")
     private Integer usePoint; //사용 포인트
 
-    public OrderRequest(Long deliveryId, List<OrderItemRequest> orderItemRequest, Integer usePoint)
+    private String deliveryRequest;
+
+    public OrderRequest(Long deliveryId, List<OrderItemRequest> orderItemRequest, Integer usePoint, String deliveryRequest)
     {
         this.deliveryId = deliveryId;
         this.orderItemRequest = orderItemRequest;
         this.usePoint = usePoint;
+        this.deliveryRequest = deliveryRequest;
     }
 }

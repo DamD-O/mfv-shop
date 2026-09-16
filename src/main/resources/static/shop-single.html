@@ -49,7 +49,7 @@
         <div class="row">
             <div class="col-lg-5 mt-5">
                 <div class="card mb-3">
-                    <img class="card-img img-fluid" src="assets/img/product_single_10.jpg" alt="상품 이미지" id="product-detail">
+                    <img class="card-img img-fluid" id="product-detail">
                 </div>
             </div>
             <!-- col end -->
@@ -105,6 +105,7 @@
         let image = data.productImageUrl;
 
         document.getElementById('product-detail').src = image || '';
+        document.getElementById('product-detail').alt = name;
         document.getElementById('product-name').innerText = name;
         document.getElementById('product-price').innerText = unit + '당 \t' + price + '원';
         document.getElementById('product-origin').innerText = data.origin;

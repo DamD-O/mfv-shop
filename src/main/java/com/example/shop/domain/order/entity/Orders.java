@@ -3,19 +3,7 @@ package com.example.shop.domain.order.entity;
 import com.example.shop.domain.address.entity.DeliveryAddress;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.global.entity.BaseTimeEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,12 +46,15 @@ public class Orders extends BaseTimeEntity {
     private OrderStatus orderStatus;
 
     @OneToMany(mappedBy = "orders", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    private List<OrderDetail> orderDetails = new ArrayList<>();
+    private final List<OrderDetail> orderDetails = new ArrayList<>();
 
     @Column(name = "use_point", nullable = false) //주문시 사용할 포인트
     private int usePoint;
 
-    public Orders(Customer customer, DeliveryAddress deliveryAddress, String addressSnapshot, int totalAmount, int usePoint)
+    @Column(name = "delivery_request", columnDefinition = "TEXT")
+    private String deliveryRequest; // 배송 요청사항
+
+    public Orders(Customer customer, DeliveryAddress deliveryAddress, String addressSnapshot, int totalAmount, int usePoint, String deliveryRequest)
     {
         this.customer = customer;
         this.deliveryAddress = deliveryAddress;
@@ -71,6 +62,7 @@ public class Orders extends BaseTimeEntity {
         this.totalAmount = totalAmount;
         this.orderStatus = OrderStatus.PAYMENT_PENDING;
         this.usePoint = usePoint;
+        this.deliveryRequest = deliveryRequest;
     }
 
     public void addOrderDetail(OrderDetail orderDetail)

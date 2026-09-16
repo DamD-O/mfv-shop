@@ -124,7 +124,7 @@
 
             data.forEach(product => {
                 const imgTag = product.productImageUrl
-                    ? `<img src="${product.productImageUrl}" class="card-img-top" alt="${product.productName}">` : '';
+                    ? `<img src="${product.productImageUrl}" class="card-img-top">` : '<span>상품이미지 없음</span>';
                 const card = `
                 <div class="col-12 col-md-4 mb-4">
                 <a href="shop-single.html?productId=${product.productId}" class="text-decoration-none text-dark">
