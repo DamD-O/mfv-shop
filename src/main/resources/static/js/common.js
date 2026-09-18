@@ -69,3 +69,15 @@ function updateCartCount() {
 
     document.getElementById('cart-count').innerText = count > 0 ? count : '';
 }
+
+async function fetchWithAuth(url, options = []) {
+    const response = await fetch(url, {credentials: 'include', ...options});
+
+    if (response.status === 401) {
+        alert('로그인이 필요합니다.');
+        location.href = 'login.html';
+        return null;
+    }
+
+    return response;
+}

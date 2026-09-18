@@ -4,6 +4,7 @@ import com.example.shop.domain.address.entity.DeliveryAddress;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author madey
@@ -12,6 +13,9 @@ import java.util.List;
  */
 
 public interface DeliveryAddressRepository extends JpaRepository<DeliveryAddress, Long> {
-    List<DeliveryAddress> findByCustomer_CustomerId(String customerId);
-    List<DeliveryAddress> findByCustomer_CustomerIdAndIsDefaultTrue(String customerId);
+    List<DeliveryAddress> findByCustomer_CustomerIdAndDeletedAtIsNullOrderByIsDefaultDesc(String customerId);
+
+    List<DeliveryAddress> findByCustomer_CustomerIdAndIsDefaultTrueAndDeletedAtIsNull(String customerId);
+
+    Optional<DeliveryAddress> findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(String customerId, Long DeliveryId);
 }

@@ -28,7 +28,7 @@ public class OrderResponse {
     {
         this.orderId = orders.getId();
         this.customerId = orders.getCustomer().getCustomerId();
-        this.deliveryId = orders.getDeliveryAddress().getId();
+        this.deliveryId = orders.getDeliveryAddress().getDeliveryId();
         this.addressSnapshot = orders.getAddressSnapshot();
         this.totalAmount = orders.getTotalAmount();
         this.orderStatus = orders.getOrderStatus();

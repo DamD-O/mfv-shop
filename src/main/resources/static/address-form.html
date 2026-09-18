@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <title>MFV - 배송지 등록/수정</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="icon" href="assets/img/favicon.ico">
+
+    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+
+</head>
+<body>
+<div id="header"></div>
+
+<section class="py-5 bg-light">
+    <div class="col-12 col-md-10 mx-auto border border-white p-4 bg-white" style="border-radius: 12px">
+        <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
+            <table class="table align-middle">
+                <caption class="caption-top fs-5 fw-bold text-dark">배송지</caption>
+                <tbody>
+                <tr>
+                    <th class="bg-light align-middle" style="width: 150px;">배송지명 <span class="text-danger">*</span></th>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="text" class="form-control w-50" maxlength="10" placeholder="배송지명을 입력하세요. (최대 10자)" id="addressName">
+                            <div>
+                                <input type="checkbox" id="isDefault">
+                                <label for="isDefault">기본배송지 설정</label>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="bg-light">수령인 <span class="text-danger">*</span></th>
+                    <td>
+                        <input type="text" class="form-control w-50" maxlength="10" id="receiver">
+                    </td>
+                </tr>
+                <tr>
+                    <th class="bg-light">연락처 <span class="text-danger">*</span></th>
+                    <td>
+                        <input type="tel" class="form-control" id="contact" placeholder="핸드폰 번호 11자리를 입력하세요. ex)01012345678">
+                    </td>
+                </tr>
+                <tr>
+                    <th class="bg-light align-top pt-3">주소</th>
+                    <td>
+                        <div class="d-flex gap-2 mb-2">
+                            <input type="text" class="form-control w-25" id="zipcode" readonly>
+                            <button type="button" class="btn btn-success" onclick="getAddress()">우편번호</button>
+                        </div>
+                        <input type="text" class="form-control mb-2" id="roadAddress" readonly>
+                        <input type="text" class="form-control" id="detailAddress" placeholder="상세주소를 입력하세요.">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
+            <div class="p-3">
+                <p class="fw-bold mb-2">개인정보수집•이용 안내</p>
+                <p class="mb-1">• 개인정보 수집목적 : 상품구매 시 배송처리</p>
+                <p class="mb-1">• 수집항목 : 배송지명, 수령인정보(수령인, 연락처, 주소)</p>
+                <p class="mb-1">• 보유 및 이용기간 : 정보 삭제 또는 회원 탈퇴 시 까지</p>
+                <p class="mb-3">• 확인버튼을 누르지 않을 경우 배송지 정보가 저장되지 않습니다.</p>
+                <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+                    <input type="checkbox" class="form-check-input" id="agreement-check">
+                    <label for="agreement-check">위 개인정보 수집•이용을 확인하고 배송지를 등록합니다.</label>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center gap-3 mt-3">
+            <button type="submit" class="btn btn-success btn-lg px-5" id="address-add-ok" disabled onclick="saveAddress()">확인</button>
+            <button type="button" class="btn btn-secondary btn-lg px-5" onclick="history.back()">취소</button>
+        </div>
+    </div>
+</section>
+
+<div id="footer"></div>
+
+<!-- Start Script -->
+<script src="assets/js/jquery-1.11.0.min.js"></script>
+<script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
+<script src="assets/js/templatemo.js"></script>
+<script src="js/common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const params = new URLSearchParams(location.search);
+        const type = params.get("type"); // add  or update
+        const deliveryId = params.get("deliveryId");
+
+        let data = null;
+        if (type === 'update') {
+            const res = await fetch(`/api/customers/address/${deliveryId}`, {credentials: 'include'});
+            data = await res.json();
+
+            document.getElementById('addressName').value = data.addressName;
+            document.getElementById('receiver').value = data.receiver;
+            document.getElementById('contact').value = data.contact;
+            document.getElementById('zipcode').value = data.zipcode;
+            document.getElementById('roadAddress').value = data.roadAddress;
+            document.getElementById('detailAddress').value = data.detailAddress;
+            document.getElementById('isDefault').checked = data.default;
+            document.getElementById('agreement-check').checked = true;
+            document.getElementById('address-add-ok').disabled = false;
+        }
+
+        document.getElementById('isDefault').addEventListener('change', (e) => {
+            if (type === 'update' && data?.default && !e.target.checked) {
+                alert('기본 배송지는 해제할 수 없습니다. 다른 배송지를 기본배송지로 설정하면 자동으로 변경됩니다.');
+                e.target.checked = true;
+            }
+        });
+
+        document.getElementById('contact').addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length <= 3) {
+                e.target.value = val;
+            } else if (val.length <= 7) {
+                e.target.value = `${val.slice(0, 3)}-${val.slice(3)}`;
+            } else {
+                e.target.value = `${val.slice(0, 3)}-${val.slice(3, 7)}-${val.slice(7, 11)}`;
+            }
+        });
+
+        document.getElementById('agreement-check').addEventListener('change', (e) => {
+            document.getElementById('address-add-ok').disabled = !e.target.checked;
+        });
+
+    })
+
+
+    function getAddress() {
+        new kakao.Postcode({
+            oncomplete: function (data) {
+                let addr = '';
+
+                if (data.userSelectedType === 'R') {
+                    addr = data.roadAddress
+                } else {
+                    addr = data.jibunAddress;
+                }
+
+                if (data.buildingName !== '')
+                    addr += ' (' + data.buildingName + ')';
+
+                document.getElementById('zipcode').value = data.zonecode;
+                document.getElementById('roadAddress').value = addr;
+
+                document.getElementById('detailAddress').focus();
+            }
+        }).open();
+    }
+
+    async function saveAddress() {
+        if (!validate()) return;
+
+        const params = new URLSearchParams(location.search);
+        const type = params.get('type');
+        const deliveryId = params.get('deliveryId');
+
+        const url = type === 'update' ? `/api/customers/address/${deliveryId}` : `/api/customers/address`;
+        const method = type === 'update' ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                addressName: document.getElementById('addressName').value,
+                receiver: document.getElementById('receiver').value,
+                contact: document.getElementById('contact').value,
+                zipcode: document.getElementById('zipcode').value,
+                roadAddress: document.getElementById('roadAddress').value,
+                detailAddress: document.getElementById('detailAddress').value,
+                isDefault: document.getElementById('isDefault').checked
+            })
+        });
+
+        if (response.ok) {
+            if (document.getElementById('isDefault').checked) {
+                const data = await response.json();
+                await fetch(`/api/customers/address/${data.deliveryId}/default`, {
+                    method: 'PATCH',
+                    credentials: 'include'
+                });
+            }
+            history.back();
+        } else {
+            const error = await response.json();
+            alert(error.message || '배송지 등록 실패');
+        }
+    }
+
+    function validate() {
+        if (!document.getElementById('addressName').value.trim()) {
+            alert('배송지명을 입력하세요.');
+            return false;
+        }
+
+        if (!document.getElementById('receiver').value.trim()) {
+            alert('수령인을 입력하세요.');
+            return false;
+        }
+
+        if (!document.getElementById('contact').value.trim()) {
+            alert('연락처를 입력하세요.');
+            return false;
+        }
+
+        const contactRegex = /^\d{3}-\d{3,4}-\d{4}$/;
+        if (!contactRegex.test(document.getElementById('contact').value)) {
+            alert('연락처 형식이 올바르지 않습니다. ex) 01012345678');
+            return false;
+        }
+
+        if (!document.getElementById('zipcode').value.trim()) {
+            alert('주소를 입력하세요.');
+            return false;
+        }
+
+        return true;
+
+    }
+</script>

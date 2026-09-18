@@ -1,15 +1,18 @@
 package com.example.shop.domain.address.service;
 
 import com.example.shop.domain.address.dto.DeliveryAddressRequest;
+import com.example.shop.domain.address.dto.DeliveryAddressResponse;
 import com.example.shop.domain.address.entity.DeliveryAddress;
 import com.example.shop.domain.address.repository.DeliveryAddressRepository;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -34,7 +37,8 @@ public class DeliveryAddressService {
         });
 
         DeliveryAddress deliveryAddress = new DeliveryAddress(customer, request.getAddressName(), request.getReceiver(), request.getContact(),
-                                                              request.getZipcode(), request.getRoadAddress(), request.getDetailAddress(), false);
+                                                              request.getZipcode(), request.getRoadAddress(), request.getDetailAddress(), false,
+                                                              null);
 
         deliveryAddressRepository.save(deliveryAddress);
 
@@ -51,7 +55,8 @@ public class DeliveryAddressService {
 
         if (!address.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 배송지만 수정 할 수 있습니다.");
 
-        address.update(request.getAddressName(), request.getReceiver(), request.getContact(), request.getZipcode(), request.getRoadAddress(), request.getDetailAddress());
+        address.update(request.getAddressName(), request.getReceiver(), request.getContact(), request.getZipcode(), request.getRoadAddress(),
+                       request.getDetailAddress());
 
         return address;
     }
@@ -59,7 +64,16 @@ public class DeliveryAddressService {
     public List<DeliveryAddress> getDeliveryAddressList(String customerId)
     {
         //로그인한 고객의 배송지 목록 조회
-        return deliveryAddressRepository.findByCustomer_CustomerId(customerId);
+        return deliveryAddressRepository.findByCustomer_CustomerIdAndDeletedAtIsNullOrderByIsDefaultDesc(customerId);
+    }
+
+    public DeliveryAddressResponse getDeliveryAddress(String customerId, Long deliveryId)
+    {
+        //배송지 단건 조회
+        DeliveryAddress address = deliveryAddressRepository.findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(customerId, deliveryId)
+                                                           .orElseThrow(() -> new EntityNotFoundException("배송지를 찾을 수 없습니다."));
+
+        return new DeliveryAddressResponse(address);
     }
 
     @Transactional
@@ -72,7 +86,9 @@ public class DeliveryAddressService {
 
         if (!address.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 배송지만 삭제 할 수 있습니다.");
 
-        deliveryAddressRepository.delete(address);
+        if (address.isDefault()) throw new IllegalStateException("기본 배송지는 삭제 할 수 없습니다.");
+
+        address.setDeletedAt(LocalDateTime.now());
     }
 
     @Transactional
@@ -86,7 +102,7 @@ public class DeliveryAddressService {
         if (!target.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 배송지만 기본배송지로 설정할 수 있습니다.");
 
         //기존 설정된 기본 배송지 false로 변경
-        List<DeliveryAddress> defaultAddress = deliveryAddressRepository.findByCustomer_CustomerIdAndIsDefaultTrue(customerId);
+        List<DeliveryAddress> defaultAddress = deliveryAddressRepository.findByCustomer_CustomerIdAndIsDefaultTrueAndDeletedAtIsNull(customerId);
 
         defaultAddress.forEach(address -> address.changeDefault(false));
 

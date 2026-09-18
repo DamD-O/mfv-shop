@@ -25,7 +25,7 @@ public class DeliveryAddressResponse {
 
     public DeliveryAddressResponse(DeliveryAddress deliveryAddress)
     {
-        this.deliveryId = deliveryAddress.getId();
+        this.deliveryId = deliveryAddress.getDeliveryId();
         this.customerId = deliveryAddress.getCustomer().getCustomerId();
         this.addressName = deliveryAddress.getAddressName();
         this.receiver = deliveryAddress.getReceiver();

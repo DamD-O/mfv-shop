@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 /**
  * @author madey
@@ -20,7 +23,7 @@ public class DeliveryAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "delivery_id")
-    private Long id;
+    private Long deliveryId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -47,7 +50,11 @@ public class DeliveryAddress {
     @Column(name = "is_default", nullable = false)
     private boolean isDefault;
 
-    public DeliveryAddress(Customer customer, String addressName, String receiver, String contact, String zipcode, String roadAddress, String detailAddress, boolean isDefault)
+    @Setter
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    public DeliveryAddress(Customer customer, String addressName, String receiver, String contact, String zipcode, String roadAddress, String detailAddress, boolean isDefault, LocalDateTime deletedAt)
     {
         this.customer = customer;
         this.addressName = addressName;
@@ -57,6 +64,7 @@ public class DeliveryAddress {
         this.roadAddress = roadAddress;
         this.detailAddress = detailAddress;
         this.isDefault = isDefault;
+        this.deletedAt = deletedAt;
     }
 
     //주소 수정

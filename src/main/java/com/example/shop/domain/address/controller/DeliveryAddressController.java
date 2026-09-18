@@ -41,6 +41,13 @@ public class DeliveryAddressController {
         return new DeliveryAddressResponse(deliveryAddressService.updateDeliveryAddress(authentication.getName(), deliveryId, request));
     }
 
+    @Operation(summary = "배송지 상세 조회")
+    @GetMapping("/{deliveryId}")
+    public DeliveryAddressResponse getAddress(@PathVariable Long deliveryId, Authentication authentication)
+    {
+        return deliveryAddressService.getDeliveryAddress(authentication.getName(), deliveryId);
+    }
+
     @Operation(summary = "배송지 목록 조회")
     @GetMapping
     public List<DeliveryAddressResponse> getList(Authentication authentication)

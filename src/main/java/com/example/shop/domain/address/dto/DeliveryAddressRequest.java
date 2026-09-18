@@ -31,7 +31,6 @@ public class DeliveryAddressRequest {
     @NotBlank(message = "주소를 선택해주세요.")
     private String roadAddress;
 
-    @NotBlank(message = "상세주소를 입력해주세요.")
     private String detailAddress;
 
     public DeliveryAddressRequest(String addressName, String receiver, String contact, String zipcode, String roadAddress, String detailAddress)
