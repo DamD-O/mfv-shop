@@ -32,7 +32,7 @@
             </div>
             <div class="rounded p-3" style="background: #f8f9fa;" id="address-info"></div>
         </div>
-        <div class="bg-white rounded p-4 mb-3 p-4 shadow-sm border-0">
+        <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
             <h5>배송 요청사항</h5>
             <div class="row g-2 mb-4">
                 <select id="deliveryRequest" class="form-select border border-dark rounded p-1" onchange="showDirectInput()">
@@ -46,35 +46,94 @@
                 <textarea id="directInput" class="form-control mt-2 d-none" rows="8" placeholder="요청사항을 입력하세요." style="resize: none"></textarea>
             </div>
         </div>
-        <div class="bg-white rounded p-4 mb-3 p-4 shadow-sm border-0">
+        <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
             <h5>주문 상품 <span class="text-success" id="product-count"></span></h5>
             <div id="order-items"></div>
         </div>
-        <div class="bg-white rounded p-4 mb-3 p-4 shadow-sm border-0">
+        <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">포인트</h5>
-                <p>보유 <span id="point">111</span>P</p>
+                <p>보유 <span id="point"></span>P</p>
             </div>
             <div class="row g-2">
                 <div class="col-8">
-                    <input type="number" class="form-control" placeholder="포인트 입력">
+                    <input type="number" class="form-control" id="usePoint" min="0" placeholder="포인트 입력">
                 </div>
                 <div class="col-4">
-                    <button class="btn btn-outline-success w-100">전액사용</button>
+                    <button class="btn btn-outline-success w-100" id="usePointBtn">전액사용</button>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded p-4 mb-3 p-4 shadow-sm border-0">
-            <h5>최종 결제금액</h5>
+        <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
+            <h5 class="border-bottom p-3 mb-3 d-flex justify-content-start">결제금액</h5>
+            <div class="d-flex justify-content-between mb-1">
+                <span>상품금액</span>
+                <span id="total"></span>
+            </div>
+            <div class="d-flex justify-content-between mb-1 text-danger">
+                <span>포인트 사용</span>
+                <span id="using"></span>
+            </div>
+            <div class="d-flex justify-content-between mb-2 fw-bold">
+                <span>배송지</span>
+                <span>무료</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2 fw-bold">
+                <span>최종 결제 금액</span>
+                <span id="totalPayment"></span>
+            </div>
         </div>
-        <div class="bg-white rounded p-4 mb-3 p-4 shadow-sm border-0">
-            <h5>결제수단</h5>
+        <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
+            <h5 class="">결제수단</h5>
+            <div class="d-flex gap-2">
+                <input type="radio" name="payMethod" id="card" value="card" class="d-none">
+                <label for="card" class="btn btn-outline-success px-4 py-2">신용/체크카드</label>
+
+                <input type="radio" name="payMethod" id="transfer" value="transfer" class="d-none" disabled>
+                <label for="transfer" class="btn btn-outline-secondary px-4 py-2">계좌이체</label>
+
+                <input type="radio" name="payMethod" id="bank" value="bank" class="d-none" disabled>
+                <label for="bank" class="btn btn-outline-secondary px-4 py-2">무통장입금</label>
+
+                <input type="radio" name="payMethod" id="easypayment" value="easypayment" class="d-none" disabled>
+                <label for="easypayment" class="btn btn-outline-secondary px-4 py-2">간편결제</label>
+            </div>
         </div>
-        <div class="bg-white rounded p-4 mb-3 p-4 shadow-sm border-0">
-            <div>동의 약관</div>
-            <button class="btn btn-success w-100">
-                <spa>금액</spa>
-                결제하기
+        <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
+            <div class="d-flex align-items-center mb-3">
+                <input type="checkbox" class="form-check-input me-2" id="agreeAll">
+                <label for="agreeAll" class="fw-bold">전체 동의</label>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <input type="checkbox" class="form-check-input me-2 agree-item" id="agree1">
+                    <label for="agree1"><span class="text-success">[필수]</span> 개인정보 수집 및 이용 동의</label>
+                </div>
+                <a class="text-muted small">보기 ›</a>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <input type="checkbox" class="form-check-input me-2 agree-item" id="agree2">
+                    <label for="agree2"><span class="text-success">[필수]</span> 개인정보 제3자 제공 동의</label>
+                </div>
+                <a class="text-muted small">보기 ›</a>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <input type="checkbox" class="form-check-input me-2 agree-item" id="agree3">
+                    <label for="agree3"><span class="text-success">[필수]</span> 결제대행 서비스 이용약관 동의</label>
+                </div>
+                <a class="text-muted small">보기 ›</a>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <input type="checkbox" class="form-check-input me-2 agree-item" id="agree4">
+                    <label for="agree4"><span class="text-success">[필수]</span> 주문 내용 확인 및 결제 진행 동의</label>
+                </div>
+            </div>
+            <button class="btn btn-success w-100 btn-lg" id="payBtn">
+                <span id="pay-amount"></span> 결제하기
             </button>
         </div>
     </div>
@@ -109,12 +168,18 @@
 <script src="js/common.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    let productTotal = 0;
     let seletedAddress = null;
-    /*
-    * 포인트 연동
-    * 최종 결제 금액 계산
-    * 결제하기 버튼 - 주문 생성 API 호출*/
+    let currentDeliveryId = null;
+
     document.addEventListener("DOMContentLoaded", async () => {
+        const orderItems = JSON.parse(sessionStorage.getItem("selectedItems")) || [];
+        if (orderItems.length === 0) {
+            alert('주문할 상품이 없습니다.');
+            location.href = 'cart.html';
+            return;
+        }
+
         await checkLogin();
         await loadDeliveryAddress()
         loadOrderItems();
@@ -124,6 +189,54 @@
 
     document.getElementById('addressModal').addEventListener('show.bs.modal', () => {
         loadAddressList();
+    });
+
+    document.getElementById('usePointBtn').addEventListener('click', () => {
+        const avail = parseInt(document.getElementById('point').innerText.replace(/,/g, ''))
+
+        document.getElementById('usePoint').value = Math.min(avail, productTotal);
+        calcTotal();
+    });
+
+    document.getElementById('usePoint').addEventListener('input', (e) => {
+        if (e.target.value < 0) e.target.value = 0;
+        calcTotal();
+    })
+
+    document.querySelectorAll('input[name="payMethod"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            document.querySelectorAll('input[name="payMethod"] + label').forEach(label => {
+                label.className = 'btn btn-outline-secondary px-4 py-2';
+            });
+            e.target.nextElementSibling.className = 'btn btn-success px-4 py-2';
+        });
+    });
+
+    document.getElementById('agreeAll').addEventListener('change', function () {
+        document.querySelectorAll('.agree-item').forEach(check => {
+            check.checked = this.checked;
+        });
+    });
+
+    document.getElementById('payBtn').addEventListener('click', () => {
+        const payMethod = document.querySelector('input[name="payMethod"]:checked');
+        if (!payMethod) {
+            alert('결제 수단을 선택해주세요.');
+            return;
+        }
+
+        let allChecked = true;
+        document.querySelectorAll('.agree-item').forEach(item => {
+            if (!item.checked) allChecked = false;
+        });
+
+        if (!allChecked) {
+            alert('필수 약관에 모두 동의해주세요.');
+            return;
+        }
+
+        processPayment();
+
     });
 
     async function checkLogin() {
@@ -136,7 +249,7 @@
     async function loadDeliveryAddress() {
         const response = await fetchWithAuth(`/api/customers/address`);
         if (!response) return;
-        
+
         const data = await response.json();
 
         const container = document.getElementById('address-info');
@@ -155,6 +268,8 @@
             else {
                 address = data.find(item => item.default) || data[0];
             }
+
+            currentDeliveryId = address.deliveryId;
 
             container.innerHTML = `
                 <p class="fw-normal mb-2 fs-6">${address.addressName} (${address.receiver})  ${address.default ? '<span class="badge rounded-pill bg-success ms-1" style="font-size: 12px;">기본배송지</span>' : ''}</p>
@@ -208,7 +323,6 @@
                     document.querySelector('#addressModal .btn-close').click();
                 });
             });
-
         }
     }
 
@@ -230,9 +344,9 @@
             if (seletedAddress?.deliveryId == deliveryId) {
                 seletedAddress = null;
             }
+
             loadDeliveryAddress();
             loadAddressList();
-
         } else {
             const error = await response.json();
             alert(error.message || '배송지 삭제 실패');
@@ -270,16 +384,40 @@
                 `;
 
                 container.innerHTML += orderProducts;
-            })
+
+                productTotal += (item.productPrice * item.quantity);
+            });
         }
     }
 
-    async function loadPoint() {
+    function calcTotal() {
+        let usePoint = parseInt(document.getElementById('usePoint').value) || 0;
 
+        if (usePoint > productTotal) {
+            usePoint = productTotal;
+            document.getElementById('usePoint').value = productTotal;
+
+        }
+
+        const avail = parseInt(document.getElementById('point').innerText.replace(/,/g, ''));
+        if (usePoint > avail) {
+            usePoint = avail;
+            document.getElementById('usePoint').value = avail;
+        }
+
+        const finalAmount = productTotal - usePoint;
+        document.getElementById('total').innerText = productTotal.toLocaleString() + '원';
+        document.getElementById('using').innerText = ' - ' + usePoint + '원'
+        document.getElementById('totalPayment').innerText = finalAmount.toLocaleString() + '원';
+        document.getElementById('pay-amount').innerText = finalAmount.toLocaleString() + '원';
     }
 
-    function loadTotalAmount() {
+    async function loadPoint() {
+        const response = await fetchWithAuth(`/api/customers/points`);
+        if (!response) return;
 
+        const data = await response.json();
+        document.getElementById("point").innerText = data.availPoint.toLocaleString();
     }
 
     function showDirectInput() {
@@ -293,7 +431,50 @@
     }
 
     async function processPayment() {
+        const orderItems = JSON.parse(sessionStorage.getItem('selectedItems')) || [];
+        const usePoint = parseInt(document.getElementById('usePoint').value) || 0;
+        const deliveryRequest = document.getElementById('deliveryRequest').value === 'direct' ? document.getElementById('directInput').value : document.getElementById('deliveryRequest').value;
 
+        const response = await fetchWithAuth(`/api/customers/orders`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                deliveryId: seletedAddress?.deliveryId || currentDeliveryId,
+                orderItemRequest: orderItems.map(item => ({
+                    productId: item.productId,
+                    quantity: item.quantity
+                })),
+                usePoint: usePoint,
+                deliveryRequest: deliveryRequest
+            })
+        });
+
+        if (!response) return;
+
+        if (response.ok) {
+            const data = await response.json();
+
+            const payResponse = await fetchWithAuth(`/api/customers/orders/${data.orderId}/payment`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (!payResponse) return;
+
+            const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
+            const orderedProductIds = orderItems.map(item => item.productId);
+            const updateCart = cart.filter(item => !orderedProductIds.includes(item.productId));
+            sessionStorage.setItem('cart', JSON.stringify(updateCart));
+            sessionStorage.removeItem('selectedItems');
+
+            if (payResponse.ok) {
+                location.href = `order.html?orderId=${data.orderId}`;
+            } else {
+                const error = await payResponse.json();
+                alert(error.message || '결제에 실패하였습니다. 다시 시도해주세요.');
+                location.href = `order.html?orderId=${data.orderId}`;
+            }
+        }
     }
 
 </script>

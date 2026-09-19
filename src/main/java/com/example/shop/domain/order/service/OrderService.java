@@ -156,6 +156,12 @@ public class OrderService {
             detail.getProduct().increaseStock(detail.getQuantity());
         }
 
+        if (status == OrderStatus.PAYMENT_COMPLETE && orders.getUsePoint() > 0)
+        {
+            orders.getCustomer().earnPoint(orders.getUsePoint());
+            pointHistoryRepository.save(new PointHistory(orders.getCustomer(), orders, PointType.CANCEL, orders.getUsePoint()));
+        }
+
         orders.changeStatus(OrderStatus.CANCELED);
     }
 

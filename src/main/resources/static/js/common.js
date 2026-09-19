@@ -77,7 +77,7 @@ function updateCartCount() {
     document.getElementById('cart-count').innerText = count > 0 ? count : '';
 }
 
-async function fetchWithAuth(url, options = []) {
+async function fetchWithAuth(url, options = {}) {
     const response = await fetch(url, {credentials: 'include', ...options});
 
     if (response.status === 401) {

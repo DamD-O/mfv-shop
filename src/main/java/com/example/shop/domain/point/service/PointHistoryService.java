@@ -2,6 +2,9 @@ package com.example.shop.domain.point.service;
 
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
+import com.example.shop.domain.order.entity.OrderStatus;
+import com.example.shop.domain.order.entity.Orders;
+import com.example.shop.domain.order.repository.OrdersRepository;
 import com.example.shop.domain.point.dto.PointHistoryResponse;
 import com.example.shop.domain.point.dto.PointSummaryResponse;
 import com.example.shop.domain.point.repository.PointHistoryRepository;
@@ -23,6 +26,7 @@ import java.util.List;
 public class PointHistoryService {
     private final PointHistoryRepository pointHistoryRepository;
     private final CustomerRepository customerRepository;
+    private final OrdersRepository ordersRepository;
 
     //사용자 포인트 이력 및 사용가능한 포인트
     public PointSummaryResponse getPointSummary(String customerId)
@@ -37,6 +41,14 @@ public class PointHistoryService {
                                                                    .map(PointHistoryResponse::new)
                                                                    .toList();
 
-        return new PointSummaryResponse(customer.getPoint(), history);
+        //결제대기 중인 주문에서 사용한 포인트를 사용가능한 포인트에서 제외
+        int pendingUsePoint = ordersRepository.findByCustomer_CustomerIdAndOrderStatus(customerId, OrderStatus.PAYMENT_PENDING)
+                                              .stream()
+                                              .mapToInt(Orders::getUsePoint)
+                                              .sum();
+
+        int availPoint = customer.getPoint() - pendingUsePoint;
+
+        return new PointSummaryResponse(availPoint, history);
     }
 }
