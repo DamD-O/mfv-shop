@@ -51,13 +51,11 @@
 <script>
     async function login() {
 
-//입력한 값 가져오기
         const customerId = document.getElementById('customerId').value;
         const password = document.getElementById('password').value;
         const errorDiv = document.getElementById('loginError');
         errorDiv.classList.add('d-none');  //에러 메세지 초기화
 
-//폼 데이터 형식으로 받기
         const formData = new URLSearchParams();
         formData.append('username', customerId);
         formData.append('password', password);
@@ -69,8 +67,11 @@
                 body: formData
             });
 
+            const params = new URLSearchParams(location.search);
+            const redirect = params.get('redirect');
+
             if (response.ok) {
-                window.location.href = 'index.html';
+                location.href = redirect ? decodeURIComponent(redirect) : 'index.html';
             } else {
                 errorDiv.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
                 errorDiv.classList.remove('d-none');

@@ -5,6 +5,7 @@ import com.example.shop.domain.customer.dto.CustomerSignupRequest;
 import com.example.shop.domain.customer.dto.WithdrawnRequest;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,5 +80,10 @@ public class CustomerService {
         else throw new RuntimeException("비밀번호가 일치 하지 않습니다.");
 
         session.invalidate();
+    }
+
+    public String getCustomerName(String customerId)
+    {
+        return customerRepository.findOneByCustomerId(customerId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자 입니다.")).getName();
     }
 }

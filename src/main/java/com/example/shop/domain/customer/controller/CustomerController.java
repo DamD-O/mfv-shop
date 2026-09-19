@@ -54,6 +54,7 @@ public class CustomerController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String customerId = auth.getName();
         String role = auth.getAuthorities().stream().findFirst().map(a -> a.getAuthority()).orElse("");
-        return ResponseEntity.ok(Map.of("customerId", customerId, "role", role));
+
+        return ResponseEntity.ok(Map.of("customerId", customerId, "role", role, "name", customerService.getCustomerName(customerId)));
     }
 }
