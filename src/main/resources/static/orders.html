@@ -177,6 +177,18 @@
     }
 
     function writeReview(orderDetailId) {
+        const order = orders.find(o => o.orderDetails.some(d => d.orderDetailId == orderDetailId));
+        console.log(order);
+        const detail = order.orderDetails.find(d => d.orderDetailId == orderDetailId);
+
+        sessionStorage.setItem('reviewTarget', JSON.stringify({
+            orderDetailId: detail.orderDetailId,
+            productName: detail.productName,
+            imageUrl: detail.imageUrl || null
+        }));
+
+        console.log(typeof detail.imageUrl, detail.imageUrl);
+
         location.href = `review.html?orderDetailId=${orderDetailId}`;
     }
 </script>
