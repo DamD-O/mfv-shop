@@ -78,8 +78,9 @@ public class Product extends BaseTimeEntity {
     {
         if (this.stock < quantity)
         {
-            throw new IllegalStateException("재고가 부족합니다.");
+            throw new IllegalStateException(this.name + "상품의 재고가 부족합니다. 현재 주문 가능 재고: " + this.stock);
         }
+
         this.stock -= quantity;
     }
 

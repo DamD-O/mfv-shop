@@ -132,9 +132,12 @@
                     <label for="agree4"><span class="text-success">[필수]</span> 주문 내용 확인 및 결제 진행 동의</label>
                 </div>
             </div>
-            <button class="btn btn-success w-100 btn-lg" id="payBtn">
-                <span id="pay-amount"></span> 결제하기
-            </button>
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <button class="btn btn-outline-danger btn-lg px-4" onclick="location.href='cart.html'">취소</button>
+                <button class="btn btn-success btn-lg flex-grow-1" id="payBtn">
+                    <span id="pay-amount"></span> 결제하기
+                </button>
+            </div>
         </div>
     </div>
 </section>
@@ -235,16 +238,9 @@
             return;
         }
 
+        if (!confirm('결제를 진행하시겠습니까?')) return;
         processPayment();
-
     });
-
-    async function checkLogin() {
-        const response = await fetch('/api/customers/my', {credentials: "include"});
-        if (!response.ok) {
-            location.href = 'login.html';
-        }
-    }
 
     async function loadDeliveryAddress() {
         const response = await fetchWithAuth(`/api/customers/address`);
@@ -474,6 +470,9 @@
                 alert(error.message || '결제에 실패하였습니다. 다시 시도해주세요.');
                 location.href = `order.html?orderId=${data.orderId}`;
             }
+        } else {
+            const error = await response.json();
+            alert(error.message || '주문서 생성에 실패했습니다.');
         }
     }
 

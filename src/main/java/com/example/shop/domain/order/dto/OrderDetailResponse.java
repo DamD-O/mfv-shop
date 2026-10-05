@@ -1,6 +1,7 @@
 package com.example.shop.domain.order.dto;
 
 import com.example.shop.domain.order.entity.OrderDetail;
+import com.example.shop.domain.product.entity.ProductImage;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +19,7 @@ public class OrderDetailResponse {
     private String productName;
     private Integer quantity;
     private Integer priceAtOrder;
+    private String imageUrl;
 
     public OrderDetailResponse(OrderDetail orderDetail)
     {
@@ -26,5 +28,6 @@ public class OrderDetailResponse {
         this.productName = orderDetail.getProduct().getName();
         this.quantity = orderDetail.getQuantity();
         this.priceAtOrder = orderDetail.getPriceAtOrder();
+        this.imageUrl = orderDetail.getProduct().getProductImages().stream().findFirst().map(ProductImage::getImagePath).orElse(null);
     }
 }

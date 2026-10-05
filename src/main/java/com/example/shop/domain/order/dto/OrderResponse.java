@@ -5,6 +5,7 @@ import com.example.shop.domain.order.entity.Orders;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -22,7 +23,12 @@ public class OrderResponse {
     private String addressSnapshot;
     private int totalAmount;
     private OrderStatus orderStatus;
+    private String orderStatusLabel;
     private List<OrderDetailResponse> orderDetails;
+    private String deliveryRequest;
+    private int usePoint;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public OrderResponse(Orders orders)
     {
@@ -33,5 +39,10 @@ public class OrderResponse {
         this.totalAmount = orders.getTotalAmount();
         this.orderStatus = orders.getOrderStatus();
         this.orderDetails = orders.getOrderDetails().stream().map(OrderDetailResponse::new).toList();
+        this.deliveryRequest = orders.getDeliveryRequest();
+        this.usePoint = orders.getUsePoint();
+        this.createdAt = orders.getCreatedAt();
+        this.updatedAt = orders.getUpdatedAt();
+        this.orderStatusLabel = orders.getOrderStatus().getLabel();
     }
 }

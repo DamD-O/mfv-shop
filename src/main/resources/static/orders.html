@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <title>MFV - 주문 내역</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="icon" href="assets/img/favicon.ico">
+
+    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+
+</head>
+<body>
+<div id="header"></div>
+<section class="py-5 bg-light">
+    <div class="col-12 col-md-10 mx-auto">
+        <h3>주문 내역</h3>
+    </div>
+    <div class="col-12 col-md-10 mx-auto border border-white p-4 bg-white" style="border-radius: 12px">
+        <div class="d-flex gap-2 mb-3 flex-wrap" id="filter-btns">
+            <button class="btn btn-sm btn-dark filter-btn" onclick="filterOrders('ALL', this)">전체</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('PAYMENT_PENDING', this)">결제대기</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('PAYMENT_COMPLETE', this)">결제완료</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('SHIPPING', this)">배송중</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('DELIVERED', this)">배송완료</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('CANCELED', this)">취소</button>
+        </div>
+        <div class="bg-white rounded shadow-sm p-0 overflow-hidden">
+            <table class="table align-middle small mb-0">
+                <thead class="border-bottom border-dark">
+                <tr>
+                    <th class="text-center" style="width: 15%;">주문일자</th>
+                    <th class="text-center" style="width: 35%;">상품</th>
+                    <th class="text-center" style="width: 10%;">수량</th>
+                    <th class="text-center" style="width: 15%;">주문금액</th>
+                    <th class="text-center" style="width: 25%;">상태</th>
+                </tr>
+                </thead>
+                <tbody id="orders"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div id="footer"></div>
+
+<!-- Start Script -->
+<script src="assets/js/jquery-1.11.0.min.js"></script>
+<script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
+<script src="assets/js/templatemo.js"></script>
+<script src="js/common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let orders = [];
+    document.addEventListener("DOMContentLoaded", async () => {
+        if (!await checkLogin()) return;
+        await getOrders();
+    });
+
+    function filterOrders(status, element) {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.className = 'btn btn-sm btn-outline-secondary filter-btn';
+        })
+        element.className = 'btn btn-sm btn-dark filter-btn';
+
+        const filtered = status == 'ALL' ? orders : orders.filter(o => o.orderStatus === status);
+
+        renderingOrders(filtered);
+    }
+
+    async function getOrders() {
+        const response = await fetchWithAuth(`/api/customers/orders`);
+        if (!response) return;
+
+        if (response.ok) {
+            const data = await response.json();
+            orders = data;
+
+            renderingOrders(data);
+        }
+    }
+
+    function renderingOrders(data) {
+        const container = document.getElementById('orders');
+        container.innerHTML = '';
+
+        if (data.length > 0) {
+            data.forEach(order => {
+                order.orderDetails.forEach((detail, index) => {
+                    const row = `
+                        <tr>
+                            ${index === 0 ? `
+                            <td class="text-center border-end border-top" rowspan="${order.orderDetails.length}">
+                                <p class="mb-1 small text-muted">${order.createdAt.split('T')[0]}</p>
+                                <p class="mb-1 small text-success">#${order.orderId}</p>
+                                <a href="order.html?orderId=${order.orderId}" class="text-muted small">상세보기</a>
+                            </td>` : ''}
+                           <td class="border-top border-end">
+                                <div class="d-flex align-items-center">
+                                    ${detail.imageUrl ? `<img src="${detail.imageUrl}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;" class="me-2">`
+                        : `<div style="width:50px; height:50px; background:#f0f0f0; border-radius:4px; flex-shrink:0;" class="me-2"></div>`}
+                                    <p class="mb-0">${detail.productName}</p>
+                                </div>
+                                ${order.orderStatus === 'DELIVERED' ? `<button class="btn btn-outline-secondary btn-sm w-100 mt-1" style="font-size:11px; padding: 2px 8px;" onclick="writeReview(${detail.orderDetailId})">리뷰작성</button>` : ''}
+                            </td>
+                            <td class="text-center border-end border-top">${detail.quantity}</td>
+                            <td class="text-center border-end border-top">${(detail.priceAtOrder * detail.quantity).toLocaleString()}원</td>
+                            ${index === 0 ? `
+                            <td class="text-center border-end border-top" rowspan="${order.orderDetails.length}">
+                                <p class="fw-bold mb-2">${order.orderStatusLabel}</p>
+                                ${getStatusButtons(order)}
+                            </td>` : ''}
+                        </tr>
+                       `;
+                    container.innerHTML += row;
+                });
+            });
+        } else {
+            container.innerHTML += `<tr><td colspan="5" class="text-center py-4 text-muted">해당 상태의 주문이 없습니다.</td></tr>`;
+        }
+    }
+
+    function getStatusButtons(order) {
+        if (order.orderStatus === 'PAYMENT_PENDING') {
+            return `
+                <button class="btn btn-outline-success btn-sm w-100 mb-1" onclick="rePayment(${order.orderId})">재결제</button>
+                <button class="btn btn-outline-danger btn-sm w-100" onclick="cancelOrder(${order.orderId})">취소</button>
+            `
+        } else if (order.orderStatus === 'PAYMENT_COMPLETE' || order.orderStatus === 'PREPARING') {
+            return `<button class="btn btn-outline-danger btn-sm w-100" onclick="cancelOrder(${order.orderId})">취소</button>`
+        } else if (order.orderStatus === 'SHIPPING') {
+            return `<button class="btn btn-outline-dark btn-sm w-100" disabled>배송조회</button>`
+        }
+
+        return '';
+    }
+
+    async function rePayment(orderId) {
+        if (!confirm('결제를 진행하시겠습니까?')) return;
+        const response = await fetchWithAuth(`/api/customers/orders/${orderId}/payment`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (!response) return;
+
+        if (response.ok) {
+            location.href = `order.html?orderId=${orderId}`;
+        } else {
+            const error = await response.json();
+            alert(error.message || '결제에 실패하였습니다. 다시 시도해주세요.');
+            location.href = 'orders.html';
+        }
+    }
+
+    async function cancelOrder(orderId) {
+        if (!confirm('주문을 취소하시겠습니까?')) return;
+
+        const response = await fetchWithAuth(`/api/customers/orders/${orderId}/cancel`, {
+            method: 'PATCH',
+            credentials: "include"
+        });
+        if (!response) return;
+
+        if (response.ok) {
+            location.href = 'orders.html';
+        } else {
+            const error = await response.json();
+            alert(error.message || '주문 취소 실패하였습니다. 다시 시도해주세요.');
+            location.href = 'orders.html';
+        }
+    }
+
+    function writeReview(orderDetailId) {
+        location.href = `review.html?orderDetailId=${orderDetailId}`;
+    }
+</script>
+</body>
+</html>

@@ -39,7 +39,7 @@ async function checkLoginStatus() {
                 document.getElementById('my-status').innerText = data.name + '님'
                 document.getElementById('my-dropdown').innerHTML = `
                     <li><a class="dropdown-item" href="mypage.html">마이페이지</a></li>
-                    <li><a class="dropdown-item" href="order.html">주문내역</a></li>
+                    <li><a class="dropdown-item" href="orders.html">주문내역</a></li>
                     <li><a class="dropdown-item" href="#" onclick="logout()">로그아웃</a></li>
                 `;
 
@@ -87,6 +87,17 @@ async function fetchWithAuth(url, options = {}) {
     }
 
     return response;
+}
+
+async function checkLogin() {
+    const response = await fetchWithAuth('/api/customers/my');
+
+    if (!response) return false;
+    if (!response.ok) {
+        location.href = `login.html?redirect=${encodeURIComponent(location.href)}`;
+        return false;
+    }
+    return true;
 }
 
 async function logout() {
