@@ -8,6 +8,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author madey
  * @DATE 2026-07-28
@@ -38,6 +41,9 @@ public class Review extends BaseTimeEntity {
 
     @Column(name = "content", length = 1000)
     private String content;
+
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
+    private final List<ReviewImage> reviewImages = new ArrayList<>();
 
     public Review(Customer customer, OrderDetail orderDetail, Integer rating, String content)
     {

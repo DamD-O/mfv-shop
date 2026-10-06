@@ -54,4 +54,11 @@ public class ReviewController {
     {
         reviewService.deleteReview(authentication.getName(), reviewId);
     }
+
+    @Operation(summary = "리뷰 단건 조회")
+    @GetMapping("/customers/reviews/{reviewId}")
+    public ReviewResponse getReview(@PathVariable Long reviewId, Authentication authentication)
+    {
+        return new ReviewResponse(reviewService.getReview(authentication.getName(), reviewId));
+    }
 }

@@ -95,4 +95,16 @@ public class ReviewService {
 
         reviewRepository.delete(review);
     }
+
+    public Review getReview(String customerId, Long reviewId)
+    {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
+            log.warn("리뷰 단건 조회 - 존재하지 않는 리뷰, reviewId : {}", reviewId);
+            return new RuntimeException("존재하지 않는 리뷰입니다.");
+        });
+
+        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인이 작성한 리뷰만 조회 가능합니다.");
+
+        return review;
+    }
 }

@@ -15,7 +15,6 @@
 <section class="py-5 bg-light">
     <div class="col-12 col-md-6 mx-auto">
         <h3 class="mb-4">리뷰 작성</h3>
-
         <div class="bg-white rounded p-4 mb-3 shadow-sm">
             <h5>상품 정보</h5>
             <div class="d-flex align-items-center gap-3">
@@ -26,7 +25,6 @@
                 </div>
             </div>
         </div>
-
         <div class="bg-white rounded p-4 mb-3 shadow-sm">
             <h5>별점</h5>
             <div class="d-flex gap-2 mb-1" id="stars">
@@ -44,7 +42,7 @@
             <textarea class="form-control" id="content" rows="5" maxlength="500"
                     placeholder="상품에 대한 솔직한 리뷰를 작성해주세요. (최소 10자)"></textarea>
             <div class="text-end mt-1">
-                <small class="text-muted"><span id="cnt">0</span> / 500</small>
+                <small class="text-muted"><span id="content-cnt">0</span> / 500</small>
             </div>
         </div>
 
@@ -67,18 +65,54 @@
 <script src="js/common.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    let selectedRating = 0;
+    const ratingLabels = ['', '별로예요', '그저 그래요', '보통이에요', '좋아요', '최고예요'];
+
     document.addEventListener("DOMContentLoaded", async () => {
         if (!await checkLogin()) return;
 
         const params = new URLSearchParams(location.search);
-        const orderDetailId = params.get('orderDetailId');
+        const type = params.get("type"); //update or write
+        const reviewId = params.get("reviewId");
 
-        getProduct(orderDetailId);
+        getProduct();
+
+        if (type === 'update') {
+            document.querySelector('button.btn-success').textContent = '수정';
+            const response = await fetchWithAuth(`/api/customers/reviews/${reviewId}`)
+            let data = await response.json();
+            document.getElementById('content').value = data.content;
+            document.getElementById('content-cnt').textContent = data.content.length;
+
+            selectedRating = data.rating;
+            document.querySelectorAll(".star").forEach(star => {
+                star.style.color = parseInt(star.dataset.value) <= selectedRating ? '#f0a500' : '#dee2e6';
+            });
+
+            document.getElementById('rating-label').textContent = selectedRating + '점 · ' + ratingLabels[selectedRating];
+
+        }
+
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.dataset.value);
+                document.querySelectorAll('.star').forEach(s => {
+                    s.style.color = parseInt(s.dataset.value) <= selectedRating ? '#f0a500' : '#dee2e6';
+                });
+            });
+        });
+
+        document.getElementById('rating-label').textContent = selectedRating + '점 · ' + ratingLabels[selectedRating];
+
+        //리뷰 내용 글자 수
+        document.getElementById('content').addEventListener('input', e => {
+            document.getElementById('content-cnt').textContent = e.target.value.length;
+        })
+
     });
 
-    async function getProduct(orderDetailId) {
+    async function getProduct() {
         const reviewProduct = JSON.parse(sessionStorage.getItem('reviewTarget'));
-        console.log('reviewProduct: -->', reviewProduct);
 
         document.getElementById('product-img').innerHTML = `
         <div class="d-flex align-items-center gap-3">
@@ -89,7 +123,86 @@
         `;
     }
 
-    /*todo: 별점 구현*/
+    async function submitReview() {
+        /*
+        * 리뷰 저장 -> 이미지 있으면 등록, 성공 시 주문 목록 페이지 / 없으면 리뷰 바로 등록
+       */
+        if (!validate()) return;
+
+        const params = new URLSearchParams(location.search);
+        const type = params.get('type');
+        const orderDetailId = params.get('orderDetailId');
+        const reviewId = params.get('reviewId');
+
+        const url = type === 'update' ? `/api/customers/reviews/${reviewId}` : `/api/customers/reviews`;
+        const method = type === 'update' ? 'PUT' : 'POST';
+
+        const response = await fetchWithAuth(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                orderDetailId: orderDetailId,
+                rating: selectedRating,
+                content: document.getElementById('content').value
+            })
+        });
+
+        if (!response) return;
+
+        if (response.ok) {
+            const data = await response.json();
+            const imagePath = document.getElementById('reviewImage').files[0];
+
+            if (imagePath) {
+                const success = await uploadReviewImage(data.reviewId, imagePath);
+                if (!success) {
+                    await fetchWithAuth(`/api/customers/reviews/${data.reviewId}`, {
+                        method: 'DELETE'
+                    });
+                    alert('이미지 업로드 실패. 다시 시도해주세요.');
+                    return;
+                }
+            }
+
+            location.href = 'orders.html';
+        } else {
+            const error = await response.json();
+            alert(error.message || '리뷰 등록 실패');
+        }
+    }
+
+    async function uploadReviewImage(reviewId, file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetchWithAuth(`/api/customers/reviews/${reviewId}/images`, {
+            method: 'POST',
+            body: formData
+        });
+
+        return response.ok
+    }
+
+    function validate() {
+        if (selectedRating == 0) {
+            alert('별점을 선택해주세요.');
+            return false;
+        }
+
+        const reviewContent = document.getElementById('content').value;
+        if (reviewContent === null || reviewContent === '') {
+            alert('리뷰 내용을 최소 10글자 작성해주세요.');
+            return false;
+        }
+
+        if (reviewContent.length < 10) {
+            alert('리뷰는 최소 10글자 작성해야 합니다.');
+            return false;
+        }
+        return true;
+    }
+
+    //todo: 리뷰 이미지 수정 구현
 </script>
 </body>
 </html>
