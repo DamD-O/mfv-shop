@@ -21,6 +21,9 @@ public class Admin extends BaseTimeEntity {
     @Column(name = "admin_id", length = 50)
     private String adminId;
 
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
+
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -31,18 +34,13 @@ public class Admin extends BaseTimeEntity {
     @Column(name = "authority", nullable = false, length = 20)
     private AuthType authority;
 
-    public Admin(String adminId, String password, String phone, AuthType authority)
+    public Admin(String adminId, String name, String password, String phone, AuthType authority)
     {
         this.adminId = adminId;
+        this.name = name;
         this.password = password;
         this.phone = phone;
         this.authority = authority;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Admin{" + "adminId='" + adminId + '\'' + ", password='" + password + '\'' + ", phone='" + phone + '\'' + ", authority=" + authority + '}';
     }
 
     public void changePassword(String encodedPassword)

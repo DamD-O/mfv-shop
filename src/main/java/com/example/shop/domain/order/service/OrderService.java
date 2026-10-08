@@ -13,7 +13,9 @@ import com.example.shop.domain.order.repository.OrdersRepository;
 import com.example.shop.domain.point.entity.PointHistory;
 import com.example.shop.domain.point.entity.PointType;
 import com.example.shop.domain.point.repository.PointHistoryRepository;
+import com.example.shop.domain.point.service.PointHistoryService;
 import com.example.shop.domain.product.entity.Product;
+import com.example.shop.domain.product.entity.ProductStatus;
 import com.example.shop.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,15 +40,18 @@ public class OrderService {
     private final DeliveryAddressRepository deliveryAddressRepository;
     private final CustomerRepository customerRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final PointHistoryService pointHistoryService;
 
     @Transactional
     public Orders createOrders(String customerId, OrderRequest request)
     {
         //배송지 조회 + 주소 스냅샷 생성
-        DeliveryAddress address = deliveryAddressRepository.findById(request.getDeliveryId()).orElseThrow(() -> {
-            log.warn("deliveryAddress not found");
-            return new RuntimeException("존재하지 않는 배송지 입니다. 다시 선택해주세요.");
-        });
+        DeliveryAddress address = deliveryAddressRepository.findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(customerId,
+                                                                                                                     request.getDeliveryId())
+                                                           .orElseThrow(() -> {
+                                                               log.warn("deliveryAddress not found");
+                                                               return new RuntimeException("존재하지 않는 배송지 입니다. 다시 선택해주세요.");
+                                                           });
 
         //주소 스냅샷 - 수령인(연락처) / 배송지(우편번호)
         String addressSnapshot = address.getReceiver() + "(" + address.getContact() + ") / " + address.getRoadAddress() + " " + address.getDetailAddress() + " (" + address.getZipcode() + ")";
@@ -59,12 +64,10 @@ public class OrderService {
         for (OrderItemRequest item : request.getOrderItemRequest())
         {
             Long productId = item.getProductId();
-            Product product = productRepository.findById(productId).orElseThrow(() -> {
-                log.warn("주문 생성 - 존재하지 않는 상품입니다. productId : {}", productId);
-                return new RuntimeException("존재하지 않는 상품으로 주문 실패");
+            Product product = productRepository.findByIdAndStatus(productId, ProductStatus.ON_SALE).orElseThrow(() -> {
+                log.warn("주문 생성 - 판매 중지되었거나 존재하지 않는 상품이 있습니다. productId : {}", productId);
+                return new RuntimeException("판매 중지되었거나 존재하지 않는 상품이 포함되어 있습니다.");
             });
-
-            product.decreaseStock(item.getQuantity()); //재고 차감
 
             //상세 주문 생성
             OrderDetail detail = new OrderDetail(product, item.getQuantity(), product.getPrice());
@@ -72,6 +75,8 @@ public class OrderService {
 
             //총 가격
             totalAmount += product.getPrice() * item.getQuantity();
+
+            product.decreaseStock(item.getQuantity()); //재고 차감
         }
 
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
@@ -82,7 +87,7 @@ public class OrderService {
         //포인트 사용
         Integer usePoint = request.getUsePoint() != null ? request.getUsePoint() : 0;
 
-        if (usePoint > customer.getPoint()) throw new RuntimeException("보유 포인트가 부족합니다.");
+        if (usePoint > pointHistoryService.getAvailPoint(customer)) throw new RuntimeException("사용 가능한 포인트가 부족합니다.");
 
         if (usePoint > totalAmount) throw new RuntimeException("사용 포인트가 상품 금액을 초과 할 수 없습니다.");
 
@@ -129,6 +134,15 @@ public class OrderService {
 
         orders.changeStatus(status);
 
+        if (orders.getOrderStatus().equals(OrderStatus.DELIVERED) && !pointHistoryRepository.existsByOrders_IdAndType(orderId, PointType.EARN))
+        {
+            //포인트 적립
+            int point = (int) (orders.getTotalAmount() * 0.015);
+            orders.getCustomer().earnPoint(point);
+            PointHistory pointHistory = new PointHistory(orders.getCustomer(), orders, PointType.EARN, point);
+            pointHistoryRepository.save(pointHistory);
+        }
+
         return orders;
     }
 
@@ -156,10 +170,14 @@ public class OrderService {
             detail.getProduct().increaseStock(detail.getQuantity());
         }
 
-        if (status == OrderStatus.PAYMENT_COMPLETE && orders.getUsePoint() > 0)
+        //사용한 포인트 원복
+        if (status == OrderStatus.PAYMENT_COMPLETE)
         {
-            orders.getCustomer().earnPoint(orders.getUsePoint());
-            pointHistoryRepository.save(new PointHistory(orders.getCustomer(), orders, PointType.CANCEL, orders.getUsePoint()));
+            if (orders.getUsePoint() > 0)
+            {
+                orders.getCustomer().earnPoint(orders.getUsePoint());
+                pointHistoryRepository.save(new PointHistory(orders.getCustomer(), orders, PointType.REFUND, orders.getUsePoint()));
+            }
         }
 
         orders.changeStatus(OrderStatus.CANCELED);
@@ -193,12 +211,6 @@ public class OrderService {
                 PointHistory usePointHistory = new PointHistory(orders.getCustomer(), orders, PointType.USE, orders.getUsePoint());
                 pointHistoryRepository.save(usePointHistory);
             }
-
-            //포인트 적립
-            int point = (int) (orders.getTotalAmount() * 0.015);
-            orders.getCustomer().earnPoint(point);
-            PointHistory pointHistory = new PointHistory(orders.getCustomer(), orders, PointType.EARN, point);
-            pointHistoryRepository.save(pointHistory);
 
             //주문 상태 변경 - 결제 완료
             orders.changeStatus(OrderStatus.PAYMENT_COMPLETE);

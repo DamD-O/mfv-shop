@@ -41,14 +41,19 @@ public class PointHistoryService {
                                                                    .map(PointHistoryResponse::new)
                                                                    .toList();
 
+        return new PointSummaryResponse(getAvailPoint(customer), history);
+    }
+
+    public int getAvailPoint(Customer customer)
+    {
         //결제대기 중인 주문에서 사용한 포인트를 사용가능한 포인트에서 제외
-        int pendingUsePoint = ordersRepository.findByCustomer_CustomerIdAndOrderStatus(customerId, OrderStatus.PAYMENT_PENDING)
+        int pendingUsePoint = ordersRepository.findByCustomer_CustomerIdAndOrderStatus(customer.getCustomerId(), OrderStatus.PAYMENT_PENDING)
                                               .stream()
                                               .mapToInt(Orders::getUsePoint)
                                               .sum();
 
         int availPoint = customer.getPoint() - pendingUsePoint;
 
-        return new PointSummaryResponse(availPoint, history);
+        return availPoint;
     }
 }

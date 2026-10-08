@@ -67,20 +67,16 @@
         <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
             <h5 class="border-bottom p-3 mb-3 d-flex justify-content-start">결제금액</h5>
             <div class="d-flex justify-content-between mb-1">
-                <span>상품금액</span>
-                <span id="total"></span>
+                <span>상품금액</span> <span id="total"></span>
             </div>
             <div class="d-flex justify-content-between mb-1 text-danger">
-                <span>포인트 사용</span>
-                <span id="using"></span>
+                <span>포인트 사용</span> <span id="using"></span>
             </div>
             <div class="d-flex justify-content-between mb-2 fw-bold">
-                <span>배송지</span>
-                <span>무료</span>
+                <span>배송지</span> <span>무료</span>
             </div>
             <div class="d-flex justify-content-between mb-2 fw-bold">
-                <span>최종 결제 금액</span>
-                <span id="totalPayment"></span>
+                <span>최종 결제 금액</span> <span id="totalPayment"></span>
             </div>
         </div>
         <div class="bg-white rounded p-4 mb-3 shadow-sm border-0">
@@ -172,8 +168,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let productTotal = 0;
-    let seletedAddress = null;
-    let currentDeliveryId = null;
+    let selectedAddress = null; //모달에서 선택한 배송지
+    let currentDeliveryId = null; //화면에 선택된 배송지
 
     document.addEventListener("DOMContentLoaded", async () => {
         const orderItems = JSON.parse(sessionStorage.getItem("selectedItems")) || [];
@@ -221,7 +217,13 @@
         });
     });
 
+
     document.getElementById('payBtn').addEventListener('click', () => {
+        if (!currentDeliveryId) {
+            alert('등록된 배송지가 없습니다. 배송지를 등록해주세요.');
+            return;
+        }
+
         const payMethod = document.querySelector('input[name="payMethod"]:checked');
         if (!payMethod) {
             alert('결제 수단을 선택해주세요.');
@@ -252,15 +254,18 @@
         container.innerHTML = '';
 
         if (data.length === 0) {
+            currentDeliveryId = null;
+            selectedAddress = null;
+
             container.innerHTML = `
               <p class="text-muted">등록된 배송지가 없습니다. 배송지를 등록하세요.</p>
-              <a href="address-form.html?type=add" class="btn btn-outline-info" btn-sm>배송지 등록</a>
+              <a href="address-form.html?type=add" class="btn btn-outline-info btn-sm">배송지 등록</a>
             `;
         } else {
             let address;
 
-            if (seletedAddress)
-                address = seletedAddress;
+            if (selectedAddress)
+                address = selectedAddress;
             else {
                 address = data.find(item => item.default) || data[0];
             }
@@ -285,7 +290,7 @@
         const container = document.getElementById('address-list');
         container.innerHTML = '';
 
-        if (data) {
+        if (data.length > 0) {
             data.forEach(address => {
                 const card = `
                     <div class="d-flex align-items-start py-3 border-top">
@@ -308,17 +313,25 @@
                 container.innerHTML += card;
             });
 
-            const targetId = seletedAddress ? seletedAddress.deliveryId : data.find(a => a.default)?.deliveryId;
-            document.querySelector(`input[value="${targetId}"]`).checked = true;
+            const targetId = selectedAddress ? selectedAddress.deliveryId : (data.find(a => a.default)?.deliveryId ?? data[0].deliveryId);
+            const checkId = document.querySelector(`input[name="addressSelect"][value="${targetId}"]`);
+            if (checkId) {
+                checkId.checked = true;
+            }
 
             document.querySelectorAll('input[name="addressSelect"]').forEach(radio => {
                 radio.addEventListener('change', (e) => {
-                    seletedAddress = data.find(a => a.deliveryId == e.target.value);
-                    loadDeliveryAddress(seletedAddress);
+                    selectedAddress = data.find(a => a.deliveryId == e.target.value);
+                    loadDeliveryAddress();
 
                     document.querySelector('#addressModal .btn-close').click();
                 });
             });
+        } else {
+            container.innerHTML = `
+              <p class="text-muted">등록된 배송지가 없습니다. 배송지를 등록하세요.</p>
+              <a href="address-form.html?type=add" class="btn btn-outline-info btn-sm">배송지 등록</a>
+            `;
         }
     }
 
@@ -330,15 +343,16 @@
 
         if (!confirm('배송지를 삭제하시겠습니까?')) return;
 
-        const response = await fetch(`/api/customers/address/${deliveryId}`, {
+        const response = await fetchWithAuth(`/api/customers/address/${deliveryId}`, {
             method: 'DELETE',
-            credentials: "include"
         });
+
+        if (!response) return;
 
         if (response.ok) {
             //선택된 배송지가 삭제된 경우 초기화
-            if (seletedAddress?.deliveryId == deliveryId) {
-                seletedAddress = null;
+            if (selectedAddress?.deliveryId == deliveryId) {
+                selectedAddress = null;
             }
 
             loadDeliveryAddress();
@@ -370,7 +384,7 @@
                        <div class="col-12 col-md-2 d-flex align-items-center">${img}</div>
                             <div class="col-12 col-md-6">
                                 <p class="fw-bold mb-0">${item.productName} </p>
-                                <p class="text-muted small mb-0">${item.unit}</p>
+                                <p class="text-muted small mb-0">${item.unit} 당 ${item.productPrice}원</p>
                             </div>
                             <div class="col-12 col-md-4 text-end">
                                 <p class="fw-bold mb-0">${(item.productPrice * item.quantity).toLocaleString()}원</p>
@@ -435,7 +449,7 @@
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                deliveryId: seletedAddress?.deliveryId || currentDeliveryId,
+                deliveryId: selectedAddress?.deliveryId || currentDeliveryId,
                 orderItemRequest: orderItems.map(item => ({
                     productId: item.productId,
                     quantity: item.quantity

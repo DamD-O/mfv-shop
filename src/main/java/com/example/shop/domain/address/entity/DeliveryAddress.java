@@ -1,6 +1,7 @@
 package com.example.shop.domain.address.entity;
 
 import com.example.shop.domain.customer.entity.Customer;
+import com.example.shop.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "delivery_address")
-public class DeliveryAddress {
+public class DeliveryAddress extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "delivery_id")

@@ -125,7 +125,7 @@
             files.forEach(file => {
                 const tempNewImageId = tempImageId--;
                 newImages.set(tempNewImageId, file);
-                renderPreview(tempNewImageId, URL.createObjectURL(file)); //새 이미지는 아이디가 없으므로 인덱스로 구분
+                renderPreview(tempNewImageId, URL.createObjectURL(file)); //새 이미지는 imageID가 없으므로 tempId로 임시 설정
             })
         })
     });
@@ -143,9 +143,7 @@
     }
 
     async function submitReview() {
-        /*
-        * 리뷰 저장 -> 이미지 있으면 등록, 성공 시 주문 목록 페이지 / 없으면 리뷰 바로 등록
-       */
+        //리뷰 저장 -> 이미지 있으면 등록, 성공 시 주문 목록 페이지 / 없으면 리뷰 바로 등록
         if (!validate()) return;
 
         const params = new URLSearchParams(location.search);

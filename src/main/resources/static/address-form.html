@@ -30,8 +30,7 @@
                         <div class="d-flex align-items-center gap-3">
                             <input type="text" class="form-control w-50" maxlength="10" placeholder="배송지명을 입력하세요. (최대 10자)" id="addressName">
                             <div>
-                                <input type="checkbox" id="isDefault">
-                                <label for="isDefault">기본배송지 설정</label>
+                                <input type="checkbox" id="isDefault"> <label for="isDefault">기본배송지 설정</label>
                             </div>
                         </div>
                     </td>
@@ -77,7 +76,7 @@
         </div>
         <div class="d-flex justify-content-center gap-3 mt-3">
             <button type="submit" class="btn btn-success btn-lg px-5" id="address-add-ok" disabled onclick="saveAddress()">확인</button>
-            <button type="button" class="btn btn-secondary btn-lg px-5" onclick="history.back()">취소</button>
+            <button type="button" class="btn btn-secondary btn-lg px-5" onclick="goBack()">취소</button>
         </div>
     </div>
 </section>
@@ -99,18 +98,28 @@
 
         let data = null;
         if (type === 'update') {
-            const res = await fetchWithAuth(`/api/customers/address/${deliveryId}`);
-            data = await res.json();
+            const response = await fetchWithAuth(`/api/customers/address/${deliveryId}`);
 
-            document.getElementById('addressName').value = data.addressName;
-            document.getElementById('receiver').value = data.receiver;
-            document.getElementById('contact').value = data.contact;
-            document.getElementById('zipcode').value = data.zipcode;
-            document.getElementById('roadAddress').value = data.roadAddress;
-            document.getElementById('detailAddress').value = data.detailAddress;
-            document.getElementById('isDefault').checked = data.default;
-            document.getElementById('agreement-check').checked = true;
-            document.getElementById('address-add-ok').disabled = false;
+            if (!response) return;
+
+            if (response.ok) {
+                data = await response.json();
+
+                document.getElementById('addressName').value = data.addressName;
+                document.getElementById('receiver').value = data.receiver;
+                document.getElementById('contact').value = data.contact;
+                document.getElementById('zipcode').value = data.zipcode;
+                document.getElementById('roadAddress').value = data.roadAddress;
+                document.getElementById('detailAddress').value = data.detailAddress;
+                document.getElementById('isDefault').checked = data.default;
+                document.getElementById('agreement-check').checked = true;
+                document.getElementById('address-add-ok').disabled = false;
+            } else {
+                const error = await response.json();
+                alert(error.message || '정보 불러오기 실패');
+                goBack();
+            }
+
         }
 
         document.getElementById('isDefault').addEventListener('change', (e) => {
@@ -137,6 +146,16 @@
 
     })
 
+    function goBack() {
+        const params = new URLSearchParams(location.search);
+        const from = params.get("from");
+
+        if (from === 'mypage') {
+            location.href = 'mypage.html#address';
+        } else {
+            history.back()
+        }
+    }
 
     function getAddress() {
         new kakao.Postcode({
@@ -170,7 +189,7 @@
         const url = type === 'update' ? `/api/customers/address/${deliveryId}` : `/api/customers/address`;
         const method = type === 'update' ? 'PUT' : 'POST';
 
-        const response = await fetch(url, {
+        const response = await fetchWithAuth(url, {
             method: method,
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -184,15 +203,17 @@
             })
         });
 
+        if (!response) return;
+
         if (response.ok) {
+            const data = await response.json();
             if (document.getElementById('isDefault').checked) {
-                const data = await response.json();
-                await fetch(`/api/customers/address/${data.deliveryId}/default`, {
+                await fetchWithAuth(`/api/customers/address/${data.deliveryId}/default`, {
                     method: 'PATCH',
-                    credentials: 'include'
                 });
             }
-            history.back();
+
+            goBack();
         } else {
             const error = await response.json();
             alert(error.message || '배송지 등록 실패');

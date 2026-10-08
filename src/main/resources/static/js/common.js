@@ -97,7 +97,7 @@ async function checkLogin() {
         location.href = `login.html?redirect=${encodeURIComponent(location.href)}`;
         return false;
     }
-    return true;
+    return await response.json();
 }
 
 async function logout() {

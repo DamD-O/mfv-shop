@@ -1,5 +1,6 @@
 package com.example.shop.domain.customer.controller;
 
+import com.example.shop.domain.admin.service.AdminService;
 import com.example.shop.domain.customer.dto.CustomerSignupRequest;
 import com.example.shop.domain.customer.dto.CustomerSignupResponse;
 import com.example.shop.domain.customer.dto.WithdrawnRequest;
@@ -31,6 +32,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomerController {
     private final CustomerService customerService;
+    private final AdminService adminService;
 
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
@@ -54,7 +56,7 @@ public class CustomerController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String customerId = auth.getName();
         String role = auth.getAuthorities().stream().findFirst().map(a -> a.getAuthority()).orElse("");
-
-        return ResponseEntity.ok(Map.of("customerId", customerId, "role", role, "name", customerService.getCustomerName(customerId)));
+        String name = role.equals("ROLE_ADMIN") ? adminService.getAdminName(customerId) : customerService.getCustomerName(customerId);
+        return ResponseEntity.ok(Map.of("customerId", customerId, "role", role, "name", name));
     }
 }

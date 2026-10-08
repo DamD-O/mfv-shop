@@ -18,4 +18,5 @@ public interface DeliveryAddressRepository extends JpaRepository<DeliveryAddress
     List<DeliveryAddress> findByCustomer_CustomerIdAndIsDefaultTrueAndDeletedAtIsNull(String customerId);
 
     Optional<DeliveryAddress> findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(String customerId, Long DeliveryId);
+
 }

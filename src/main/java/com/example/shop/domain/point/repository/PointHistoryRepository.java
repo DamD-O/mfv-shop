@@ -1,6 +1,7 @@
 package com.example.shop.domain.point.repository;
 
 import com.example.shop.domain.point.entity.PointHistory;
+import com.example.shop.domain.point.entity.PointType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,4 +14,7 @@ import java.util.List;
 
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
     List<PointHistory> findByCustomer_CustomerIdOrderByCreatedAtDesc(String customerId);
+
+    boolean existsByOrders_IdAndType(Long orderId, PointType pointType);
 }
+

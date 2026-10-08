@@ -36,8 +36,10 @@ public class DeliveryAddressService {
             return new RuntimeException("존재하지 않는 사용자 입니다.");
         });
 
+        boolean isDefault = deliveryAddressRepository.findByCustomer_CustomerIdAndDeletedAtIsNullOrderByIsDefaultDesc(customerId).isEmpty();
+
         DeliveryAddress deliveryAddress = new DeliveryAddress(customer, request.getAddressName(), request.getReceiver(), request.getContact(),
-                                                              request.getZipcode(), request.getRoadAddress(), request.getDetailAddress(), false,
+                                                              request.getZipcode(), request.getRoadAddress(), request.getDetailAddress(), isDefault,
                                                               null);
 
         deliveryAddressRepository.save(deliveryAddress);
@@ -48,12 +50,11 @@ public class DeliveryAddressService {
     @Transactional
     public DeliveryAddress updateDeliveryAddress(String customerId, Long deliveryId, DeliveryAddressRequest request)
     {
-        DeliveryAddress address = deliveryAddressRepository.findById(deliveryId).orElseThrow(() -> {
-            log.warn("존재하지 않는 배송지 입니다. deliveryId : {}", deliveryId);
-            return new RuntimeException("존재하지 않는 배송지 입니다. 다시 확인 부탁드립니다.");
-        });
-
-        if (!address.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 배송지만 수정 할 수 있습니다.");
+        DeliveryAddress address = deliveryAddressRepository.findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(customerId, deliveryId)
+                                                           .orElseThrow(() -> {
+                                                               log.warn("존재하지 않는 배송지 입니다. deliveryId : {}", deliveryId);
+                                                               return new RuntimeException("존재하지 않는 배송지 입니다. 다시 확인 부탁드립니다.");
+                                                           });
 
         address.update(request.getAddressName(), request.getReceiver(), request.getContact(), request.getZipcode(), request.getRoadAddress(),
                        request.getDetailAddress());
@@ -79,12 +80,11 @@ public class DeliveryAddressService {
     @Transactional
     public void deleteDeliveryAddress(String customerId, Long deliveryId)
     {
-        DeliveryAddress address = deliveryAddressRepository.findById(deliveryId).orElseThrow(() -> {
-            log.warn("존재하지 않는 배송지 입니다. deliveryId : {}", deliveryId);
-            return new RuntimeException("존재하지 않는 배송지 입니다. 다시 확인 부탁드립니다.");
-        });
-
-        if (!address.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 배송지만 삭제 할 수 있습니다.");
+        DeliveryAddress address = deliveryAddressRepository.findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(customerId, deliveryId)
+                                                           .orElseThrow(() -> {
+                                                               log.warn("존재하지 않는 배송지 입니다. deliveryId : {}", deliveryId);
+                                                               return new RuntimeException("존재하지 않는 배송지 입니다. 다시 확인 부탁드립니다.");
+                                                           });
 
         if (address.isDefault()) throw new IllegalStateException("기본 배송지는 삭제 할 수 없습니다.");
 
@@ -94,12 +94,11 @@ public class DeliveryAddressService {
     @Transactional
     public void setIsDefault(String customerId, Long deliveryId)
     {
-        DeliveryAddress target = deliveryAddressRepository.findById(deliveryId).orElseThrow(() -> {
-            log.warn("존재하지 않는 배송지 - deliveryId: {}", deliveryId);
-            return new RuntimeException("존재하지 않는 배송지 입니다.");
-        });
-
-        if (!target.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 배송지만 기본배송지로 설정할 수 있습니다.");
+        DeliveryAddress target = deliveryAddressRepository.findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(customerId, deliveryId)
+                                                          .orElseThrow(() -> {
+                                                              log.warn("존재하지 않는 배송지 - deliveryId: {}", deliveryId);
+                                                              return new RuntimeException("존재하지 않는 배송지 입니다.");
+                                                          });
 
         //기존 설정된 기본 배송지 false로 변경
         List<DeliveryAddress> defaultAddress = deliveryAddressRepository.findByCustomer_CustomerIdAndIsDefaultTrueAndDeletedAtIsNull(customerId);
