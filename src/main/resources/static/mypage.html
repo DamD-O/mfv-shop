@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <title>MFV - 마이페이지</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="icon" href="assets/img/favicon.ico">
+
+    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+
+    <style>
+        .sidebar-item.active {
+            color: #198754 !important;
+            font-weight: bold;
+        }
+
+        .sidebar-item {
+            font-size: 14px !important;
+        }
+    </style>
+</head>
+<body>
+<div id="header"></div>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-3">
+            <h4>마이페이지</h4>
+            <div class="mb-4 p-3 bg-success text-white rounded">
+                <p class="mb-0 fw-bold fs-6" id="user-name"></p>
+                <p class="mb-0 small mt-1">포인트 <span id="user-point" class="fw-bold" style="color: #ffd700;"></span>P</p>
+            </div>
+            <div class="mb-3">
+                <p class="text-muted small fw-bold mb-2 fs-6">쇼핑활동</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('order', this)">주문/배송 조회</a>
+                    </li>
+                </ul>
+            </div>
+            <hr>
+            <div class="mb-3">
+                <p class="text-muted small fw-bold mb-2">혜택</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('point', this)">포인트</a>
+                    </li>
+                </ul>
+            </div>
+            <hr>
+            <div class="mb-3">
+                <p class="text-muted small fw-bold mb-2">참여</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('review', this)">리뷰</a>
+                    </li>
+                </ul>
+            </div>
+            <hr>
+            <div class="mb-3">
+                <p class="text-muted small fw-bold mb-2">마이정보</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('info', this)">회원정보 수정</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('address', this)">배송지 관리</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('withdraw', this)">회원탈퇴</a>
+                    </li>
+                </ul>
+            </div>
+            <hr>
+            <div class="mb-3">
+                <p class="text-muted small fw-bold mb-2">문의</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('qna', this)">상품 Q&A 내역</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-9">
+            <div id="order" class="mypage-section">
+                <h6 class="border-bottom pb-3 mb-4">주문/배송 조회</h6>
+                <!-- 내용 -->
+            </div>
+            <div id="point" class="mypage-section d-none">
+                <h6 class="border-bottom pb-3 mb-4">포인트</h6>
+                <div id="point-container">
+                    <div class="bg-success text-white rounded p-4 mb-4 text-center">
+                        <p class="mb-1" style="font-size: 7px">보유 포인트</p>
+                        <h3 class="mb-0 fw-bold"><span id="point-available"></span>P</h3>
+                    </div>
+                    <table class="table align-middle small table-sm">
+                        <thead class="border-bottom border-dark">
+                        <tr>
+                            <th class="text-center">날짜</th>
+                            <th class="text-center">주문번호</th>
+                            <th class="text-center">종류</th>
+                            <th class="text-center">포인트</th>
+                        </tr>
+                        </thead>
+                        <tbody id="point-history"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="review" class="mypage-section d-none">
+                <h6 class="border-bottom pb-3 mb-4">리뷰</h6>
+            </div>
+            <div id="info" class="mypage-section d-none">
+                <h6 class="border-bottom pb-3 mb-4">회원정보 수정</h6>
+            </div>
+            <div id="address" class="mypage-section d-none">
+                <h6 class="border-bottom pb-3 mb-4">배송지 관리</h6>
+                <a href="address-form.html?type=add&from=mypage" class="btn btn-outline-success mb-3 w-100">배송지 등록</a>
+                <div id="address-container"></div>
+            </div>
+            <div id="withdraw" class="mypage-section d-none">
+                <h6 class="border-bottom pb-3 mb-4">회원탈퇴</h6>
+            </div>
+            <div id="qna" class="mypage-section d-none">
+                <h6 class="border-bottom pb-3 mb-4">상품 Q&A 내역</h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/js/jquery-1.11.0.min.js"></script>
+<script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
+<script src="assets/js/templatemo.js"></script>
+<script src="js/common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const user = await checkLogin();
+        if (!user) return;
+
+        document.getElementById('user-name').innerText = user.name + '님';
+        loadPoints();
+
+        //특정 항목에서 다른 페이지 이동 후 되돌아올때 원래 항목으로 돌아오게
+        const hash = location.hash.replace('#', ''); //todo 다른 항목 넘어가도 유지 되는 현상 수정 필요
+        if (hash) {
+            showSection(hash);
+        }
+
+
+    });
+
+    function showSection(type, element) {
+        document.querySelectorAll('.mypage-section').forEach(s => s.classList.add('d-none'));
+        document.getElementById(type).classList.remove('d-none');
+
+        document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+        if (element) element.classList.add('active'); //사이드마 메뉴 클릭한 항목있으면 초록색 표시
+
+        if (type === 'order') loadOrders();
+        if (type === 'point') loadPoints(type);
+        if (type === 'review') loadReviews();
+        if (type === 'info') loadInfo();
+        if (type === 'address') loadAddressList();
+        if (type === 'withdraw') loadWithDraw();
+        if (type === 'qna') loadQna();
+    }
+
+    async function loadPoints(type = '') {
+        const response = await fetchWithAuth('/api/customers/points');
+        if (!response) return;
+
+        const data = await response.json();
+        const body = document.getElementById('point-history');
+        body.innerHTML = '';
+
+        if (data) {
+            document.getElementById('user-point').innerText = data.availPoint;
+
+            if (type) {
+                document.getElementById('point').classList.remove('d-none');
+                document.getElementById('point-available').innerText = data.availPoint;
+
+                data.historyList.forEach(i => {
+                    const pointList = `
+                    <tr>
+                        <td class="text-center">${i.createdAt.split('T')[0]}</td>
+                        <td class="text-center">#${i.orderId}</td>
+                        <td class="text-center">${i.typeLabel}</td>
+                        <td class="text-center ${i.type === 'USE' ? 'text-danger' : 'text-success'}">${i.type === 'USE' ? '-' : '+'}${i.point.toLocaleString()}</td>
+                    </tr>
+                `;
+                    body.innerHTML += pointList
+                });
+            }
+        }
+
+    }
+
+    async function loadAddressList() {
+        const response = await fetchWithAuth(`/api/customers/address`);
+        if (!response) return;
+
+        const data = await response.json();
+
+        const container = document.getElementById('address-container');
+        container.innerHTML = '';
+
+        if (data) {
+            data.forEach(address => {
+                const card = `
+                   <div class="d-flex align-items-start py-3 border-top">
+                        <div class="flex-grow-1">
+                            <p class="fw-bold mb-1">${address.addressName} (${address.receiver})
+                            ${address.default ? '<span class="badge bg-secondary">기본배송지</span>' : ''}
+                            </p>
+                            <p class="mb-1">(${address.zipcode}) ${address.roadAddress}</p>
+                            <p class="mb-1">${address.detailAddress}</p>
+                            <p>${address.contact}</p>
+                        </div>
+                        <div class="d-flex flex-column align-item-end gap-1 text-nowrap">
+                            <a class="text-muted small" href="address-form.html?type=update&from=mypage&deliveryId=${address.deliveryId}">수정</a>
+                            <a class="text-danger small" onclick="deleteAddress(${address.deliveryId}, ${address.default})">삭제</a>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML += card;
+            });
+        }
+    }
+
+    async function deleteAddress(deliveryId, isDefault) {
+        if (isDefault) {
+            alert('기본배송지는 삭제 할 수 없습니다.');
+            return;
+        }
+
+        if (!confirm('배송지를 삭제하시겠습니까?')) return;
+
+        const response = await fetchWithAuth(`/api/customers/address/${deliveryId}`, {
+            method: 'DELETE',
+        });
+
+        if (!response) return;
+        if (response.ok) {
+            loadAddressList();
+        } else {
+            const error = await response.json();
+            alert(error.message || '배송지 삭제 실패');
+        }
+    }
+</script>
+</body>
+</html>
