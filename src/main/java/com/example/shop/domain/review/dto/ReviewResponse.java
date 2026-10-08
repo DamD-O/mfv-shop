@@ -1,11 +1,11 @@
 package com.example.shop.domain.review.dto;
 
 import com.example.shop.domain.review.entity.Review;
-import com.example.shop.domain.review.entity.ReviewImage;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author madey
@@ -24,8 +24,7 @@ public class ReviewResponse {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String imageUrl;
-    private Long reviewImageId;
+    private List<ReviewImageResponse> images;
 
     public ReviewResponse(Review review)
     {
@@ -37,7 +36,6 @@ public class ReviewResponse {
         this.content = review.getContent();
         this.createdAt = review.getCreatedAt();
         this.updatedAt = review.getUpdatedAt();
-        this.imageUrl = review.getReviewImages().stream().findFirst().map(ReviewImage::getImagePath).orElse(null);
-        this.reviewImageId = review.getReviewImages().stream().findFirst().map(ReviewImage::getId).orElse(null);
+        this.images = review.getReviewImages().stream().map(ReviewImageResponse::new).toList();
     }
 }

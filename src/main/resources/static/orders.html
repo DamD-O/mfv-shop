@@ -108,7 +108,7 @@
                                 <button class="btn btn-outline-danger btn-sm flex-grow-1" style="font-size:11px; padding: 2px 8px;" onclick="deleteReview(${detail.reviewId})">리뷰삭제</button>
                             </div>`
                             : `<div class="mt-1">
-                                <button class="btn btn-outline-secondary btn-sm" style="font-size:11px; padding: 2px 8px;" onclick="goToReview(${detail.orderDetailId})">리뷰작성</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:11px; padding: 2px 8px;" onclick="writeReview(${detail.orderDetailId})">리뷰작성</button>
                               </div>` : ''}
                             </td>
                             <td class="text-center border-end border-top">${detail.quantity}</td>
@@ -147,7 +147,6 @@
         if (!confirm('결제를 진행하시겠습니까?')) return;
         const response = await fetchWithAuth(`/api/customers/orders/${orderId}/payment`, {
             method: 'POST',
-            credentials: 'include'
         });
 
         if (!response) return;
@@ -166,7 +165,6 @@
 
         const response = await fetchWithAuth(`/api/customers/orders/${orderId}/cancel`, {
             method: 'PATCH',
-            credentials: "include"
         });
         if (!response) return;
 
@@ -195,9 +193,21 @@
         location.href = url;
     }
 
-    //todo: 리뷰 삭제 구현
-    async function deleteReview() {
+    async function deleteReview(reviewId) {
+        if (!confirm('작성한 리뷰를 삭제하시겠습니까?')) return;
 
+        const response = await fetchWithAuth(`/api/customers/reviews/${reviewId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response) return;
+
+        if (response.ok) {
+            location.href = 'orders.html';
+        } else {
+            const error = await response.json();
+            alert(error.message || '리뷰 삭제 실패');
+        }
     }
 </script>
 </body>

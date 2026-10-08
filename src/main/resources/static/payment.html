@@ -452,7 +452,6 @@
 
             const payResponse = await fetchWithAuth(`/api/customers/orders/${data.orderId}/payment`, {
                 method: 'POST',
-                credentials: 'include'
             });
 
             if (!payResponse) return;

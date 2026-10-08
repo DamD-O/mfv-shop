@@ -48,7 +48,9 @@
 
         <div class="bg-white rounded p-4 mb-3 shadow-sm">
             <h5>사진 첨부 <small class="text-muted fw-normal">(선택)</small></h5>
-            <input type="file" class="form-control" id="reviewImage" accept="image/*">
+            <div id="image-preview" class="d-flex gap-2 flex-wrap mb-2"></div>
+            <input type="file" id="reviewImage" accept="image/*" multiple class="d-none">
+            <button type="button" class="btn btn-outline-success" onclick="document.getElementById('reviewImage').click()">사진 추가</button>
         </div>
 
         <div class="d-flex justify-content-end gap-2">
@@ -67,6 +69,11 @@
 <script>
     let selectedRating = 0;
     const ratingLabels = ['', '별로예요', '그저 그래요', '보통이에요', '좋아요', '최고예요'];
+
+    let existImages = new Map(); //key: reviewImageId, value: imageUrl
+    const deleteImages = new Map(); //key: reviewImageId, value: imageUrl
+    const newImages = new Map(); // key: tempImageId(임시ID), value: File
+    let tempImageId = -1;
 
     document.addEventListener("DOMContentLoaded", async () => {
         if (!await checkLogin()) return;
@@ -91,6 +98,11 @@
 
             document.getElementById('rating-label').textContent = selectedRating + '점 · ' + ratingLabels[selectedRating];
 
+            //이미지 미리보기
+            data.images.forEach(image => {
+                existImages.set(image.imageId, image.imagePath);
+                renderPreview(image.imageId, image.imagePath);
+            })
         }
 
         document.querySelectorAll('.star').forEach(star => {
@@ -102,13 +114,20 @@
             });
         });
 
-        document.getElementById('rating-label').textContent = selectedRating + '점 · ' + ratingLabels[selectedRating];
-
         //리뷰 내용 글자 수
         document.getElementById('content').addEventListener('input', e => {
             document.getElementById('content-cnt').textContent = e.target.value.length;
         })
 
+        //이미지 추가
+        document.getElementById('reviewImage').addEventListener('change', e => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const tempNewImageId = tempImageId--;
+                newImages.set(tempNewImageId, file);
+                renderPreview(tempNewImageId, URL.createObjectURL(file)); //새 이미지는 아이디가 없으므로 인덱스로 구분
+            })
+        })
     });
 
     async function getProduct() {
@@ -151,15 +170,17 @@
 
         if (response.ok) {
             const data = await response.json();
-            const imagePath = document.getElementById('reviewImage').files[0];
 
-            if (imagePath) {
-                const success = await uploadReviewImage(data.reviewId, imagePath);
+            for (const [imageId] of deleteImages) {
+                await fetchWithAuth(`/api/customers/reviews/images/${imageId}`, {
+                    method: 'DELETE'
+                });
+            }
+
+            for (const [_, file] of newImages) {
+                const success = await uploadReviewImage(data.reviewId, file);
                 if (!success) {
-                    await fetchWithAuth(`/api/customers/reviews/${data.reviewId}`, {
-                        method: 'DELETE'
-                    });
-                    alert('이미지 업로드 실패. 다시 시도해주세요.');
+                    alert('이미지 업로드 실패');
                     return;
                 }
             }
@@ -202,7 +223,27 @@
         return true;
     }
 
-    //todo: 리뷰 이미지 수정 구현
+    function renderPreview(imageId, url) {
+        const container = document.getElementById('image-preview');
+        const div = document.createElement('div');
+        div.style.cssText = 'position:relative; width:80px; height:80px;';
+        div.innerHTML = `
+            <img src="${url}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+            <button type="button" onclick="removeImage(this, ${imageId})"
+                style="position:absolute; top: -6px; right: -6px; width: 20px; height: 20px; border: border-radius:50%; border:none; background:#dc3545; color:white; font-size:12px; cursor:pointer;">×</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function removeImage(btn, imageId) {
+        if (existImages.has(imageId)) {
+            deleteImages.set(imageId, existImages.get(imageId));
+            existImages.delete(imageId);
+        } else {
+            newImages.delete(imageId);
+        }
+        btn.parentElement.remove(); //미리보기 제거
+    }
 </script>
 </body>
 </html>

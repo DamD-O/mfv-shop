@@ -175,7 +175,6 @@
         if (!confirm('결제를 진행하시겠습니까?')) return;
         const response = await fetchWithAuth(`/api/customers/orders/${orderId}/payment`, {
             method: 'POST',
-            credentials: 'include'
         });
 
         if (!response) return;
@@ -194,7 +193,6 @@
 
         const response = await fetchWithAuth(`/api/customers/orders/${orderId}/cancel`, {
             method: 'PATCH',
-            credentials: "include"
         });
         if (!response) return;
 
