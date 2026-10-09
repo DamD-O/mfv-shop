@@ -18,12 +18,13 @@
     </div>
     <div class="col-12 col-md-10 mx-auto border border-white p-4 bg-white" style="border-radius: 12px">
         <div class="d-flex gap-2 mb-3 flex-wrap" id="filter-btns">
-            <button class="btn btn-sm btn-dark filter-btn" onclick="filterOrders('ALL', this)">전체</button>
-            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('PAYMENT_PENDING', this)">결제대기</button>
-            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('PAYMENT_COMPLETE', this)">결제완료</button>
-            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('SHIPPING', this)">배송중</button>
-            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('DELIVERED', this)">배송완료</button>
-            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('CANCELED', this)">취소</button>
+            <button class="btn btn-sm btn-dark filter-btn" onclick="filterOrders('ALL', this)" data-status="ALL">전체</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('PAYMENT_PENDING', this)" data-status="PAYMENT_PENDING">결제대기</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('PAYMENT_COMPLETE', this)" data-status="PAYMENT_COMPLETE">결제완료</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('PREPARING', this)" data-status="PREPARING">배송준비중</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('SHIPPING', this)" data-status="SHIPPING">배송중</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('DELIVERED', this)" data-status="DELIVERED">배송완료</button>
+            <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterOrders('CANCELED', this)" data-status="CANCELED">취소</button>
         </div>
         <div class="bg-white rounded shadow-sm p-0 overflow-hidden">
             <table class="table align-middle small mb-0">
@@ -55,6 +56,15 @@
     document.addEventListener("DOMContentLoaded", async () => {
         if (!await checkLogin()) return;
         await getOrders();
+
+        const status = new URLSearchParams(location.search).get('status');
+        let btn = null;
+        if (status) {
+            btn = document.querySelector(`#filter-btns [data-status="${status}"]`);
+
+            if (btn) filterOrders(status, btn);
+        }
+
     });
 
     function filterOrders(status, element) {
@@ -65,7 +75,11 @@
 
         const filtered = status == 'ALL' ? orders : orders.filter(o => o.orderStatus === status);
 
-        renderingOrders(filtered);
+        renderOrders(filtered);
+
+        const url = new URL(location.href);
+        url.searchParams.set('status', status);
+        history.replaceState(null, '', url);
     }
 
     async function getOrders() {
@@ -76,11 +90,11 @@
             const data = await response.json();
             orders = data;
 
-            renderingOrders(data);
+            renderOrders(data);
         }
     }
 
-    function renderingOrders(data) {
+    function renderOrders(data) {
         const container = document.getElementById('orders');
         container.innerHTML = '';
 

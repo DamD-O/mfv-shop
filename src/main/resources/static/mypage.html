@@ -39,7 +39,7 @@
                 <p class="text-muted small fw-bold mb-2 fs-6">쇼핑활동</p>
                 <ul class="list-unstyled">
                     <li class="mb-2">
-                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('order', this)">주문/배송 조회</a>
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small active" onclick="showSection('order')" data-section="order">주문/배송 조회</a>
                     </li>
                 </ul>
             </div>
@@ -48,7 +48,7 @@
                 <p class="text-muted small fw-bold mb-2">혜택</p>
                 <ul class="list-unstyled">
                     <li class="mb-2">
-                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('point', this)">포인트</a>
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('point')" data-section="point">포인트</a>
                     </li>
                 </ul>
             </div>
@@ -57,22 +57,22 @@
                 <p class="text-muted small fw-bold mb-2">참여</p>
                 <ul class="list-unstyled">
                     <li class="mb-2">
-                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('review', this)">리뷰</a>
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('review')" data-section="review">리뷰</a>
                     </li>
                 </ul>
             </div>
             <hr>
             <div class="mb-3">
-                <p class="text-muted small fw-bold mb-2">마이정보</p>
+                <p class="text-muted small fw-bold mb-2">나의 정보</p>
                 <ul class="list-unstyled">
                     <li class="mb-2">
-                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('info', this)">회원정보 수정</a>
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('info')" data-section="info">회원정보 수정</a>
                     </li>
                     <li class="mb-2">
-                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('address', this)">배송지 관리</a>
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('address')" data-section="address">배송지 관리</a>
                     </li>
                     <li class="mb-2">
-                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('withdraw', this)">회원탈퇴</a>
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('withdraw')" data-section="withdraw">회원탈퇴</a>
                     </li>
                 </ul>
             </div>
@@ -81,7 +81,7 @@
                 <p class="text-muted small fw-bold mb-2">문의</p>
                 <ul class="list-unstyled">
                     <li class="mb-2">
-                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('qna', this)">상품 Q&A 내역</a>
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('qna')" data-section="qna">상품 Q&A 내역</a>
                     </li>
                 </ul>
             </div>
@@ -89,7 +89,53 @@
         <div class="col-9">
             <div id="order" class="mypage-section">
                 <h6 class="border-bottom pb-3 mb-4">주문/배송 조회</h6>
-                <!-- 내용 -->
+                <div class="row g-2 mb-4" id="order-summary">
+                    <div class="col-4 col-md-2">
+                        <a href="orders.html?status=PAYMENT_PENDING" class="d-block text-center text-decoration-none text-dark border rounded py-3">
+                            <h4 class="mb-1 fw-bold" data-count="PAYMENT_PENDING">0</h4>
+                            <span class="small text-muted">결제 대기</span> </a>
+                    </div>
+                    <div class="col-4 col-md-2">
+                        <a href="orders.html?status=PAYMENT_COMPLETE" class="d-block text-center text-decoration-none text-dark border rounded py-3">
+                            <h4 class="mb-1 fw-bold" data-count="PAYMENT_COMPLETE">0</h4>
+                            <span class="small text-muted">결제 완료</span> </a>
+                    </div>
+                    <div class="col-4 col-md-2">
+                        <a href="orders.html?status=PREPARING" class="d-block text-center text-decoration-none text-dark border rounded py-3">
+                            <h4 class="mb-1 fw-bold" data-count="PREPARING">0</h4>
+                            <span class="small text-muted">배송준비중</span> </a>
+                    </div>
+                    <div class="col-4 col-md-2">
+                        <a href="orders.html?status=SHIPPING" class="d-block text-center text-decoration-none text-dark border rounded py-3">
+                            <h4 class="mb-1 fw-bold" data-count="SHIPPING">0</h4>
+                            <span class="small text-muted">배송 중</span> </a>
+                    </div>
+                    <div class="col-4 col-md-2">
+                        <a href="orders.html?status=DELIVERED" class="d-block text-center text-decoration-none text-dark border rounded py-3">
+                            <h4 class="mb-1 fw-bold" data-count="DELIVERED">0</h4>
+                            <span class="small text-muted">배송 완료</span> </a>
+                    </div>
+                    <div class="col-4 col-md-2">
+                        <a href="orders.html?status=CANCELED" class="d-block text-center text-decoration-none text-dark border rounded py-3">
+                            <h4 class="mb-1 fw-bold" data-count="CANCELED">0</h4>
+                            <span class="small text-muted">취소</span> </a>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <p class="fw-bold small mb-0">최근 주문</p>
+                    <a href="orders.html" class="small text-muted">전체 보기</a>
+                </div>
+                <table class="table align-middle small table-sm">
+                    <thead class="border-bottom border-dark">
+                    <tr>
+                        <th class="text-center">주문일</th>
+                        <th class="text-center">주문번호</th>
+                        <th class="text-center">금액</th>
+                        <th class="text-center">상태</th>
+                    </tr>
+                    </thead>
+                    <tbody id="order-preview"></tbody>
+                </table>
             </div>
             <div id="point" class="mypage-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">포인트</h6>
@@ -131,9 +177,7 @@
         </div>
     </div>
 </div>
-
 <div id="footer"></div>
-
 <script src="assets/js/jquery-1.11.0.min.js"></script>
 <script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
 <script src="assets/js/templatemo.js"></script>
@@ -146,25 +190,25 @@
 
         document.getElementById('user-name').innerText = user.name + '님';
         loadPoints();
+        loadOrders();
 
         //특정 항목에서 다른 페이지 이동 후 되돌아올때 원래 항목으로 돌아오게
-        const hash = location.hash.replace('#', ''); //todo 다른 항목 넘어가도 유지 되는 현상 수정 필요
+        const hash = location.hash.replace('#', '');
         if (hash) {
             showSection(hash);
         }
-
-
     });
 
-    function showSection(type, element) {
+    function showSection(type) {
         document.querySelectorAll('.mypage-section').forEach(s => s.classList.add('d-none'));
         document.getElementById(type).classList.remove('d-none');
 
-        document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
-        if (element) element.classList.add('active'); //사이드마 메뉴 클릭한 항목있으면 초록색 표시
+        document.querySelectorAll('.sidebar-item').forEach(s => s.classList.toggle('active', s.dataset.section === type));
 
-        if (type === 'order') loadOrders();
+        history.replaceState(null, '', '#' + type);
+
         if (type === 'point') loadPoints(type);
+        if (type === 'order') loadOrders();
         if (type === 'review') loadReviews();
         if (type === 'info') loadInfo();
         if (type === 'address') loadAddressList();
@@ -200,8 +244,65 @@
                 });
             }
         }
+    }
+
+    async function loadOrders() {
+        const response = await fetchWithAuth('/api/customers/orders');
+        if (!response) return;
+
+        if (response.ok) {
+            const data = await response.json();
+
+            renderOrderCount(data);
+            renderOrderPreview(data)
+        }
+    }
+
+    function renderOrderCount(data) {
+        const counts = {};
+        document.querySelectorAll('#order-summary [data-count]').forEach(el => {
+            counts[el.dataset.count] = 0;
+        });
+
+        //주문 상태 별 카운트 더하기
+        data.forEach(i => {
+            counts[i.orderStatus] += 1
+        });
+
+        //카운트 표시
+        document.querySelectorAll('#order-summary [data-count]').forEach(el => {
+            el.textContent = counts[el.dataset.count];
+        });
+    }
+
+    function renderOrderPreview(data) {
+        const container = document.getElementById('order-preview');
+        container.innerHTML = '';
+
+        const orders = [...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const currentOrders = orders.slice(0, 5);
+
+        if (currentOrders.length > 0) {
+            currentOrders.forEach(i => {
+                const card = `
+            <tr>
+                <td class="text-center">${i.createdAt.split('T')[0]}</td>
+                <td class="text-center"><a class="text-success" href="order.html?orderId=${i.orderId}">#${i.orderId}</a></td>
+                <td class="text-center">${i.totalAmount.toLocaleString()}원</td>
+                <td class="text-center">${i.orderStatusLabel}</td>
+            </tr>`;
+                container.innerHTML += card;
+            });
+        } else {
+            container.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">주문내역이 없습니다.</td></tr>`;
+        }
+    }
+
+    async function loadReviews() {
 
     }
+
+    async function loadInfo() {}
 
     async function loadAddressList() {
         const response = await fetchWithAuth(`/api/customers/address`);
@@ -256,6 +357,15 @@
             alert(error.message || '배송지 삭제 실패');
         }
     }
+
+    async function loadWithDraw() {
+
+    }
+
+    async function loadQna() {
+
+    }
+
 </script>
 </body>
 </html>
