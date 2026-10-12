@@ -96,6 +96,7 @@ public class Customer extends BaseTimeEntity {
     {
         this.withdrawn = true;
         this.withdrawnAt = LocalDateTime.now();
-
+        this.point = 0;
     }
+
 }

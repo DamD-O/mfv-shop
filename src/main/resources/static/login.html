@@ -70,13 +70,14 @@
             const redirect = params.get('redirect');
 
             if (response.ok) {
-                location.href = redirect ? decodeURIComponent(redirect) : 'index.html';
+                location.href = redirect ? decodeURIComponent(redirect) : '/index.html';
             } else {
-                errorDiv.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+                const error = await response.json();
+                errorDiv.textContent = error.message || '로그인에 실패하였습니다.';
                 errorDiv.classList.remove('d-none');
             }
         } catch (error) {
-            errorDiv.textContent = '로그인 중 오류가 발생했습니다.';
+            errorDiv.textContent = '로그인 중 오류가 발생했습니다. 관리자에 문의해주세요.';
             errorDiv.classList.remove('d-none');
         }
     }

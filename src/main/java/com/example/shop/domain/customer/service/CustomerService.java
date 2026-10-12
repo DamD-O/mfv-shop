@@ -5,6 +5,8 @@ import com.example.shop.domain.customer.dto.CustomerSignupRequest;
 import com.example.shop.domain.customer.dto.WithdrawnRequest;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
+import com.example.shop.domain.order.entity.OrderStatus;
+import com.example.shop.domain.order.repository.OrdersRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerService {
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OrdersRepository ordersRepository;
 
     //회원가입
     @Transactional
@@ -76,8 +79,15 @@ public class CustomerService {
             return new RuntimeException("탈퇴실패하였습니다. 사유 : 존재하지 않는 사용자 입니다.");
         });
 
-        if (passwordEncoder.matches(request.getPassword(), customer.getPassword())) customer.setWithdrawn();
-        else throw new RuntimeException("비밀번호가 일치 하지 않습니다.");
+        if (!passwordEncoder.matches(request.getPassword(), customer.getPassword()))
+        {
+            throw new RuntimeException("비밀번호가 일치 하지 않습니다.");
+        }
+
+        if (ordersRepository.existsByCustomer_CustomerIdAndOrderStatusIn(customerId, OrderStatus.notAvailWithdrawnStatus()))
+            throw new RuntimeException("진행 중인 주문이 있어 탈퇴할 수 없습니다. 배송 완료 또는 주문 취소 후 다시 시도해주세요.");
+
+        customer.setWithdrawn();
 
         session.invalidate();
     }

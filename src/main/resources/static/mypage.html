@@ -170,6 +170,29 @@
             </div>
             <div id="withdraw" class="mypage-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">회원탈퇴</h6>
+
+                <div class="alert alert-warning small">
+                    <p class="fw-bold mb-2">탈퇴 전에 꼭 확인해주세요.</p>
+                    <ul class="mb-0 ps-3">
+                        <li>탈퇴하면 같은 아이디로 다시 로그인할 수 없습니다.</li>
+                        <li>보유 중인 포인트는 모두 소멸되며 복구할 수 없습니다.</li>
+                        <li>결제 대기, 결제 완료, 배송 준비중, 배송 중인 주문이 있으면 탈퇴할 수 없습니다. 배송 완료 또는 취소 후 진행해주세요.</li>
+                        <li>주문 내역은 서버에 보관될 수 있습니다.</li>
+                    </ul>
+                </div>
+
+                <div class="mb-3" style="max-width: 400px;">
+                    <label for="withdraw-password" class="form-label small fw-bold">비밀번호 확인</label>
+                    <input type="password" class="form-control" id="withdraw-password" placeholder="현재 비밀번호를 입력하세요" autocomplete="current-password">
+                    <p class="text-danger small mt-2 mb-0 d-none" id="withdraw-error"></p>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" id="withdraw-agree">
+                    <label class="form-check-label small" for="withdraw-agree">위 내용을 모두 확인했으며 탈퇴에 동의합니다.</label>
+                </div>
+
+                <button type="button" class="btn btn-danger" id="withdraw-btn" onclick="withdraw()" disabled>회원 탈퇴</button>
             </div>
             <div id="qna" class="mypage-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">상품 Q&A 내역</h6>
@@ -197,6 +220,11 @@
         if (hash) {
             showSection(hash);
         }
+
+        //탈퇴 체크박스
+        document.getElementById('withdraw-agree').addEventListener('change', (e) => {
+            document.getElementById('withdraw-btn').disabled = !e.target.checked;
+        });
     });
 
     function showSection(type) {
@@ -252,7 +280,6 @@
 
         if (response.ok) {
             const data = await response.json();
-
             renderOrderCount(data);
             renderOrderPreview(data)
         }
@@ -358,8 +385,39 @@
         }
     }
 
-    async function loadWithDraw() {
+    function loadWithDraw() {
+        document.getElementById('withdraw-password').value = '';
+        document.getElementById('withdraw-error').classList.add('d-none');
+        document.getElementById('withdraw-error').textContent = '';
+        document.getElementById('withdraw-agree').checked = false;
+        document.getElementById('withdraw-btn').disabled = true;
+    }
 
+    async function withdraw() {
+        if (document.getElementById('withdraw-password').value === '') {
+            alert('비밀번호를 입력해주세요.');
+            return;
+        }
+
+        if (!confirm('회원탈퇴를 하시겠습니까?')) return;
+
+        const response = await fetchWithAuth(`/api/customers/withdrawn`, {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({password: document.getElementById('withdraw-password').value})
+        });
+
+        if (!response) return;
+
+        if (!response.ok) {
+            const error = await response.json();
+            document.getElementById('withdraw-error').classList.remove('d-none');
+            document.getElementById('withdraw-error').textContent = error.message || '탈퇴를 실패하였습니다.';
+            return;
+        }
+
+        alert('탈퇴되었습니다.');
+        window.location.href = 'index.html';
     }
 
     async function loadQna() {

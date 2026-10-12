@@ -1,5 +1,9 @@
 package com.example.shop.domain.order.entity;
 
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+
 /**
  * @author madey
  * @date 2026-07-27
@@ -24,6 +28,12 @@ public enum OrderStatus {
     public String getLabel()
     {
         return label;
+    }
+
+    public static List<OrderStatus> notAvailWithdrawnStatus()
+    {
+        EnumSet<OrderStatus> excludeStatus = EnumSet.of(OrderStatus.CANCELED, OrderStatus.DELIVERED);
+        return Arrays.stream(OrderStatus.values()).filter(status -> !excludeStatus.contains(status)).toList();
     }
 }
 

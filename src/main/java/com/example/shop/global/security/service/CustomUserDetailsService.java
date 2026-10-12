@@ -5,7 +5,6 @@ import com.example.shop.domain.admin.repository.AdminRepository;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,24 +34,18 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (adminOpt.isPresent())
         {
             Admin admin = adminOpt.get();
-            UserDetails adminUser = User.builder()
-                                        .username(admin.getAdminId())
-                                        .password(admin.getPassword())
-                                        .roles("ADMIN")
-                                        .build();
+            UserDetails adminUser = User.builder().username(admin.getAdminId()).password(admin.getPassword()).roles("ADMIN").build();
             return adminUser;
         }
 
         //관리자 아이디가 없으면 사용자 조회, 사용자도 없으면 UsernameNotFound 처리
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new UsernameNotFoundException(customerId));
 
-        //탈퇴 체크
-        if (customer.isWithdrawn()) throw new DisabledException("탈퇴한 사용자 입니다.");
-
         UserDetails customerUser = User.builder()
                                        .username(customer.getCustomerId())
                                        .password(customer.getPassword())
                                        .roles("USER")
+                                       .disabled(customer.isWithdrawn())
                                        .build();
         return customerUser;
     }
