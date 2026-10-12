@@ -159,6 +159,8 @@
             </div>
             <div id="review" class="mypage-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">리뷰</h6>
+                <div id="review-list"></div>
+                <p id="review-empty" class="text-muted d-none">작성한 리뷰가 없습니다.</p>
             </div>
             <div id="info" class="mypage-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">회원정보 수정</h6>
@@ -326,7 +328,34 @@
     }
 
     async function loadReviews() {
+        const response = await fetchWithAuth('/api/customers/reviews/my');
+        if (!response) return;
 
+        if (response.ok) {
+            const data = await response.json();
+            const container = document.getElementById('review-list');
+            container.innerHTML = '';
+
+            if (data.length > 0) {
+                document.getElementById('review-empty').classList.add('d-none');
+                const list = data.map(i => `
+                    <a href="review.html?type=update&reviewId=${i.reviewId}&orderDetailId=${i.orderDetailId}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">${i.productName}</div>
+                            <small class="text-muted">${i.createdAt.split('T')[0]}</small>
+                        </div>
+                        <span class="text-warning">${'★'.repeat(i.rating)}${'☆'.repeat(5 - i.rating)}</span>
+                    </a>
+                `).join('');
+
+                container.innerHTML = `<div class="list-group">${list}</div>`;
+            } else {
+                document.getElementById('review-empty').classList.remove('d-none');
+            }
+        } else {
+            const error = await response.json();
+            alert(error.message || '리뷰 목록 조회 실패, 다시 시도해주세요.');
+        }
     }
 
     async function loadInfo() {}

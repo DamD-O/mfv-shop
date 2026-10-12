@@ -7,6 +7,7 @@ import com.example.shop.domain.order.entity.OrderStatus;
 import com.example.shop.domain.order.repository.OrderDetailRepository;
 import com.example.shop.domain.product.repository.ProductRepository;
 import com.example.shop.domain.review.dto.ReviewRequest;
+import com.example.shop.domain.review.dto.ReviewResponse;
 import com.example.shop.domain.review.entity.Review;
 import com.example.shop.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -106,5 +107,12 @@ public class ReviewService {
         if (!review.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인이 작성한 리뷰만 조회 가능합니다.");
 
         return review;
+    }
+
+    // 지연 로딩을 위해 세션 유지
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> getUserReview(String customerId)
+    {
+        return reviewRepository.findByCustomer_CustomerIdOrderByCreatedAtDesc(customerId).stream().map(ReviewResponse::new).toList();
     }
 }

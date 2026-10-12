@@ -61,4 +61,11 @@ public class ReviewController {
     {
         return new ReviewResponse(reviewService.getReview(authentication.getName(), reviewId));
     }
+
+    @Operation(summary = "사용자 리뷰 목록 조회")
+    @GetMapping("/customers/reviews/my")
+    public List<ReviewResponse> getUserReviews(Authentication authentication)
+    {
+        return reviewService.getUserReview(authentication.getName());
+    }
 }
