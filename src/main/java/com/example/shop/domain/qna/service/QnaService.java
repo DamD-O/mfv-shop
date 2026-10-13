@@ -88,7 +88,7 @@ public class QnaService {
     //사용자 상품별 문의사항 목록
     public List<Qna> getQnaListByCustomer(String customerId)
     {
-        return qnaRepository.findByCustomer_CustomerId(customerId);
+        return qnaRepository.findByCustomer_CustomerIdOrderByCreatedAtDesc(customerId);
     }
 
     //문의 삭제 - 답변이 안된 경우만
@@ -100,11 +100,9 @@ public class QnaService {
             return new RuntimeException("QnA 삭제 실패 - 존재하지 않는 문의입니다.");
         });
 
-        if (!qna.getCustomer().getCustomerId().equals(customerId))
-            throw new RuntimeException("본인의 문의사항만 삭제 할 수 있습니다.");
+        if (!qna.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 문의사항만 삭제 할 수 있습니다.");
 
-        if (qna.getStatus().equals(QnaStatus.ANSWERED))
-            throw new RuntimeException("답변이 완료된 문의는 삭제 할 수 없습니다.");
+        if (qna.getStatus().equals(QnaStatus.ANSWERED)) throw new RuntimeException("답변이 완료된 문의는 삭제 할 수 없습니다.");
 
         qnaRepository.delete(qna);
     }

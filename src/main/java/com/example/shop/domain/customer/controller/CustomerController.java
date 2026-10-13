@@ -1,9 +1,7 @@
 package com.example.shop.domain.customer.controller;
 
 import com.example.shop.domain.admin.service.AdminService;
-import com.example.shop.domain.customer.dto.CustomerSignupRequest;
-import com.example.shop.domain.customer.dto.CustomerSignupResponse;
-import com.example.shop.domain.customer.dto.WithdrawnRequest;
+import com.example.shop.domain.customer.dto.*;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,6 +48,7 @@ public class CustomerController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "마이페이지")
     @GetMapping("/my")
     public ResponseEntity<?> getMyPage()
     {
@@ -58,5 +57,19 @@ public class CustomerController {
         String role = auth.getAuthorities().stream().findFirst().map(a -> a.getAuthority()).orElse("");
         String name = role.equals("ROLE_ADMIN") ? adminService.getAdminName(customerId) : customerService.getCustomerName(customerId);
         return ResponseEntity.ok(Map.of("customerId", customerId, "role", role, "name", name));
+    }
+
+    @Operation(summary = "회원 본인 정보 조회")
+    @GetMapping("/info")
+    public CustomerResponse getCustomerInfo(Authentication authentication)
+    {
+        return customerService.getCustomerInfo(authentication.getName());
+    }
+
+    @Operation(summary = "회원 정보 수정", description = "회원 정보 및 비밀번호 변경 가능")
+    @PutMapping("/info")
+    public CustomerResponse updateCustomerInfo(Authentication authentication, @Valid @RequestBody CustomerUpdateRequest request)
+    {
+        return new CustomerResponse(customerService.updateCustomerInfo(authentication.getName(), request));
     }
 }

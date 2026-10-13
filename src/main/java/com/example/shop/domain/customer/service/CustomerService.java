@@ -1,7 +1,9 @@
 package com.example.shop.domain.customer.service;
 
 import com.example.shop.domain.admin.entity.AuthType;
+import com.example.shop.domain.customer.dto.CustomerResponse;
 import com.example.shop.domain.customer.dto.CustomerSignupRequest;
+import com.example.shop.domain.customer.dto.CustomerUpdateRequest;
 import com.example.shop.domain.customer.dto.WithdrawnRequest;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
@@ -81,7 +83,7 @@ public class CustomerService {
 
         if (!passwordEncoder.matches(request.getPassword(), customer.getPassword()))
         {
-            throw new RuntimeException("비밀번호가 일치 하지 않습니다.");
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
         if (ordersRepository.existsByCustomer_CustomerIdAndOrderStatusIn(customerId, OrderStatus.notAvailWithdrawnStatus()))
@@ -95,5 +97,54 @@ public class CustomerService {
     public String getCustomerName(String customerId)
     {
         return customerRepository.findOneByCustomerId(customerId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자 입니다.")).getName();
+    }
+
+    public CustomerResponse getCustomerInfo(String customerId)
+    {
+        Customer customer = customerRepository.findByCustomerIdAndWithdrawnFalse(customerId).orElseThrow(() -> {
+            log.warn("사용자 정보 조회 실패, customerId: {}", customerId);
+            return new RuntimeException("사용자 정보를 가져오기 실패하였습니다.");
+        });
+
+        return new CustomerResponse(customer);
+    }
+
+    @Transactional
+    public Customer updateCustomerInfo(String customerId, CustomerUpdateRequest request)
+    {
+        Customer customer = customerRepository.findByCustomerIdAndWithdrawnFalse(customerId).orElseThrow(() -> {
+            log.warn("사용자 정보 수정 실패, customerId: {}", customerId);
+            return new RuntimeException("사용자 정보 수정 - 존재하지 않는 사용자 입니다.");
+        });
+
+        if (!passwordEncoder.matches(request.getOldPassword(), customer.getPassword())) throw new RuntimeException("현재 비밀번호가 일치하지 않습니다.");
+
+        if (!customer.getEmail().equals(request.getEmail()))
+        {
+            if (customerRepository.existsByEmail(request.getEmail()))
+            {
+                log.warn("회원 정보 수정 실패 - 이미 사용중인 이메일 : {}", request.getEmail());
+                throw new RuntimeException(request.getEmail() + "는 이미 사용중인 이메일 입니다.");
+            }
+        }
+
+        if (!customer.getPhone().equals(request.getPhone()))
+        {
+            if (customerRepository.existsByPhone(request.getPhone()))
+            {
+                log.warn("회원 정보 수정 실패 - 이미 사용중인 핸드폰 번호 : {}", request.getPhone());
+                throw new RuntimeException(request.getPhone() + "는 이미 사용중인 핸드폰 번호 입니다.");
+            }
+        }
+
+        customer.updateInfo(request.getPhone(), request.getEmail());
+
+        String newPassword = request.getNewPassword();
+        if (newPassword != null)
+        {
+            customer.changePassword(passwordEncoder.encode(newPassword));
+        }
+
+        return customer;
     }
 }

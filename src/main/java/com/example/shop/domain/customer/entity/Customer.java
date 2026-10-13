@@ -69,7 +69,7 @@ public class Customer extends BaseTimeEntity {
         this.password = encodedPassword;
     }
 
-    public void updateContact(String phone, String email)
+    public void updateInfo(String phone, String email)
     {
         this.phone = phone;
         this.email = email;
