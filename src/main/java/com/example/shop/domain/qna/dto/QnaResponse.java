@@ -27,6 +27,7 @@ public class QnaResponse {
     private String adminAnswer;
     private QnaStatus status;
     private String statusLabel;
+    private boolean secret;
     private LocalDateTime createdAt;
 
     public QnaResponse(Qna qna)
@@ -41,6 +42,22 @@ public class QnaResponse {
         this.adminAnswer = qna.getAdminAnswer();
         this.status = qna.getStatus();
         this.statusLabel = qna.getStatus().getLabel();
+        this.secret = qna.isSecret();
         this.createdAt = qna.getCreatedAt();
+    }
+
+    public void maskQna(boolean canView)
+    {
+        if (canView) return;
+
+        int visibleLength = customerId.length() / 2;
+        this.customerId = customerId.substring(0, visibleLength) + "*".repeat(customerId.length() - visibleLength);
+
+        if (this.secret)
+        {
+            this.title = "비밀글입니다.";
+            this.content = null;
+            this.adminAnswer = null;
+        }
     }
 }

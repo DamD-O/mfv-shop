@@ -245,7 +245,7 @@
                 </div>
                 <button type="button" class="btn btn-danger" id="withdraw-btn" onclick="withdraw()" disabled>회원 탈퇴</button>
             </div>
-            <!--qna : 문의내용-->
+            <!--qna : 문의상태-->
             <div id="qna" class="mypage-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">상품 Q&A 내역</h6>
                 <div id="qna-list" class="accordion"></div>
@@ -586,7 +586,7 @@
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#qna-${i.qnaId}">
                                     ${i.productImage ? `<img src="${i.productImage}" width="48" height="48" class="rounded me-3 object-fit-cover">` : `<div style="width:48px; height:48px; background:#f0f0f0; border-radius:4px; flex-shrink:0;" class="rounded me-3 object-fit-cover"></div>`}
                                     <div class="flex-grow-1">
-                                        <div class="fw-bold">${i.title}</div>
+                                        <div class="fw-bold">${i.title} ${i.secret ? '🔒' : ''}</div>
                                         <small>${i.productName} · ${i.createdAt.split('T')[0]}</small>
                                     </div>
                                     <span class="badge ${i.status === 'WAITING' ? 'bg-secondary' : 'bg-success'} me-2">${i.statusLabel}</span>
@@ -608,7 +608,7 @@
                     `;
 
                     container.innerHTML += card;
-                })
+                });
             } else {
                 document.getElementById('qna-empty').classList.remove('d-none');
             }

@@ -6,6 +6,7 @@ import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.repository.ProductRepository;
 import com.example.shop.domain.qna.dto.QnaAnswerRequest;
 import com.example.shop.domain.qna.dto.QnaCreateRequest;
+import com.example.shop.domain.qna.dto.QnaResponse;
 import com.example.shop.domain.qna.entity.Qna;
 import com.example.shop.domain.qna.entity.QnaStatus;
 import com.example.shop.domain.qna.repository.QnaRepository;
@@ -44,7 +45,7 @@ public class QnaService {
             return new RuntimeException("존재하지 않는 상품입니다.");
         });
 
-        Qna qna = new Qna(product, customer, request.getTitle(), request.getContent());
+        Qna qna = new Qna(product, customer, request.getTitle(), request.getContent(), request.isSecret());
 
         qnaRepository.save(qna);
 
@@ -66,23 +67,38 @@ public class QnaService {
     }
 
     //상품별 문의 목록 조회
-    public List<Qna> getQnaListByProduct(Long productId)
+    @Transactional(readOnly = true)
+    public List<QnaResponse> getQnaListByProduct(Long productId, String customerId, String role)
     {
         productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품별 문의 목록 조회 - 존재하지 않는 상품 입니다. product id : {}", productId);
             return new RuntimeException("상품 별 문의 목록 조회 - 존재하지 않는 상품입니다.");
         });
 
-        return qnaRepository.findByProduct_Id(productId);
+        List<Qna> qnaList = qnaRepository.findByProduct_IdOrderByCreatedAtDesc(productId);
+
+        return qnaList.stream().map(qna -> {
+            QnaResponse qnaResponse = new QnaResponse(qna);
+            boolean canView = isViewable(qna, customerId, role);
+            qnaResponse.maskQna(canView);
+            return qnaResponse;
+        }).toList();
     }
 
     //목록 상세 조회
-    public Qna getQnaByQnaId(Long qnaId)
+    @Transactional(readOnly = true)
+    public QnaResponse getQnaByQnaId(Long qnaId, String customerId, String role)
     {
-        return qnaRepository.findById(qnaId).orElseThrow(() -> {
+        Qna qna = qnaRepository.findById(qnaId).orElseThrow(() -> {
             log.warn("문의 상세조회 실패 - 존재하지 않는 qnaId: {}", qnaId);
             return new RuntimeException("존재하지 않는 문의 사항입니다.");
         });
+
+        boolean canView = isViewable(qna, customerId, role);
+        QnaResponse qnaResponse = new QnaResponse(qna);
+        qnaResponse.maskQna(canView);
+
+        return qnaResponse;
     }
 
     //사용자 상품별 문의사항 목록
@@ -105,5 +121,10 @@ public class QnaService {
         if (qna.getStatus().equals(QnaStatus.ANSWERED)) throw new RuntimeException("답변이 완료된 문의는 삭제 할 수 없습니다.");
 
         qnaRepository.delete(qna);
+    }
+
+    private boolean isViewable(Qna qna, String customerId, String role)
+    {
+        return (qna.getCustomer().getCustomerId().equals(customerId) || "ROLE_ADMIN".equals(role));
     }
 }

@@ -48,7 +48,7 @@ public class Customer extends BaseTimeEntity {
     private AuthType authority;
 
     @Column(name = "withdrawn", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
-    private boolean withdrawn = false;
+    private boolean withdrawn;
 
     @Column(name = "withdrawn_at")
     private LocalDateTime withdrawnAt;

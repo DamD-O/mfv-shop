@@ -44,16 +44,16 @@ public class QnaController {
 
     @Operation(summary = "상품별 문의 조회")
     @GetMapping("/products/{productId}/qna")
-    public List<QnaResponse> getQnaByProduct(@PathVariable("productId") Long productId)
+    public List<QnaResponse> getQnaByProduct(@PathVariable Long productId, Authentication authentication)
     {
-        return qnaService.getQnaListByProduct(productId).stream().map(QnaResponse::new).toList();
+        return qnaService.getQnaListByProduct(productId, getCustomerId(authentication), getRole(authentication));
     }
 
     @Operation(summary = "문의 상세조회")
     @GetMapping("/qna/{qnaId}")
-    public QnaResponse getQnaById(@PathVariable Long qnaId)
+    public QnaResponse getQnaById(@PathVariable Long qnaId, Authentication authentication)
     {
-        return new QnaResponse(qnaService.getQnaByQnaId(qnaId));
+        return qnaService.getQnaByQnaId(qnaId, getCustomerId(authentication), getRole(authentication));
     }
 
     @Operation(summary = "문의 답변")
@@ -65,8 +65,18 @@ public class QnaController {
 
     @Operation(summary = "문의 삭제")
     @DeleteMapping("/customers/qna/{qnaId}")
-    public void deleteQna(@PathVariable Long qnaId,  Authentication authentication)
+    public void deleteQna(@PathVariable Long qnaId, Authentication authentication)
     {
         qnaService.deleteQnaByQnaId(qnaId, authentication.getName());
+    }
+
+    private String getCustomerId(Authentication authentication)
+    {
+        return authentication != null ? authentication.getName() : null;
+    }
+
+    private String getRole(Authentication authentication)
+    {
+        return authentication != null ? authentication.getAuthorities().stream().findFirst().map(a -> a.getAuthority()).orElse("") : null;
     }
 }

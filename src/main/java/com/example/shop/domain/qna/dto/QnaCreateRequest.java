@@ -24,10 +24,13 @@ public class QnaCreateRequest {
     @NotBlank(message = "문의 내용을 입력해주세요.")
     private String content;
 
-    public QnaCreateRequest(Long productId, String title, String content)
+    private boolean secret;
+
+    public QnaCreateRequest(Long productId, String title, String content, boolean secret)
     {
         this.productId = productId;
         this.title = title;
         this.content = content;
+        this.secret = secret;
     }
 }

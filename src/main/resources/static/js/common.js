@@ -26,8 +26,8 @@ async function checkLoginStatus() {
         const data = await response.json();
 
         if (response.ok) {
+            document.getElementById('my-status').innerText = data.name + '님'
             if (data.role === 'ROLE_ADMIN') {
-                document.getElementById('my-status').innerText = '관리자페이지'
                 document.getElementById('my-dropdown').innerHTML = `
                     <li><a class="dropdown-item" href="admin.html">관리자페이지</a></li>
                     <li><a class="dropdown-item" href="#" onclick="logout()">로그아웃</a></li>
@@ -36,7 +36,6 @@ async function checkLoginStatus() {
                 footerLoginLink.href = 'admin.html';
                 footerLoginLink.textContent = '관리자페이지';
             } else {
-                document.getElementById('my-status').innerText = data.name + '님'
                 document.getElementById('my-dropdown').innerHTML = `
                     <li><a class="dropdown-item" href="mypage.html">마이페이지</a></li>
                     <li><a class="dropdown-item" href="orders.html">주문내역</a></li>
@@ -109,4 +108,16 @@ async function logout() {
     if (response.ok) {
         location.href = 'index.html';
     }
+}
+
+function escapeHtml(str) {
+    if (str == null) return '';
+    str = String(str);
+
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }

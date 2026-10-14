@@ -3,18 +3,7 @@ package com.example.shop.domain.qna.entity;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.global.entity.BaseTimeEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,13 +48,17 @@ public class Qna extends BaseTimeEntity {
     @Column(name = "status", nullable = false, length = 10)
     private QnaStatus status;
 
-    public Qna(Product product, Customer customer, String title, String content)
+    @Column(name = "secret", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean secret;
+
+    public Qna(Product product, Customer customer, String title, String content, boolean secret)
     {
         this.product = product;
         this.customer = customer;
         this.title = title;
         this.content = content;
         this.status = QnaStatus.WAITING;
+        this.secret = secret;
     }
 
     public void answer(String adminAnswer)

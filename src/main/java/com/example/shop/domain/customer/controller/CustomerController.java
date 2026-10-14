@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,7 +55,7 @@ public class CustomerController {
     {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String customerId = auth.getName();
-        String role = auth.getAuthorities().stream().findFirst().map(a -> a.getAuthority()).orElse("");
+        String role = auth.getAuthorities().stream().findFirst().map(GrantedAuthority::getAuthority).orElse("");
         String name = role.equals("ROLE_ADMIN") ? adminService.getAdminName(customerId) : customerService.getCustomerName(customerId);
         return ResponseEntity.ok(Map.of("customerId", customerId, "role", role, "name", name));
     }

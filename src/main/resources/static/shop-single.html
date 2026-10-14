@@ -19,12 +19,21 @@
         input[type="number"]::-webkit-outer-spin-button {
             opacity: 1;
         }
+
+        .nav-underline .nav-link {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .nav-underline .nav-link.active {
+            color: #198754;
+            border-bottom-color: #198754;
+        }
     </style>
 
 </head>
 <body>
 <div id="header"></div>
-
 <!-- Modal -->
 <div class="modal fade bg-white" id="templatemo_search" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -41,7 +50,7 @@
         </form>
     </div>
 </div>
-<!-- Open Content -->
+<!-- 상품정보 -->
 <section class="bg-light">
     <div class="container pb-5">
         <div class="row">
@@ -73,25 +82,68 @@
         </div>
     </div>
 </section>
-<!-- Close Content -->
-
+<!--리뷰 / 문의목록-->
+<section class="py-5">
+    <div class="container">
+        <ul class="nav nav-underline border-bottom" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="review-tab" data-bs-toggle="tab" data-bs-target="#review-pane" type="button" role="tab">
+                    상품 리뷰 <span class="small" id="review-count"></span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="qna-tab" data-bs-toggle="tab" data-bs-target="#qna-pane" type="button" role="tab">
+                    상품 문의 <span class="small" id="qna-count"></span>
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content pt-4">
+            <div class="tab-pane fade show active" id="review-pane" role="tabpanel">
+                <div id="review-list"></div>
+                <p id="review-empty" class="text-muted text-center py-5 d-none">등록된 리뷰가 없습니다.</p>
+            </div>
+            <div class="tab-pane fade" id="qna-pane" role="tabpanel">
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-outline-success btn-sm" id="qna-write-btn" type="button" data-bs-toggle="collapse" data-bs-target="#qna-form">문의하기</button>
+                </div>
+                <p id="qna-login-notice" class="text-muted d-none">문의 작성은 로그인 후 이용할 수 있습니다. <a id="qna-login-link">로그인</a></p>
+                <div class="collapse" id="qna-form">
+                    <div class="card card-body bg-white mb-4">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="qna-title" placeholder="제목">
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" id="qna-content" rows="4" placeholder="문의 내용을 입력하세요"></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="qna-secret">
+                                <label class="form-check-label" for="qna-secret">비밀글</label>
+                            </div>
+                            <button class="btn btn-success" id="qna-submit" type="button" onclick="createQna()">등록</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion" id="qna-list"></div>
+                <p id="qna-empty" class="text-muted text-center py-5 d-none">등록된 문의가 없습니다.</p>
+            </div>
+        </div>
+    </div>
+</section>
 <div id="footer"></div>
-<!-- Start Script -->
 <script src="assets/js/jquery-1.11.0.min.js"></script>
 <script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
 <script src="assets/js/templatemo.js"></script>
 <script src="js/common.js"></script>
-
 <script>
+    const productId = new URLSearchParams(window.location.search).get('productId');
     document.addEventListener('DOMContentLoaded', () => {
         getProduct();
+        checkQnaLogin();
+        loadQna();
     });
 
     async function getProduct() {
-
-        const params = new URLSearchParams(window.location.search);
-        const productId = params.get('productId')
-
         const response = await fetch(`/api/products/${productId}`);
         const data = await response.json();
 
@@ -133,8 +185,107 @@
         updateCartCount()
         alert('장바구니에 추가되었습니다.')
     }
+
+    async function loadQna() {
+        const response = await fetch(`/api/products/${productId}/qna`);
+
+        if (response.ok) {
+            const data = await response.json();
+            const container = document.getElementById('qna-list');
+            container.innerHTML = '';
+
+            if (data.length > 0) {
+                document.getElementById('qna-empty').classList.add('d-none');
+                document.getElementById('qna-count').innerText = data.length;
+                data.forEach(i => {
+                    const locked = i.secret && !i.content;
+                    const card = `
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" ${locked ? 'disabled' : `data-bs-toggle="collapse" data-bs-target="#qna-${i.qnaId}"`}  >
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold">${escapeHtml(i.title)} ${i.secret ? '🔒' : ''}</div>
+                                        <small>${escapeHtml(i.customerId)} · ${i.createdAt.split('T')[0]}</small>
+                                    </div>
+                                    <span class="badge ${i.status === 'WAITING' ? 'bg-secondary' : 'bg-success'} me-2">${i.statusLabel}</span>
+                                </button>
+                            </h2>
+                            ${locked ? '' : `
+                            <div id="qna-${i.qnaId}" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <p class="fw-bold mb-1">문의 내용</p>
+                                        <p class="mb-0" style="white-space: pre-wrap;">${escapeHtml(i.content)}</p>
+                                    </div>
+                                    <div class="border-top pt-3">
+                                        <p class="fw-bold mb-1">답변</p>
+                                        <p class="mb-0" style="white-space: pre-wrap;">${i.adminAnswer ? escapeHtml(i.adminAnswer) : '아직 답변이 등록되지 않았습니다.'}</p>
+                                    </div>
+                                </div>
+                            </div>`}
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            } else {
+                document.getElementById('qna-empty').classList.remove('d-none');
+            }
+
+        } else {
+            const error = await response.json();
+            alert(error.message || 'QnA 목록 조회 실패');
+
+        }
+    }
+
+    async function createQna() {
+        const title = document.getElementById('qna-title').value.trim();
+        const content = document.getElementById('qna-content').value.trim();
+        const secret = document.getElementById('qna-secret').checked;
+
+        if (!title) {
+            alert('문의 제목을 입력해주세요.');
+            return;
+        }
+
+        if (!content) {
+            alert('문의 내용을 입력해주세요.');
+            return;
+        }
+
+        const response = await fetchWithAuth(`/api/customers/qna`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                productId: Number(productId),
+                title: title,
+                content: content,
+                secret: secret
+            }),
+        });
+        if (!response) return;
+
+        if (response.ok) {
+            document.getElementById('qna-title').value = '';
+            document.getElementById('qna-content').value = '';
+            document.getElementById('qna-secret').checked = false;
+            bootstrap.Collapse.getOrCreateInstance(document.getElementById('qna-form')).hide();
+            loadQna();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'QnA 등록 실패');
+        }
+    }
+
+    async function checkQnaLogin() {
+        const response = await fetch('/api/customers/my');
+        if (!response.ok) {
+            document.getElementById('qna-write-btn').disabled = true;
+            document.getElementById('qna-login-notice').classList.remove('d-none');
+            document.getElementById('qna-login-link').href = `login.html?redirect=${encodeURIComponent(location.href)}`;
+        }
+    }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- End Script -->
 </body>
 </html>

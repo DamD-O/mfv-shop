@@ -11,7 +11,7 @@ import java.util.List;
  * @description
  */
 public interface QnaRepository extends JpaRepository<Qna, Long> {
-    List<Qna> findByProduct_Id(Long productId);
-
     List<Qna> findByCustomer_CustomerIdOrderByCreatedAtDesc(String customerId);
+
+    List<Qna> findByProduct_IdOrderByCreatedAtDesc(Long productId);
 }
