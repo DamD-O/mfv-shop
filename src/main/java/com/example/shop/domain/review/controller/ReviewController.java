@@ -38,7 +38,7 @@ public class ReviewController {
     @GetMapping("/products/{productId}/reviews")
     public List<ReviewResponse> getReviews(@PathVariable Long productId)
     {
-        return reviewService.getReviewsByProductId(productId).stream().map(ReviewResponse::new).toList();
+        return reviewService.getReviewsByProductId(productId);
     }
 
     @Operation(summary = "리뷰 수정")

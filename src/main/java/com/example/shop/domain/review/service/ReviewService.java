@@ -57,14 +57,22 @@ public class ReviewService {
     }
 
     //상품별 리뷰 목록 조회 - 상품 상세페이지
-    public List<Review> getReviewsByProductId(Long productId)
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> getReviewsByProductId(Long productId)
     {
         productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품별 리뷰 목록 조회 - 존재하지 않는 상품 입니다. product id : {}", productId);
             return new RuntimeException("상품 별 리뷰 목록 조회 - 존재하지 않는 상품입니다.");
         });
 
-        return reviewRepository.findByOrderDetail_Product_Id(productId);
+        List<Review> reviewList = reviewRepository.findByOrderDetail_Product_IdOrderByCreatedAtDesc(productId);
+
+
+        return reviewList.stream().map(review -> {
+            ReviewResponse reviewResponse = new ReviewResponse(review);
+            reviewResponse.maskReview();
+            return reviewResponse;
+        }).toList();
     }
 
     //리뷰 수정

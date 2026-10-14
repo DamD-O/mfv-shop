@@ -3,6 +3,7 @@ package com.example.shop.domain.qna.dto;
 import com.example.shop.domain.product.entity.ProductImage;
 import com.example.shop.domain.qna.entity.Qna;
 import com.example.shop.domain.qna.entity.QnaStatus;
+import com.example.shop.global.util.MaskingUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -50,8 +51,7 @@ public class QnaResponse {
     {
         if (canView) return;
 
-        int visibleLength = customerId.length() / 2;
-        this.customerId = customerId.substring(0, visibleLength) + "*".repeat(customerId.length() - visibleLength);
+        this.customerId = MaskingUtil.maskingCustomerId(customerId);
 
         if (this.secret)
         {

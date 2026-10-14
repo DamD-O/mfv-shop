@@ -2,6 +2,7 @@ package com.example.shop.domain.review.dto;
 
 import com.example.shop.domain.product.entity.ProductImage;
 import com.example.shop.domain.review.entity.Review;
+import com.example.shop.global.util.MaskingUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -48,5 +49,10 @@ public class ReviewResponse {
         this.createdAt = review.getCreatedAt();
         this.updatedAt = review.getUpdatedAt();
         this.reviewImages = review.getReviewImages().stream().map(ReviewImageResponse::new).toList();
+    }
+
+    public void maskReview()
+    {
+        this.customerId = MaskingUtil.maskingCustomerId(customerId);
     }
 }

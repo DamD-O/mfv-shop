@@ -4,6 +4,7 @@ import com.example.shop.domain.qna.dto.QnaAnswerRequest;
 import com.example.shop.domain.qna.dto.QnaCreateRequest;
 import com.example.shop.domain.qna.dto.QnaResponse;
 import com.example.shop.domain.qna.service.QnaService;
+import com.example.shop.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -46,14 +47,14 @@ public class QnaController {
     @GetMapping("/products/{productId}/qna")
     public List<QnaResponse> getQnaByProduct(@PathVariable Long productId, Authentication authentication)
     {
-        return qnaService.getQnaListByProduct(productId, getCustomerId(authentication), getRole(authentication));
+        return qnaService.getQnaListByProduct(productId, AuthUtil.getCustomerId(authentication), AuthUtil.getRole(authentication));
     }
 
     @Operation(summary = "문의 상세조회")
     @GetMapping("/qna/{qnaId}")
     public QnaResponse getQnaById(@PathVariable Long qnaId, Authentication authentication)
     {
-        return qnaService.getQnaByQnaId(qnaId, getCustomerId(authentication), getRole(authentication));
+        return qnaService.getQnaByQnaId(qnaId, AuthUtil.getCustomerId(authentication), AuthUtil.getRole(authentication));
     }
 
     @Operation(summary = "문의 답변")
@@ -68,15 +69,5 @@ public class QnaController {
     public void deleteQna(@PathVariable Long qnaId, Authentication authentication)
     {
         qnaService.deleteQnaByQnaId(qnaId, authentication.getName());
-    }
-
-    private String getCustomerId(Authentication authentication)
-    {
-        return authentication != null ? authentication.getName() : null;
-    }
-
-    private String getRole(Authentication authentication)
-    {
-        return authentication != null ? authentication.getAuthorities().stream().findFirst().map(a -> a.getAuthority()).orElse("") : null;
     }
 }

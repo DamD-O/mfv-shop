@@ -139,6 +139,7 @@
     const productId = new URLSearchParams(window.location.search).get('productId');
     document.addEventListener('DOMContentLoaded', () => {
         getProduct();
+        loadReviews();
         checkQnaLogin();
         loadQna();
     });
@@ -186,6 +187,54 @@
         alert('장바구니에 추가되었습니다.')
     }
 
+    async function loadReviews() {
+        const response = await fetch(`/api/products/${productId}/reviews`);
+
+        if (response.ok) {
+            const data = await response.json();
+            const container = document.getElementById('review-list');
+            container.innerHTML = '';
+
+            if (data.length > 0) {
+                document.getElementById('review-empty').classList.add('d-none');
+                document.getElementById('review-count').textContent = data.length;
+
+                data.forEach(i => {
+                    const rating = i.rating;
+                    const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                    const images = !i.reviewImages?.length ? '' :
+                        `<div class="d-flex gap-2 flex-wrap"> ${i.reviewImages.map(image =>
+                            `<img src="${escapeHtml(image.imagePath)}" width="96" height="96" class="rounded object-fit-cover" alt="리뷰 사진">`
+                        ).join('')} </div>`;
+
+                    const card = `
+                        <div class="border-bottom py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-warning">${stars}</span>
+                                    <small class="text-muted ms-2">${escapeHtml(i.customerId)}</small>
+                                </div>
+                                <small class="text-muted">${i.createdAt.split('T')[0]}</small>
+                            </div>
+                            <p class="mt-2 mb-2" style="white-space: pre-wrap;">${escapeHtml(i.content)}</p>
+                                ${images}
+
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            } else {
+                document.getElementById('review-empty').classList.remove('d-none');
+                document.getElementById('review-count').textContent = 0;
+            }
+
+        } else {
+            const error = await response.json();
+            alert(error.message || '리뷰 목록 조회 실패');
+
+        }
+    }
+
     async function loadQna() {
         const response = await fetch(`/api/products/${productId}/qna`);
 
@@ -196,7 +245,8 @@
 
             if (data.length > 0) {
                 document.getElementById('qna-empty').classList.add('d-none');
-                document.getElementById('qna-count').innerText = data.length;
+                document.getElementById('qna-count').textContent = data.length;
+
                 data.forEach(i => {
                     const locked = i.secret && !i.content;
                     const card = `
@@ -229,6 +279,7 @@
                 });
             } else {
                 document.getElementById('qna-empty').classList.remove('d-none');
+                document.getElementById('qna-count').textContent = 0;
             }
 
         } else {
