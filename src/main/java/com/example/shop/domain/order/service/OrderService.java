@@ -6,6 +6,7 @@ import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
 import com.example.shop.domain.order.dto.OrderItemRequest;
 import com.example.shop.domain.order.dto.OrderRequest;
+import com.example.shop.domain.order.dto.OrderResponse;
 import com.example.shop.domain.order.entity.OrderDetail;
 import com.example.shop.domain.order.entity.OrderStatus;
 import com.example.shop.domain.order.entity.Orders;
@@ -19,6 +20,7 @@ import com.example.shop.domain.product.entity.ProductStatus;
 import com.example.shop.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,7 +125,13 @@ public class OrderService {
         return orders;
     }
 
-    //주문 상태 변경 - 관리자용
+    /**
+     *
+     * @param orderId
+     * @param status
+     * 관리자 주문 상태 변경
+     * 변경 가능 규칙 - OrderStatus#canChangeTo 참고
+     */
     @Transactional
     public Orders updateOrderStatus(Long orderId, OrderStatus status)
     {
@@ -131,6 +139,11 @@ public class OrderService {
             log.warn("주문 상태변경 - 존재하지 않는 orderId: {}", orderId);
             return new RuntimeException("존재 하지 않는 주문으로 주문 상태변경 실패");
         });
+
+        OrderStatus currentStatus = orders.getOrderStatus();
+        currentStatus.validateChangeTo(status);
+
+        if (status.equals(OrderStatus.CANCELED)) restoreStockAndPoint(orders);
 
         orders.changeStatus(status);
 
@@ -146,7 +159,12 @@ public class OrderService {
         return orders;
     }
 
-    //주문 취소
+    /**
+     *
+     * @param customerId
+     * @param orderId
+     * 고객 주문 취소
+     */
     @Transactional
     public void cancelOrder(String customerId, Long orderId)
     {
@@ -164,21 +182,7 @@ public class OrderService {
             throw new RuntimeException("배송 준비 중 이후 상태의 주문은 취소할 수 없습니다. \n 주문 상태 : " + status.getLabel());
         }
 
-        //재고 원복
-        for (OrderDetail detail : orders.getOrderDetails())
-        {
-            detail.getProduct().increaseStock(detail.getQuantity());
-        }
-
-        //사용한 포인트 원복
-        if (status == OrderStatus.PAYMENT_COMPLETE)
-        {
-            if (orders.getUsePoint() > 0)
-            {
-                orders.getCustomer().earnPoint(orders.getUsePoint());
-                pointHistoryRepository.save(new PointHistory(orders.getCustomer(), orders, PointType.REFUND, orders.getUsePoint()));
-            }
-        }
+        restoreStockAndPoint(orders);
 
         orders.changeStatus(OrderStatus.CANCELED);
     }
@@ -221,5 +225,36 @@ public class OrderService {
         }
 
         return orders;
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getAllOrders(OrderStatus status)
+    {
+        List<Orders> orders;
+
+        if (status != null) orders = ordersRepository.findByOrderStatusOrderByCreatedAtDesc(status);
+        else orders = ordersRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        return orders.stream().map(OrderResponse::new).toList();
+    }
+
+    private void restoreStockAndPoint(Orders orders)
+    {
+        //재고 원복
+        for (OrderDetail detail : orders.getOrderDetails())
+        {
+            detail.getProduct().increaseStock(detail.getQuantity());
+        }
+
+        //사용한 포인트 원복
+        OrderStatus status = orders.getOrderStatus();
+        if (status == OrderStatus.PAYMENT_COMPLETE || status == OrderStatus.PREPARING)
+        {
+            if (orders.getUsePoint() > 0)
+            {
+                orders.getCustomer().earnPoint(orders.getUsePoint());
+                pointHistoryRepository.save(new PointHistory(orders.getCustomer(), orders, PointType.REFUND, orders.getUsePoint()));
+            }
+        }
     }
 }

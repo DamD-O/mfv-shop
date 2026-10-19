@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>MFV - 관리자</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/templatemo.css">
+    <link rel="icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+    <style>
+        .sidebar-item.active {
+            color: #198754 !important;
+            font-weight: bold;
+        }
+
+        .sidebar-item {
+            font-size: 14px !important;
+        }
+    </style>
+</head>
+<body>
+<div id="header"></div>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-3">
+            <h4>관리자</h4>
+            <ul class="list-unstyled">
+                <li class="mb-3">
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item active" onclick="showSection('dashboard')" data-section="dashboard">대시보드</a>
+                </li>
+                <li class="mb-3">
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" onclick="showSection('product')" data-section="product">상품 관리</a>
+                </li>
+                <li class="mb-3">
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" onclick="showSection('customer')" data-section="customer">회원 관리</a>
+                </li>
+                <li class="mb-3">
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" onclick="showSection('order')" data-section="order">주문 관리</a>
+                </li>
+                <li class="mb-3">
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" onclick="showSection('qna')" data-section="qna">Q&A 관리</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-9">
+            <div id="dashboard" class="admin-section">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                    <h6 class="mb-0">대시보드</h6>
+                    <div class="btn-group btn-group-sm" id="period-group">
+                        <button type="button" class="btn btn-success" data-period="1">한 달</button>
+                        <button type="button" class="btn btn-outline-success" data-period="3">3개월</button>
+                    </div>
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <p class="small text-muted mb-1">전체 회원</p>
+                            <h4 class="fw-bold mb-0" id="stat-customer-total">0</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <p class="small text-muted mb-1">활성 회원</p>
+                            <h4 class="fw-bold mb-0" id="stat-customer-active">0</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <p class="small text-muted mb-1">탈퇴 회원</p>
+                            <h4 class="fw-bold mb-0" id="stat-customer-withdrawn">0</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 text-center">
+                            <p class="small text-muted mb-1">배송 완료 주문</p>
+                            <h4 class="fw-bold text-success mb-0" id="stat-order-delivered">0</h4>
+                        </div>
+                    </div>
+                </div>
+                <p class="fw-bold small mb-2">상품 판매 순위 (판매 수량)</p>
+                <table class="table align-middle small table-sm">
+                    <thead class="border-bottom border-dark">
+                    <tr>
+                        <th class="text-center" style="width: 80px;">순위</th>
+                        <th>상품명</th>
+                        <th class="text-center" style="width: 120px;">판매 수량</th>
+                    </tr>
+                    </thead>
+                    <tbody id="ranking-body"></tbody>
+                </table>
+                <p id="ranking-empty" class="text-muted small d-none">집계된 판매 내역이 없습니다.</p>
+            </div>
+
+            <div id="product" class="admin-section d-none">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                    <h6 class="mb-0">상품 관리</h6>
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#product-modal" onclick="openProductForm()">상품 등록</button>
+                </div>
+                <table class="table align-middle small table-sm">
+                    <thead class="border-bottom border-dark">
+                    <tr>
+                        <th class="text-center">이미지</th>
+                        <th>상품명</th>
+                        <th class="text-center">카테고리</th>
+                        <th class="text-center">가격</th>
+                        <th class="text-center">재고</th>
+                        <th class="text-center">상태</th>
+                        <th class="text-center">관리</th>
+                    </tr>
+                    </thead>
+                    <tbody id="product-list"></tbody>
+                </table>
+                <p id="product-empty" class="text-muted small d-none">등록된 상품이 없습니다.</p>
+            </div>
+
+            <div id="customer" class="admin-section d-none">
+                <h6 class="border-bottom pb-3 mb-4">회원 관리</h6>
+                <table class="table align-middle small table-sm table-hover">
+                    <thead class="border-bottom border-dark">
+                    <tr>
+                        <th class="text-center">아이디</th>
+                        <th class="text-center">이름</th>
+                        <th class="text-center">이메일</th>
+                        <th class="text-center">연락처</th>
+                        <th class="text-center">상태</th>
+                    </tr>
+                    </thead>
+                    <tbody id="customer-list"></tbody>
+                </table>
+                <p id="customer-empty" class="text-muted small d-none">회원이 없습니다.</p>
+            </div>
+
+            <div id="order" class="admin-section d-none">
+                <h6 class="border-bottom pb-3 mb-4">주문 관리</h6>
+                <div class="d-flex flex-wrap gap-2 mb-3" id="order-filter">
+                    <button type="button" class="btn btn-sm btn-success" data-status="">전체</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="PAYMENT_PENDING">결제대기</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="PAYMENT_COMPLETE">결제완료</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="PREPARING">배송준비중</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="SHIPPING">배송중</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="DELIVERED">배송완료</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="CANCELED">취소</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle small table-sm text-nowrap">
+                        <thead class="border-bottom border-dark">
+                        <tr>
+                            <th class="text-center">주문일</th>
+                            <th class="text-center">주문번호</th>
+                            <th class="text-center">주문자</th>
+                            <th class="text-center">금액</th>
+                            <th class="text-center">상태</th>
+                            <th class="text-center">상태 변경</th>
+                        </tr>
+                        </thead>
+                        <tbody id="admin-order-list"></tbody>
+                    </table>
+                </div>
+                <p id="admin-order-empty" class="text-muted small d-none">주문이 없습니다.</p>
+            </div>
+
+            <div id="qna" class="admin-section d-none">
+                <h6 class="border-bottom pb-3 mb-4">Q&A 관리</h6>
+                <div class="d-flex flex-wrap gap-2 mb-3" id="qna-filter">
+                    <button type="button" class="btn btn-sm btn-success" data-status="">전체</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="WAITING">답변 대기</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="ANSWERED">답변 완료</button>
+                </div>
+                <div id="admin-qna-list" class="accordion"></div>
+                <p id="admin-qna-empty" class="text-muted small d-none">문의가 없습니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="product-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="product-modal-title">상품 등록</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="product-id">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="product-name" class="form-label small fw-bold">상품명</label>
+                        <input type="text" class="form-control" id="product-name">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="product-category" class="form-label small fw-bold">카테고리</label>
+                        <select class="form-select" id="product-category">
+                            <option value="">선택</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="product-price" class="form-label small fw-bold">가격</label>
+                        <input type="number" class="form-control" id="product-price" min="0">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="product-stock" class="form-label small fw-bold">재고</label>
+                        <input type="number" class="form-control" id="product-stock" min="0">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="product-origin" class="form-label small fw-bold">원산지</label>
+                        <input type="text" class="form-control" id="product-origin">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="product-storage" class="form-label small fw-bold">보관방법</label>
+                        <input type="text" class="form-control" id="product-storage">
+                    </div>
+                    <div class="col-12">
+                        <label for="product-description" class="form-label small fw-bold">설명</label>
+                        <textarea class="form-control" id="product-description" rows="3"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label for="product-image-input" class="form-label small fw-bold">상품 이미지</label>
+                        <input type="file" class="form-control" id="product-image-input" accept="image/*" multiple>
+                        <div class="d-flex flex-wrap gap-2 mt-2" id="product-image-list"></div>
+                    </div>
+                </div>
+                <p class="text-danger small mt-3 mb-0 d-none" id="product-error"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-success btn-sm" id="product-save-btn" onclick="saveProduct()">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="customer-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">회원 상세</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="customer-detail-id" class="form-label small fw-bold">아이디</label>
+                    <input type="text" class="form-control" id="customer-detail-id" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="customer-detail-name" class="form-label small fw-bold">이름</label>
+                    <input type="text" class="form-control" id="customer-detail-name">
+                </div>
+                <div class="mb-3">
+                    <label for="customer-detail-email" class="form-label small fw-bold">이메일</label>
+                    <input type="text" class="form-control" id="customer-detail-email" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="customer-detail-phone" class="form-label small fw-bold">연락처</label>
+                    <input type="text" class="form-control" id="customer-detail-phone" readonly>
+                </div>
+                <p class="text-danger small mb-0 d-none" id="customer-error"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-success btn-sm" id="customer-name-btn" onclick="updateCustomerName()">이름 수정</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="footer"></div>
+<script src="assets/js/jquery-1.11.0.min.js"></script>
+<script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
+<script src="assets/js/templatemo.js"></script>
+<script src="js/common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const hash = location.hash.replace('#', '');
+        if (hash) {
+            showSection(hash);
+        }
+
+        document.querySelector('#order-filter').addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (btn == null) return;
+
+            document.querySelectorAll('#order-filter button').forEach(function (el) {
+                el.className = 'btn btn-sm btn-outline-success';
+            });
+
+            btn.className = 'btn btn-sm btn-success';
+            loadOrder();
+        });
+
+        document.querySelector('#admin-order-list').addEventListener('click', async (e) => {
+            const btn = e.target.closest('button');
+            if (btn == null) return;
+
+            const orderId = btn.dataset.orderId;
+            const orderStatus = btn.dataset.status;
+
+            if ('CANCELED' == orderStatus) {
+                if (!confirm('주문을 취소하시겠습니까? 취소하면 되돌릴 수 없습니다.'))
+                    return;
+            }
+
+            const response = await fetchWithAuth(`/api/admin/orders/${orderId}/status`, {
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({orderStatus: orderStatus})
+            });
+
+            if (!response) return;
+
+            if (response.ok) {
+                loadOrder();
+            } else {
+                const error = await response.json();
+                alert(error.message || '주문 상태 변경 실패');
+            }
+        })
+    });
+
+    function showSection(type) {
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.add('d-none'));
+        document.getElementById(type).classList.remove('d-none');
+
+        document.querySelectorAll('.sidebar-item').forEach(s => s.classList.toggle('active', s.dataset.section === type));
+
+        history.replaceState(null, '', '#' + type);
+
+        // if (type === 'dashboard') loadDashboard();
+        // if (type === 'product') loadProducts();
+        // if (type === 'customer') loadCustomer();
+        if (type === 'order') loadOrder();
+        // if (type === 'qna') loadQna();
+    }
+
+    async function loadOrder() {
+        const status = document.querySelector('#order-filter .btn-success')?.dataset.status;
+        const url = status ? `/api/admin/orders?status=${status}` : `/api/admin/orders`;
+        const response = await fetchWithAuth(url);
+        if (!response) return;
+
+        if (response.ok) {
+            const data = await response.json();
+            const container = document.getElementById('admin-order-list');
+            container.innerHTML = '';
+
+            if (data.length > 0) {
+                document.getElementById('admin-order-empty').classList.add('d-none');
+
+                data.forEach(order => {
+                    const card = `
+                    <tr>
+                        <td class="text-center">${order.createdAt.split('T')[0]}</td>
+                        <td class="text-center">#${order.orderId}</td>
+                        <td class="text-center">${escapeHtml(order.customerId)}</td>
+                        <td class="text-center">${order.totalAmount.toLocaleString()}원</td>
+                        <td class="text-center">${escapeHtml(order.orderStatusLabel)}</td>
+                        <td class="text-center me-1">${renderOrderButton(order)}</td>
+                    </tr>
+                    `;
+
+                    container.innerHTML += card;
+                });
+            } else {
+                document.getElementById('admin-order-empty').classList.remove('d-none');
+            }
+        } else {
+            const error = await response.json();
+            alert(error.message || '주문 목록 조회 실패');
+        }
+    }
+
+    function renderOrderButton(order) {
+        const buttonHtml = {
+            PAYMENT_COMPLETE: `<button class="btn btn-sm btn-success" data-order-id="${order.orderId}" data-status="PREPARING">배송준비 시작</button>`,
+            PREPARING: `<button class="btn btn-sm btn-success" data-order-id="${order.orderId}" data-status="SHIPPING">배송 시작</button>
+                        <button class="btn btn-sm btn-outline-danger" data-order-id="${order.orderId}" data-status="CANCELED">판매사 취소</button>`,
+            SHIPPING: `<button class="btn btn-sm btn-success" data-order-id="${order.orderId}" data-status="DELIVERED">배송 완료</button>`,
+        };
+
+        const currentStatus = order.orderStatus;
+
+        return buttonHtml[currentStatus] || '';
+    }
+</script>
+</body>
+</html>

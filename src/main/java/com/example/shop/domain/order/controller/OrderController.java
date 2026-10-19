@@ -3,6 +3,7 @@ package com.example.shop.domain.order.controller;
 import com.example.shop.domain.order.dto.OrderRequest;
 import com.example.shop.domain.order.dto.OrderResponse;
 import com.example.shop.domain.order.dto.OrderStatusUpdateRequest;
+import com.example.shop.domain.order.entity.OrderStatus;
 import com.example.shop.domain.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -68,5 +69,12 @@ public class OrderController {
     public OrderResponse processPayment(@PathVariable Long orderId, Authentication authentication)
     {
         return new OrderResponse(orderService.processPayment(authentication.getName(), orderId));
+    }
+
+    @Operation(summary = "관리자용 전체 주문 목록 조회")
+    @GetMapping("/admin/orders")
+    public List<OrderResponse> getAllOrders(@RequestParam(required = false) OrderStatus status)
+    {
+        return orderService.getAllOrders(status);
     }
 }
