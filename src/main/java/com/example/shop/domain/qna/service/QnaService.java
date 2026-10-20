@@ -12,6 +12,7 @@ import com.example.shop.domain.qna.entity.QnaStatus;
 import com.example.shop.domain.qna.repository.QnaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,6 +103,7 @@ public class QnaService {
     }
 
     //사용자 상품별 문의사항 목록
+    @Transactional(readOnly = true)
     public List<Qna> getQnaListByCustomer(String customerId)
     {
         return qnaRepository.findByCustomer_CustomerIdOrderByCreatedAtDesc(customerId);
@@ -121,6 +123,20 @@ public class QnaService {
         if (qna.getStatus().equals(QnaStatus.ANSWERED)) throw new RuntimeException("답변이 완료된 문의는 삭제 할 수 없습니다.");
 
         qnaRepository.delete(qna);
+    }
+
+    /**
+     * 관리자용 QnA 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<QnaResponse> getAllQna(QnaStatus status)
+    {
+        List<Qna> qna;
+
+        if (status != null) qna = qnaRepository.findByStatusOrderByCreatedAtDesc(status);
+        else qna = qnaRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        return qna.stream().map(QnaResponse::new).toList();
     }
 
     private boolean isViewable(Qna qna, String customerId, String role)

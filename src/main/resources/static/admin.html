@@ -273,52 +273,21 @@
 <script src="js/common.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener('DOMContentLoaded', function () {
         const hash = location.hash.replace('#', '');
         if (hash) {
             showSection(hash);
         }
 
-        document.querySelector('#order-filter').addEventListener('click', (e) => {
-            const btn = e.target.closest('button');
-            if (btn == null) return;
-
-            document.querySelectorAll('#order-filter button').forEach(function (el) {
-                el.className = 'btn btn-sm btn-outline-success';
-            });
-
-            btn.className = 'btn btn-sm btn-success';
-            loadOrder();
+        initFilterGroup('#order-filter', loadOrder);
+        initFilterGroup('#qna-filter', loadQna);
+        initOrderStatusChange('#admin-order-list', {
+            getUrl: (id) => `/api/admin/orders/${id}/status`,
+            onSuccess: () => loadOrder()
         });
 
-        document.querySelector('#admin-order-list').addEventListener('click', async (e) => {
-            const btn = e.target.closest('button');
-            if (btn == null) return;
-
-            const orderId = btn.dataset.orderId;
-            const orderStatus = btn.dataset.status;
-
-            if ('CANCELED' == orderStatus) {
-                if (!confirm('주문을 취소하시겠습니까? 취소하면 되돌릴 수 없습니다.'))
-                    return;
-            }
-
-            const response = await fetchWithAuth(`/api/admin/orders/${orderId}/status`, {
-                method: 'PATCH',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({orderStatus: orderStatus})
-            });
-
-            if (!response) return;
-
-            if (response.ok) {
-                loadOrder();
-            } else {
-                const error = await response.json();
-                alert(error.message || '주문 상태 변경 실패');
-            }
-        })
-    });
+        initQnaAnswer();
+    })
 
     function showSection(type) {
         document.querySelectorAll('.admin-section').forEach(s => s.classList.add('d-none'));
@@ -332,44 +301,168 @@
         // if (type === 'product') loadProducts();
         // if (type === 'customer') loadCustomer();
         if (type === 'order') loadOrder();
-        // if (type === 'qna') loadQna();
+        if (type === 'qna') loadQna();
     }
 
-    async function loadOrder() {
-        const status = document.querySelector('#order-filter .btn-success')?.dataset.status;
-        const url = status ? `/api/admin/orders?status=${status}` : `/api/admin/orders`;
+    function initFilterGroup(groupSelector, onChange) {
+        const group = document.querySelector(groupSelector);
+        if (!group) return;
+
+        group.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn || !group.contains(btn)) return;
+
+            group.querySelectorAll('button').forEach((el) => {
+                const active = el === btn;
+                el.classList.toggle('btn-success', active);
+                el.classList.toggle('btn-outline-success', !active);
+            });
+
+            onChange(btn.dataset.status);
+        });
+    }
+
+    function getActiveStatus(groupSelector) {
+        return document.querySelector(`${groupSelector} .btn-success`)?.dataset.status;
+    }
+
+    /**
+     *  필터를 빠르게 바꿀 때 늦게 도착한 이전 요청의 응답이
+     *  최신 목록을 덮어쓰지 않도록 목록별 최신 요청 번호를 저장
+     */
+    const latestRequest = {};
+
+    async function loadList({url, listId, emptyId, renderRow, errorMessage}) {
+        const requestId = (latestRequest[listId] ?? 0) + 1;
+        latestRequest[listId] = requestId;
+
         const response = await fetchWithAuth(url);
-        if (!response) return;
+        if (!response || latestRequest[listId] !== requestId) return; // 응답을 기다리는 사이 새 요청이 있었다면 이 응답은 무시
 
-        if (response.ok) {
-            const data = await response.json();
-            const container = document.getElementById('admin-order-list');
-            container.innerHTML = '';
-
-            if (data.length > 0) {
-                document.getElementById('admin-order-empty').classList.add('d-none');
-
-                data.forEach(order => {
-                    const card = `
-                    <tr>
-                        <td class="text-center">${order.createdAt.split('T')[0]}</td>
-                        <td class="text-center">#${order.orderId}</td>
-                        <td class="text-center">${escapeHtml(order.customerId)}</td>
-                        <td class="text-center">${order.totalAmount.toLocaleString()}원</td>
-                        <td class="text-center">${escapeHtml(order.orderStatusLabel)}</td>
-                        <td class="text-center me-1">${renderOrderButton(order)}</td>
-                    </tr>
-                    `;
-
-                    container.innerHTML += card;
-                });
-            } else {
-                document.getElementById('admin-order-empty').classList.remove('d-none');
-            }
-        } else {
-            const error = await response.json();
-            alert(error.message || '주문 목록 조회 실패');
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || errorMessage);
+            return;
         }
+
+        const data = await response.json();
+        if (latestRequest[listId] !== requestId) return;
+
+        document.getElementById(listId).innerHTML = data.map(renderRow).join('');
+        document.getElementById(emptyId).classList.toggle('d-none', data.length > 0);
+    }
+
+    async function loadOrder(status = getActiveStatus('#order-filter')) {
+        const url = status ? `/api/admin/orders?status=${status}` : `/api/admin/orders`;
+
+        await loadList({
+            url,
+            listId: 'admin-order-list',
+            emptyId: 'admin-order-empty',
+            renderRow: renderOrderRow,
+            errorMessage: '주문 목록 조회 실패'
+        });
+    }
+
+    async function loadQna(status = getActiveStatus('#qna-filter')) {
+        const url = status ? `/api/admin/qna?status=${status}` : `/api/admin/qna`;
+
+        await loadList({
+            url,
+            listId: 'admin-qna-list',
+            emptyId: 'admin-qna-empty',
+            renderRow: renderQnaRow,
+            errorMessage: 'QnA 목록 조회 실패'
+        });
+    }
+
+    function initOrderStatusChange(listSelector, {getUrl, onSuccess}) {
+        const list = document.querySelector(listSelector);
+        if (!list) return;
+
+        list.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button[data-status]');
+            if (!btn || !list.contains(btn)) return;
+
+            const {orderId, status} = btn.dataset;
+
+            if (status === 'CANCELED' && !confirm('주문을 취소하시겠습니까? 취소하면 되돌릴 수 없습니다.')) return;
+
+            btn.disabled = true; //중복 클릭 방지용
+            try {
+                const response = await fetchWithAuth(getUrl(orderId), {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({orderStatus: status})
+                });
+
+                if (!response) return;
+
+                if (response.ok) {
+                    onSuccess();
+                    return;
+                }
+
+                const error = await response.json().catch(() => ({}));
+                alert(error.message || '주문 상태 변경 실패');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    }
+
+    function initQnaAnswer() {
+        const list = document.querySelector('#admin-qna-list');
+        if (!list) return;
+
+        list.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button[data-qna-id]');
+            if (!btn || !list.contains(btn)) return;
+
+            const {qnaId} = btn.dataset;
+            const answer = document.getElementById(`qna-answer-${qnaId}`).value.trim();
+
+            if (!answer) {
+                alert('답변을 입력하세요.');
+                return;
+            }
+
+            btn.disabled = true;
+            try {
+                const response = await fetchWithAuth(`/api/admin/qna/${qnaId}/answer`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({answer})
+                });
+
+                if (!response) return;
+
+                if (response.ok) {
+                    loadQna();
+                    return;
+                }
+
+                const error = await response.json().catch(() => ({}));
+                alert(error.message || '답변 등록 실패');
+
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+    }
+
+    function renderOrderRow(order) {
+        return `
+            <tr>
+                <td class="text-center">${order.createdAt.split('T')[0]}</td>
+                <td class="text-center">#${order.orderId}</td>
+                <td class="text-center">${escapeHtml(order.customerId)}</td>
+                <td class="text-center">${order.totalAmount.toLocaleString()}원</td>
+                <td class="text-center">${escapeHtml(order.orderStatusLabel)}</td>
+                <td class="text-center">${renderOrderButton(order)}</td>
+            </tr>
+        `;
     }
 
     function renderOrderButton(order) {
@@ -383,6 +476,32 @@
         const currentStatus = order.orderStatus;
 
         return buttonHtml[currentStatus] || '';
+    }
+
+    function renderQnaRow(qna) {
+        return `
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed small" type="button" data-bs-toggle="collapse" data-bs-target="#qna-collapse-${qna.qnaId}">
+                        <span class="badge ${qna.status === 'WAITING' ? 'bg-secondary' : 'bg-success'} me-2">${escapeHtml(qna.statusLabel)}</span>
+                        <span class="flex-grow-1 text-break">
+                            <span class="d-block text-muted small">${escapeHtml(qna.productName)}</span>
+                            <span class="d-block">${qna.secret ? '🔒 ' : ''}${escapeHtml(qna.title)}</span>
+                            <span class="d-block text-muted small">${escapeHtml(qna.customerId)} (${qna.createdAt.split('T')[0]})</span>
+                        </span>
+                    </button>
+                </h2>
+                <div id="qna-collapse-${qna.qnaId}" class="accordion-collapse collapse">
+                    <div class="accordion-body small">
+                        <p class="fw-bold mb-1">문의 내용</p>
+                        <p style="white-space: pre-wrap;">${escapeHtml(qna.content)}</p>
+                        <p class="fw-bold mb-1">답변</p>
+                        <textarea class="form-control mb-2" rows="3" id="qna-answer-${qna.qnaId}">${escapeHtml(qna.adminAnswer)}</textarea>
+                        <button type="button" class="btn btn-sm btn-success" data-qna-id="${qna.qnaId}">${qna.status === 'ANSWERED' ? '답변 수정' : '답변 등록'}</button>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 </script>
 </body>

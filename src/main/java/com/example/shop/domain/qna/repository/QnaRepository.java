@@ -1,6 +1,7 @@
 package com.example.shop.domain.qna.repository;
 
 import com.example.shop.domain.qna.entity.Qna;
+import com.example.shop.domain.qna.entity.QnaStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -14,4 +15,6 @@ public interface QnaRepository extends JpaRepository<Qna, Long> {
     List<Qna> findByCustomer_CustomerIdOrderByCreatedAtDesc(String customerId);
 
     List<Qna> findByProduct_IdOrderByCreatedAtDesc(Long productId);
+
+    List<Qna> findByStatusOrderByCreatedAtDesc(QnaStatus status);
 }

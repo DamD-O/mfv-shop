@@ -3,6 +3,7 @@ package com.example.shop.domain.qna.controller;
 import com.example.shop.domain.qna.dto.QnaAnswerRequest;
 import com.example.shop.domain.qna.dto.QnaCreateRequest;
 import com.example.shop.domain.qna.dto.QnaResponse;
+import com.example.shop.domain.qna.entity.QnaStatus;
 import com.example.shop.domain.qna.service.QnaService;
 import com.example.shop.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,4 +71,12 @@ public class QnaController {
     {
         qnaService.deleteQnaByQnaId(qnaId, authentication.getName());
     }
+
+    @Operation(summary = "관리자용 문의 목록 조회")
+    @GetMapping("/admin/qna")
+    public List<QnaResponse> getAllQna(@RequestParam(required = false) QnaStatus status)
+    {
+        return qnaService.getAllQna(status);
+    }
+
 }
