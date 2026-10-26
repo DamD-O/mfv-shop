@@ -7,6 +7,8 @@ import com.example.shop.domain.product.entity.ProductStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author madey
  * @DATE 2026-08-24
@@ -27,6 +29,9 @@ public class ProductResponse {
     private String origin;
     private String storageMethod;
     private String description;
+    private String categoryLabel;
+    private String statusLabel;
+    private List<ProductImageResponse> productImages;
 
 
     public ProductResponse(Product product)
@@ -42,5 +47,8 @@ public class ProductResponse {
         this.origin = product.getOrigin();
         this.storageMethod = product.getStorageMethod();
         this.description = product.getDescription();
+        this.categoryLabel = product.getCategory().getLabel();
+        this.statusLabel = product.getStatus().getLabel();
+        this.productImages = product.getProductImages().stream().map(ProductImageResponse::new).toList();
     }
 }

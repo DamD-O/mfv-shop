@@ -1,7 +1,6 @@
 package com.example.shop.domain.product.service;
 
-import com.example.shop.domain.product.dto.ProductCreateRequest;
-import com.example.shop.domain.product.dto.ProductUpdateRequest;
+import com.example.shop.domain.product.dto.ProductRequest;
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.entity.ProductCategory;
 import com.example.shop.domain.product.entity.ProductStatus;
@@ -28,7 +27,7 @@ public class ProductService {
 
     //상품 생성
     @Transactional
-    public Product createProduct(ProductCreateRequest request)
+    public Product createProduct(ProductRequest request)
     {
         Product product = new Product(request.getProductName(), request.getProductPrice(), request.getProductStock(), request.getProductCategory(),
                                       request.getUnit(), request.getOrigin(), request.getStorageMethod(), request.getDescription());
@@ -40,7 +39,7 @@ public class ProductService {
 
     //상품 수정
     @Transactional
-    public Product updateProduct(Long productId, ProductUpdateRequest request)
+    public Product updateProduct(Long productId, ProductRequest request)
     {
         Product product = productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품 수정 실패 - 존재하지 않는 productId: {}", productId);

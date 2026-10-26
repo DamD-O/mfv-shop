@@ -1,9 +1,8 @@
 package com.example.shop.domain.product.controller;
 
-import com.example.shop.domain.product.dto.ProductCreateRequest;
+import com.example.shop.domain.product.dto.ProductRequest;
 import com.example.shop.domain.product.dto.ProductResponse;
 import com.example.shop.domain.product.dto.ProductStatusUpdateRequest;
-import com.example.shop.domain.product.dto.ProductUpdateRequest;
 import com.example.shop.domain.product.entity.ProductCategory;
 import com.example.shop.domain.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,21 +30,21 @@ public class ProductController {
 
     @Operation(summary = "상품 등록")
     @PostMapping("/admin/products")
-    public ProductResponse createProduct(@Valid @RequestBody ProductCreateRequest request)
+    public ProductResponse createProduct(@Valid @RequestBody ProductRequest request)
     {
         return new ProductResponse(productService.createProduct(request));
     }
 
     @Operation(summary = "상품 수정")
     @PutMapping("/admin/products/{productId}")
-    public ProductResponse updateProduct(@Valid @RequestBody ProductUpdateRequest request, @PathVariable Long productId)
+    public ProductResponse updateProduct(@Valid @RequestBody ProductRequest request, @PathVariable Long productId)
     {
         return new ProductResponse(productService.updateProduct(productId, request));
     }
 
     @Operation(summary = "상품 상태변경")
     @PatchMapping("/admin/products/{productId}/status")
-    public ProductResponse updateProductStatus(@RequestBody ProductStatusUpdateRequest request, @PathVariable Long productId)
+    public ProductResponse updateProductStatus(@Valid @RequestBody ProductStatusUpdateRequest request, @PathVariable Long productId)
     {
         return new ProductResponse(productService.changeProductStatus(productId, request.getStatus()));
     }

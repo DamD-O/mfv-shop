@@ -99,6 +99,13 @@
                     <h6 class="mb-0">상품 관리</h6>
                     <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#product-modal" onclick="openProductForm()">상품 등록</button>
                 </div>
+                <div class="d-flex flex-wrap gap-2 mb-3" id="product-filter">
+                    <button type="button" class="btn btn-sm btn-success" data-value="">전체</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="MEAT">육류</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="FRUIT">과일</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="VEGETABLE">채소</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="OTHER">기타</button>
+                </div>
                 <table class="table align-middle small table-sm">
                     <thead class="border-bottom border-dark">
                     <tr>
@@ -136,13 +143,13 @@
             <div id="order" class="admin-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">주문 관리</h6>
                 <div class="d-flex flex-wrap gap-2 mb-3" id="order-filter">
-                    <button type="button" class="btn btn-sm btn-success" data-status="">전체</button>
-                    <button type="button" class="btn btn-sm btn-outline-success" data-status="PAYMENT_PENDING">결제대기</button>
-                    <button type="button" class="btn btn-sm btn-outline-success" data-status="PAYMENT_COMPLETE">결제완료</button>
-                    <button type="button" class="btn btn-sm btn-outline-success" data-status="PREPARING">배송준비중</button>
-                    <button type="button" class="btn btn-sm btn-outline-success" data-status="SHIPPING">배송중</button>
-                    <button type="button" class="btn btn-sm btn-outline-success" data-status="DELIVERED">배송완료</button>
-                    <button type="button" class="btn btn-sm btn-outline-success" data-status="CANCELED">취소</button>
+                    <button type="button" class="btn btn-sm btn-success" data-value="">전체</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="PAYMENT_PENDING">결제대기</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="PAYMENT_COMPLETE">결제완료</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="PREPARING">배송준비중</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="SHIPPING">배송중</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="DELIVERED">배송완료</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="CANCELED">취소</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table align-middle small table-sm text-nowrap">
@@ -165,9 +172,9 @@
             <div id="qna" class="admin-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">Q&A 관리</h6>
                 <div class="d-flex flex-wrap gap-2 mb-3" id="qna-filter">
-                    <button type="button" class="btn btn-sm btn-success" data-status="">전체</button>
-                    <button type="button" class="btn btn-sm btn-outline-success" data-status="WAITING">답변 대기</button>
-                    <button type="button" class="btn btn-sm btn-outline-success" data-status="ANSWERED">답변 완료</button>
+                    <button type="button" class="btn btn-sm btn-success" data-value="">전체</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="WAITING">답변 대기</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="ANSWERED">답변 완료</button>
                 </div>
                 <div id="admin-qna-list" class="accordion"></div>
                 <p id="admin-qna-empty" class="text-muted small d-none">문의가 없습니다.</p>
@@ -194,21 +201,29 @@
                         <label for="product-category" class="form-label small fw-bold">카테고리</label>
                         <select class="form-select" id="product-category">
                             <option value="">선택</option>
+                            <option value="MEAT">육류</option>
+                            <option value="FRUIT">과일</option>
+                            <option value="VEGETABLE">채소</option>
+                            <option value="OTHER">기타</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label for="product-price" class="form-label small fw-bold">가격</label>
-                        <input type="number" class="form-control" id="product-price" min="0">
+                        <input type="number" class="form-control" id="product-price" min="1">
                     </div>
                     <div class="col-md-6">
                         <label for="product-stock" class="form-label small fw-bold">재고</label>
                         <input type="number" class="form-control" id="product-stock" min="0">
                     </div>
                     <div class="col-md-6">
+                        <label for="product-unit" class="form-label small fw-bold">판매 단위</label>
+                        <input type="text" class="form-control" id="product-unit" placeholder="예: 500g, 1팩">
+                    </div>
+                    <div class="col-md-6">
                         <label for="product-origin" class="form-label small fw-bold">원산지</label>
                         <input type="text" class="form-control" id="product-origin">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <label for="product-storage" class="form-label small fw-bold">보관방법</label>
                         <input type="text" class="form-control" id="product-storage">
                     </div>
@@ -273,21 +288,69 @@
 <script src="js/common.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    const existImages = new Map(); // imageId :imagePath
+    const deleteImages = new Map(); // imageId :imagePath
+    const newImages = new Map(); //임시id : file
+    let tempImageId = -1;
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        const loginUser = await checkLogin();
+        if (!loginUser) return;
+        if (loginUser.role !== 'ROLE_ADMIN') {
+            alert('접근 권한이 없습니다.');
+            location.replace('index.html');
+            return;
+        }
+
         const hash = location.hash.replace('#', '');
         if (hash) {
             showSection(hash);
         }
 
+        initFilterGroup('#product-filter', loadProducts);
         initFilterGroup('#order-filter', loadOrder);
         initFilterGroup('#qna-filter', loadQna);
+
+        initProductListActions('#product-list', {
+            getUrl: (productId) => `/api/admin/products/${productId}/status`,
+            onSuccess: () => loadProducts()
+        });
+
         initOrderStatusChange('#admin-order-list', {
             getUrl: (id) => `/api/admin/orders/${id}/status`,
             onSuccess: () => loadOrder()
         });
 
         initQnaAnswer();
-    })
+
+        document.getElementById('product-image-input').addEventListener('change', e => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                tempNewImageId = tempImageId--;
+                newImages.set(tempNewImageId, file);
+                renderImagePreview(tempNewImageId, URL.createObjectURL(file));
+            });
+            document.getElementById('product-image-input').value = '';
+        });
+
+        document.getElementById('product-image-list').addEventListener('click', e => {
+            const imageBtn = e.target.closest('button[data-image-id]');
+            if (!imageBtn) return;
+            const imageId = Number(imageBtn.dataset.imageId);
+
+            if (existImages.has(imageId)) {
+                deleteImages.set(imageId, existImages.get(imageId));
+                existImages.delete(imageId);
+            } else {
+                newImages.delete(imageId);
+            }
+            imageBtn.parentElement.remove();
+        });
+
+        document.getElementById('product-modal').addEventListener('hide.bs.modal', () => {
+            document.activeElement.blur();
+        });
+    });
 
     function showSection(type) {
         document.querySelectorAll('.admin-section').forEach(s => s.classList.add('d-none'));
@@ -298,7 +361,7 @@
         history.replaceState(null, '', '#' + type);
 
         // if (type === 'dashboard') loadDashboard();
-        // if (type === 'product') loadProducts();
+        if (type === 'product') loadProducts();
         // if (type === 'customer') loadCustomer();
         if (type === 'order') loadOrder();
         if (type === 'qna') loadQna();
@@ -318,12 +381,12 @@
                 el.classList.toggle('btn-outline-success', !active);
             });
 
-            onChange(btn.dataset.status);
+            onChange(btn.dataset.value);
         });
     }
 
-    function getActiveStatus(groupSelector) {
-        return document.querySelector(`${groupSelector} .btn-success`)?.dataset.status;
+    function getActiveFilter(groupSelector) {
+        return document.querySelector(`${groupSelector} .btn-success`)?.dataset.value;
     }
 
     /**
@@ -352,7 +415,18 @@
         document.getElementById(emptyId).classList.toggle('d-none', data.length > 0);
     }
 
-    async function loadOrder(status = getActiveStatus('#order-filter')) {
+    async function loadProducts(category = getActiveFilter('#product-filter')) {
+        const url = category ? `/api/admin/products?category=${category}` : '/api/admin/products';
+        await loadList({
+            url,
+            listId: 'product-list',
+            emptyId: 'product-empty',
+            renderRow: renderProductRow,
+            errorMessage: '상품 조회 실패'
+        });
+    }
+
+    async function loadOrder(status = getActiveFilter('#order-filter')) {
         const url = status ? `/api/admin/orders?status=${status}` : `/api/admin/orders`;
 
         await loadList({
@@ -364,7 +438,7 @@
         });
     }
 
-    async function loadQna(status = getActiveStatus('#qna-filter')) {
+    async function loadQna(status = getActiveFilter('#qna-filter')) {
         const url = status ? `/api/admin/qna?status=${status}` : `/api/admin/qna`;
 
         await loadList({
@@ -373,6 +447,215 @@
             emptyId: 'admin-qna-empty',
             renderRow: renderQnaRow,
             errorMessage: 'QnA 목록 조회 실패'
+        });
+    }
+
+    async function openProductForm(productId = '') {
+        document.getElementById('product-id').value = productId;
+        document.getElementById('product-error').classList.add('d-none');
+        document.getElementById('product-name').value = '';
+        document.getElementById('product-price').value = '';
+        document.getElementById('product-stock').value = '';
+        document.getElementById('product-category').value = '';
+        document.getElementById('product-unit').value = '';
+        document.getElementById('product-origin').value = '';
+        document.getElementById('product-storage').value = '';
+        document.getElementById('product-description').value = '';
+        document.getElementById('product-modal-title').textContent = '상품 등록';
+        document.getElementById('product-image-list').textContent = '';
+        document.getElementById('product-image-input').value = '';
+        existImages.clear();
+        deleteImages.clear();
+        newImages.clear();
+
+        if (productId) {
+            document.getElementById('product-modal-title').textContent = '상품 수정';
+            const response = await fetchWithAuth(`/api/products/${productId}`);
+            if (!response) return;
+
+            if (response.ok) {
+                const data = await response.json();
+
+                document.getElementById('product-name').value = data.productName;
+                document.getElementById('product-price').value = data.productPrice;
+                document.getElementById('product-stock').value = data.productStock;
+                document.getElementById('product-category').value = data.productCategory;
+                document.getElementById('product-unit').value = data.unit;
+                document.getElementById('product-origin').value = data.origin;
+                document.getElementById('product-storage').value = data.storageMethod;
+                document.getElementById('product-description').value = data.description;
+
+                data.productImages.forEach((image) => {
+                    existImages.set(image.imageId, image.imagePath);
+                    renderImagePreview(image.imageId, image.imagePath);
+                });
+            } else {
+                const error = await response.json().catch(() => ({}));
+                showProductError(error.message || '상품 정보 가져오기 실패');
+            }
+        }
+    }
+
+    async function saveProduct() {
+        const btn = document.getElementById('product-save-btn');
+        const productId = document.getElementById('product-id').value;
+        const productName = document.getElementById('product-name').value.trim();
+        const productPrice = document.getElementById('product-price').value;
+        const productStock = document.getElementById('product-stock').value;
+        const productCategory = document.getElementById('product-category').value;
+        const unit = document.getElementById('product-unit').value.trim();
+        const origin = document.getElementById('product-origin').value.trim();
+        const storageMethod = document.getElementById('product-storage').value.trim();
+        const description = document.getElementById('product-description').value.trim();
+        document.getElementById('product-error').classList.add('d-none');
+
+        if (!productName) {
+            showProductError('상품명을 입력해주세요.');
+            return;
+        }
+
+        if (!productPrice) {
+            showProductError('상품 가격을 입력해주세요.');
+            return;
+        }
+
+        if (Number(productPrice) < 1) {
+            showProductError('상품 가격은 1원 이상이어야 합니다.');
+            return;
+        }
+
+        if (!productStock) {
+            showProductError('재고를 입력해주세요.');
+            return;
+        }
+
+        if (Number(productStock) < 0) {
+            showProductError('재고는 0개 이상이어야 합니다.');
+            return;
+        }
+
+        if (!productCategory) {
+            showProductError('카테고리를 선택해주세요.');
+            return;
+        }
+
+        if (!unit) {
+            showProductError('판매단위를 입력해주세요.');
+            return;
+        }
+
+        if (!origin) {
+            showProductError('원산지를 입력해주세요.');
+            return;
+        }
+
+        if (!storageMethod) {
+            showProductError('보관 방법을 입력해주세요.');
+            return;
+        }
+
+        if (!description) {
+            showProductError('상품 설명을 입력해주세요.');
+            return;
+        }
+
+        btn.disabled = true;
+        const url = productId ? `/api/admin/products/${productId}` : `/api/admin/products`;
+        const method = productId ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetchWithAuth(url, {
+                method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    productName,
+                    productPrice: Number(productPrice),
+                    productStock: Number(productStock),
+                    productCategory,
+                    unit,
+                    origin,
+                    storageMethod,
+                    description
+                })
+            });
+
+            if (!response) return;
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('product-id').value = data.productId;
+
+                for (const [imageId] of deleteImages) {
+                    if (!await deleteProductImage(imageId)) {
+                        showProductError('상품은 저장되었지만 이미지 삭제에 실패하였습니다.');
+                        loadProducts();
+                        return;
+                    }
+
+                    deleteImages.delete(imageId);
+                }
+
+                for (const [tempId, file] of newImages) {
+                    if (!await uploadProductImage(data.productId, file)) {
+                        showProductError('상품은 저장되었지만 이미지 등록에 실패하였습니다.');
+                        loadProducts();
+                        return;
+                    }
+
+                    newImages.delete(tempId);
+                }
+
+                alert(`상품 ${productId ? '수정' : '등록'} 성공`);
+                bootstrap.Modal.getInstance('#product-modal').hide();
+                loadProducts();
+                return;
+            }
+
+            const error = await response.json().catch(() => ({}));
+            showProductError(error.message || `상품 ${productId ? '수정' : '등록'} 실패`);
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    function initProductListActions(listSelector, {getUrl, onSuccess}) {
+        const list = document.querySelector(listSelector);
+        if (!list) return;
+
+        list.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button[data-product-id]');
+            if (!btn || !list.contains(btn)) return;
+
+            const {productId, status, action} = btn.dataset;
+
+            if (action === 'update') {
+                openProductForm(productId);
+                return;
+            }
+
+            if (status === 'STOPPED' && !confirm('판매를 중지하시겠습니까?')) return;
+
+            btn.disabled = true;
+
+            try {
+                const response = await fetchWithAuth(getUrl(productId), {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({status: status})
+                });
+
+                if (!response) return;
+
+                if (response.ok) {
+                    onSuccess();
+                    return;
+                }
+
+                const error = await response.json().catch(() => ({}));
+                alert(error.message || '상품 상태 변경 실패');
+            } finally {
+                btn.disabled = false;
+            }
         });
     }
 
@@ -452,6 +735,45 @@
 
     }
 
+    function renderProductRow(product) {
+        return `
+            <tr>
+                <td class="text-center">${product.productImageUrl ? `<img src="${escapeHtml(product.productImageUrl)}" width="48" height="48" class="rounded object-fit-cover">` : `<div style="width:48px; height:48px; background:#f0f0f0;" class="rounded mx-auto"></div>`}</td>
+                <td>${escapeHtml(product.productName)}</td>
+                <td class="text-center">${escapeHtml(product.categoryLabel)}</td>
+                <td class="text-center">${product.productPrice.toLocaleString()}원</td>
+                <td class="text-center">${product.productStock}</td>
+                <td class="text-center">${escapeHtml(product.statusLabel)}</td>
+                <td class="text-center"><div class="d-flex gap-1 justify-content-center">${renderProductButton(product)}</div></td>
+            </tr>
+        `;
+    }
+
+    function renderProductButton(product) {
+        let buttonHtml = `<button class="btn btn-sm btn-outline-success" data-product-id="${product.productId}" data-bs-toggle="modal" data-bs-target="#product-modal" data-action="update">상품 수정</button>`;
+
+        const statusBtn = {
+            ON_SALE: `<button class="btn btn-sm btn-danger" data-product-id="${product.productId}" data-status="STOPPED">판매 중단</button>`,
+            STOPPED: `<button class="btn btn-sm btn-success" data-product-id="${product.productId}" data-status="ON_SALE">판매 재개</button>`
+        };
+
+        const currentStatus = product.productStatus;
+
+        buttonHtml += statusBtn[currentStatus];
+        return buttonHtml;
+    }
+
+    function renderImagePreview(imageId, imageUrl) {
+        const container = document.getElementById('product-image-list');
+        const div = document.createElement('div');
+        div.style.cssText = 'position:relative; width:80px; height:80px;';
+        div.innerHTML = `
+            <img src="${escapeHtml(imageUrl)}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+            <button type="button" data-image-id="${imageId}" style="position:absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius:50%; border:none; background:#dc3545; color:white; font-size:12px; cursor:pointer;">×</button>
+        `;
+        container.appendChild(div);
+    }
+
     function renderOrderRow(order) {
         return `
             <tr>
@@ -502,6 +824,34 @@
                 </div>
             </div>
         `;
+    }
+
+    function showProductError(message) {
+        document.getElementById('product-error').textContent = message;
+        document.getElementById('product-error').classList.remove('d-none');
+    }
+
+    async function deleteProductImage(imageId) {
+        const response = await fetchWithAuth(`/api/admin/products/images/${imageId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response) return false;
+        return response.ok;
+    }
+
+    async function uploadProductImage(productId, file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetchWithAuth(`/api/admin/products/${productId}/images`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response) return false;
+
+        return response.ok;
     }
 </script>
 </body>

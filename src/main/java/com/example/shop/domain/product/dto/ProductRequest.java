@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 /**
  * @author madey
  * @DATE 2026-08-24
- * @description 상품 수정 요청 DTO
+ * @description 상품 생성/수정 요청 DTO
  */
 
 @Getter
 @NoArgsConstructor
-public class ProductUpdateRequest {
+public class ProductRequest {
 
     @NotBlank(message = "상품명을 입력해주세요.")
     private String productName;
@@ -44,8 +44,9 @@ public class ProductUpdateRequest {
     @NotBlank(message = "상품 설명을 입력해주세요.")
     private String description;
 
-    public ProductUpdateRequest(Integer productPrice, Integer productStock, ProductCategory productCategory, String unit, String origin, String storageMethod, String description)
+    public ProductRequest(String productName, Integer productPrice, Integer productStock, ProductCategory productCategory, String unit, String origin, String storageMethod, String description)
     {
+        this.productName = productName;
         this.productPrice = productPrice;
         this.productStock = productStock;
         this.productCategory = productCategory;
@@ -54,4 +55,5 @@ public class ProductUpdateRequest {
         this.storageMethod = storageMethod;
         this.description = description;
     }
+
 }

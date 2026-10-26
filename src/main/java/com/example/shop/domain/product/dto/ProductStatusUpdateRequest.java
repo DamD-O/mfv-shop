@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductStatusUpdateRequest {
 
-     @NotNull(message = "판매 상태를 선택해주세요.")
+    @NotNull(message = "판매 상태를 선택해주세요.")
     private ProductStatus status;
 
     public ProductStatusUpdateRequest(ProductStatus status)

@@ -4,7 +4,7 @@
 
 ## 소개
 
-신선식품 카테고리(정육·과일·채소)를 한 곳에서 주문하고, AI가 상품 기반 레시피를 추천해 주는 웹 애플리케이션입니다.
+신선식품 카테고리 (정육·과일·채소)를 한 곳에서 주문하고, AI가 상품 기반 레시피를 추천해 주는 웹 애플리케이션입니다.
 
 ## 주요 기능
 
@@ -18,16 +18,15 @@
 
 ## 스크린샷
 
-
 ## 기술 스택
 
-| 구분 | 사용 기술 |
-|---|---|
-| Frontend | HTML, CSS, JavaScript, Bootstrap 5.3.3 (ZayShop 템플릿 기반) |
-| Backend | Java 17, Spring Boot 4.1.0, Spring Security, Spring Data JPA, Gradle |
-| Database | MySQL 9.7 (Docker) |
-| AI | Spring AI 2.0.0, Google Gemini |
-| 배포 | <!-- 배포 완료 후 작성 --> |
+| 구분     | 사용 기술                                                            |
+|----------|----------------------------------------------------------------------|
+| Frontend | HTML, CSS, JavaScript, Bootstrap 5.3.3 (ZayShop 템플릿 기반)         |
+| Backend  | Java 17, Spring Boot 4.1.0, Spring Security, Spring Data JPA, Gradle |
+| Database | MySQL 9.7 (Docker)                                                   |
+| AI       | Spring AI 2.0.0, Google Gemini                                       |
+| 배포     | <!-- 배포 완료 후 작성 -->                                           |
 
 ## 시작하기
 
@@ -49,10 +48,10 @@ Docker로 MySQL 9.7 컨테이너를 실행하고 `shop` 데이터베이스를 �
 
 ### 환경 변수 설정
 
-| 변수명 | 설명 |
-|---|---|
-| `DB_USERNAME` | DB 사용자명 |
-| `DB_PASSWORD` | DB 비밀번호 |
+| 변수명           | 설명                 |
+|------------------|----------------------|
+| `DB_USERNAME`    | DB 사용자명          |
+| `DB_PASSWORD`    | DB 비밀번호          |
 | `GEMINI_API_KEY` | Google Gemini API 키 |
 
 `application.yml`은 저장소에 포함되어 있지 않으므로 직접 생성해 위 변수를 참조하도록 설정합니다.
@@ -64,6 +63,7 @@ Docker로 MySQL 9.7 컨테이너를 실행하고 `shop` 데이터베이스를 �
 ```
 
 http://localhost:8080 으로 접속합니다. <!-- 포트를 바꿨다면 수정 -->
+API 문서 (Swagger UI)는 http://localhost:8080/swagger-ui/index.html 에서 확인할 수 있습니다.
 
 ## 폴더 구조
 

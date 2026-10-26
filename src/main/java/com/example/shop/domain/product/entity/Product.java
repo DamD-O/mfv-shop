@@ -47,6 +47,7 @@ public class Product extends BaseTimeEntity {
     private String unit;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OrderBy
     private final List<ProductImage> productImages = new ArrayList<>();
 
     // 원산지
