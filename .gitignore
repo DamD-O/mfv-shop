@@ -43,3 +43,7 @@ application.yaml
 
 #log
 *.log
+
+#AI
+.claude
+CLAUDE.md
