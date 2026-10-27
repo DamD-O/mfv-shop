@@ -50,35 +50,41 @@
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                     <h6 class="mb-0">대시보드</h6>
                     <div class="btn-group btn-group-sm" id="period-group">
-                        <button type="button" class="btn btn-success" data-period="1">한 달</button>
-                        <button type="button" class="btn btn-outline-success" data-period="3">3개월</button>
+                        <button type="button" class="btn btn-success" data-value="ONE_MONTH">1개월</button>
+                        <button type="button" class="btn btn-outline-success" data-value="THREE_MONTHS">3개월</button>
+                        <button type="button" class="btn btn-outline-success" data-value="SIX_MONTHS">6개월</button>
+                        <button type="button" class="btn btn-outline-success" data-value="ONE_YEAR">1년</button>
                     </div>
                 </div>
                 <div class="row g-3 mb-4">
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="border rounded p-3 text-center">
                             <p class="small text-muted mb-1">전체 회원</p>
                             <h4 class="fw-bold mb-0" id="stat-customer-total">0</h4>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="border rounded p-3 text-center">
                             <p class="small text-muted mb-1">활성 회원</p>
                             <h4 class="fw-bold mb-0" id="stat-customer-active">0</h4>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="border rounded p-3 text-center">
                             <p class="small text-muted mb-1">탈퇴 회원</p>
                             <h4 class="fw-bold mb-0" id="stat-customer-withdrawn">0</h4>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="border rounded p-3 text-center">
-                            <p class="small text-muted mb-1">배송 완료 주문</p>
-                            <h4 class="fw-bold text-success mb-0" id="stat-order-delivered">0</h4>
-                        </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <p class="fw-bold small mb-0">배송 완료 주문 추이</p>
+                    <div class="btn-group btn-group-sm" id="unit-group">
+                        <button type="button" class="btn btn-success" data-value="DAY">일별</button>
+                        <button type="button" class="btn btn-outline-success" data-value="MONTH">월별</button>
                     </div>
+                </div>
+                <div class="border rounded p-3 mb-4" style="position: relative; height: 300px;">
+                    <canvas id="order-stats-chart"></canvas>
                 </div>
                 <p class="fw-bold small mb-2">상품 판매 순위 (판매 수량)</p>
                 <table class="table align-middle small table-sm">
@@ -287,11 +293,13 @@
 <script src="assets/js/templatemo.js"></script>
 <script src="js/common.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
     const existImages = new Map(); // imageId :imagePath
     const deleteImages = new Map(); // imageId :imagePath
     const newImages = new Map(); //임시id : file
     let tempImageId = -1;
+    let orderStatsChart;
 
     document.addEventListener('DOMContentLoaded', async function () {
         const loginUser = await checkLogin();
@@ -305,8 +313,12 @@
         const hash = location.hash.replace('#', '');
         if (hash) {
             showSection(hash);
+        } else {
+            loadDashboard();
         }
 
+        initFilterGroup('#period-group', () => loadOrderStats());
+        initFilterGroup('#unit-group', () => loadOrderStats());
         initFilterGroup('#product-filter', loadProducts);
         initFilterGroup('#order-filter', loadOrder);
         initFilterGroup('#qna-filter', loadQna);
@@ -326,7 +338,7 @@
         document.getElementById('product-image-input').addEventListener('change', e => {
             const files = Array.from(e.target.files);
             files.forEach(file => {
-                tempNewImageId = tempImageId--;
+                const tempNewImageId = tempImageId--;
                 newImages.set(tempNewImageId, file);
                 renderImagePreview(tempNewImageId, URL.createObjectURL(file));
             });
@@ -360,7 +372,7 @@
 
         history.replaceState(null, '', '#' + type);
 
-        // if (type === 'dashboard') loadDashboard();
+        if (type === 'dashboard') loadDashboard();
         if (type === 'product') loadProducts();
         // if (type === 'customer') loadCustomer();
         if (type === 'order') loadOrder();
@@ -413,6 +425,46 @@
 
         document.getElementById(listId).innerHTML = data.map(renderRow).join('');
         document.getElementById(emptyId).classList.toggle('d-none', data.length > 0);
+    }
+
+    async function loadDashboard() {
+        loadOrderStats();
+    }
+
+    async function loadOrderStats() {
+        const period = getActiveFilter('#period-group');
+        const unit = getActiveFilter('#unit-group');
+        const url = `/api/admin/dashboard/order-stats?period=${period}&unit=${unit}`;
+        const response = await fetchWithAuth(url);
+        if (!response) return;
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || '주문 추이 조회 실패');
+            return;
+        }
+        const data = await response.json();
+        orderStatsChart?.destroy();
+        orderStatsChart = new Chart(document.getElementById('order-stats-chart'), {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.date),
+                datasets: [{
+                    label: '배송 완료 주문',
+                    data: data.map(d => d.count),
+                    pointRadius: unit === 'DAY' ? 0 : 3,
+                }]
+            },
+            options:{
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {precision: 0},
+                        suggestedMax: 10
+                    }
+                }
+            }
+        });
     }
 
     async function loadProducts(category = getActiveFilter('#product-filter')) {
