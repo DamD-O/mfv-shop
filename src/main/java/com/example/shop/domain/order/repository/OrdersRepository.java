@@ -32,6 +32,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
              GROUP BY baseDate
              ORDER BY baseDate
             """, nativeQuery = true)
-    List<OrderStatsProjection> findDateCompletedDeliveryCounts(@Param("pattern") String pattern, @Param("startDate") LocalDateTime startDate);
+    List<OrderStatsProjection> findDateDeliveredCounts(@Param("pattern") String pattern, @Param("startDate") LocalDateTime startDate);
 }
 

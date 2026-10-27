@@ -1,21 +1,23 @@
 package com.example.shop.domain.admin.service;
 
 import com.example.shop.domain.admin.dto.OrderStatsResponse;
+import com.example.shop.domain.admin.dto.SalesProductRankResponse;
 import com.example.shop.domain.admin.entity.DateGroupingUnit;
 import com.example.shop.domain.admin.entity.PeriodForDashboard;
 import com.example.shop.domain.admin.repository.AdminRepository;
+import com.example.shop.domain.admin.dto.CustomerStatsResponse;
+import com.example.shop.domain.customer.repository.CustomerRepository;
 import com.example.shop.domain.order.dto.OrderStatsProjection;
+import com.example.shop.domain.order.repository.OrderDetailRepository;
 import com.example.shop.domain.order.repository.OrdersRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author madey
@@ -29,6 +31,8 @@ public class AdminService {
 
     private final AdminRepository adminRepository;
     private final OrdersRepository ordersRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final CustomerRepository customerRepository;
 
     public String getAdminName(String adminId)
     {
@@ -48,7 +52,7 @@ public class AdminService {
         startDate = unit == DateGroupingUnit.MONTH ? startDate.withDayOfMonth(1) : startDate;
         Map<String, Long> orderStatData = new HashMap<>();
 
-        for (OrderStatsProjection data : ordersRepository.findDateCompletedDeliveryCounts(unit.getPattern(), startDate.atStartOfDay()))
+        for (OrderStatsProjection data : ordersRepository.findDateDeliveredCounts(unit.getPattern(), startDate.atStartOfDay()))
         {
             orderStatData.put(data.getBaseDate(), data.getOrderCount());
         }
@@ -77,5 +81,30 @@ public class AdminService {
         }
 
         return orderStatsList;
+    }
+
+    /**
+     *
+     * @param period 조회 기간
+     * @return 상품 판매량 순위
+     */
+    public List<SalesProductRankResponse> getSalesProductRank(PeriodForDashboard period)
+    {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startDate = today.minusMonths(period.getMonths()).atStartOfDay();
+
+        return orderDetailRepository.findProductSalesRank(startDate).stream().map(SalesProductRankResponse::new).toList();
+    }
+
+    /**
+     * @return 회원 수 (전체 / 활성 / 탈퇴)
+     */
+    public CustomerStatsResponse getCustomerStats()
+    {
+        Long totalCount = customerRepository.count();
+        Long activeCount = customerRepository.countByWithdrawnFalse();
+        Long withdrawnCount = customerRepository.countByWithdrawnTrue();
+
+        return new CustomerStatsResponse(totalCount, activeCount, withdrawnCount);
     }
 }

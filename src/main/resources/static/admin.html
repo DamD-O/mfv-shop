@@ -60,19 +60,19 @@
                     <div class="col-md-4">
                         <div class="border rounded p-3 text-center">
                             <p class="small text-muted mb-1">전체 회원</p>
-                            <h4 class="fw-bold mb-0" id="stat-customer-total">0</h4>
+                            <h4 class="fw-bold mb-0" id="stat-customer-total"></h4>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="border rounded p-3 text-center">
                             <p class="small text-muted mb-1">활성 회원</p>
-                            <h4 class="fw-bold mb-0" id="stat-customer-active">0</h4>
+                            <h4 class="fw-bold mb-0" id="stat-customer-active"></h4>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="border rounded p-3 text-center">
                             <p class="small text-muted mb-1">탈퇴 회원</p>
-                            <h4 class="fw-bold mb-0" id="stat-customer-withdrawn">0</h4>
+                            <h4 class="fw-bold mb-0" id="stat-customer-withdrawn"></h4>
                         </div>
                     </div>
                 </div>
@@ -86,17 +86,10 @@
                 <div class="border rounded p-3 mb-4" style="position: relative; height: 300px;">
                     <canvas id="order-stats-chart"></canvas>
                 </div>
-                <p class="fw-bold small mb-2">상품 판매 순위 (판매 수량)</p>
-                <table class="table align-middle small table-sm">
-                    <thead class="border-bottom border-dark">
-                    <tr>
-                        <th class="text-center" style="width: 80px;">순위</th>
-                        <th>상품명</th>
-                        <th class="text-center" style="width: 120px;">판매 수량</th>
-                    </tr>
-                    </thead>
-                    <tbody id="ranking-body"></tbody>
-                </table>
+                <p class="fw-bold small mb-2">상품 판매 순위 (판매 수량) <span class="text-muted small" id="sales-rank-period"></span></p>
+                <div class="border rounded p-3 mb-2" style="position: relative; height: 360px;" id="sales-rank-box">
+                    <canvas id="sales-rank-chart"></canvas>
+                </div>
                 <p id="ranking-empty" class="text-muted small d-none">집계된 판매 내역이 없습니다.</p>
             </div>
 
@@ -300,6 +293,7 @@
     const newImages = new Map(); //임시id : file
     let tempImageId = -1;
     let orderStatsChart;
+    let salesRankChart;
 
     document.addEventListener('DOMContentLoaded', async function () {
         const loginUser = await checkLogin();
@@ -317,7 +311,7 @@
             loadDashboard();
         }
 
-        initFilterGroup('#period-group', () => loadOrderStats());
+        initFilterGroup('#period-group', () => loadPeriodStats());
         initFilterGroup('#unit-group', () => loadOrderStats());
         initFilterGroup('#product-filter', loadProducts);
         initFilterGroup('#order-filter', loadOrder);
@@ -374,7 +368,7 @@
 
         if (type === 'dashboard') loadDashboard();
         if (type === 'product') loadProducts();
-        // if (type === 'customer') loadCustomer();
+        if (type === 'customer') loadCustomer();
         if (type === 'order') loadOrder();
         if (type === 'qna') loadQna();
     }
@@ -427,8 +421,31 @@
         document.getElementById(emptyId).classList.toggle('d-none', data.length > 0);
     }
 
-    async function loadDashboard() {
+    function loadDashboard() {
+        loadCustomerStats();
+        loadPeriodStats();
+    }
+
+    function loadPeriodStats() {
         loadOrderStats();
+        loadSalesProductRank();
+    }
+
+    async function loadCustomerStats() {
+        const response = await fetchWithAuth('/api/admin/dashboard/customer-stats');
+        if (!response) return;
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || '회원 수 조회 실패');
+            return;
+        }
+
+        const data = await response.json();
+        document.getElementById('stat-customer-total').textContent = data.totalCount.toLocaleString();
+        document.getElementById('stat-customer-active').textContent = data.activeCount.toLocaleString();
+        document.getElementById('stat-customer-withdrawn').textContent = data.withdrawnCount.toLocaleString();
+
     }
 
     async function loadOrderStats() {
@@ -455,12 +472,69 @@
                     pointRadius: unit === 'DAY' ? 0 : 3,
                 }]
             },
-            options:{
+            options: {
                 scales: {
                     y: {
                         beginAtZero: true,
                         ticks: {precision: 0},
-                        suggestedMax: 10
+                        suggestedMax: 10,
+                        title: {
+                            display: true,
+                            text: '주문 수(건)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async function loadSalesProductRank() {
+        const period = getActiveFilter('#period-group');
+        const periodLabel = document.querySelector('#period-group .btn-success').textContent;
+        const url = `/api/admin/dashboard/sales-ranking?period=${period}`;
+
+        const response = await fetchWithAuth(url);
+        if (!response) return;
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || '상품 판매량 순위 조회 실패');
+            return;
+        }
+
+        const data = await response.json();
+        document.getElementById('sales-rank-box').classList.toggle('d-none', data.length === 0);
+        salesRankChart?.destroy();
+        document.getElementById('ranking-empty').classList.toggle('d-none', data.length > 0);
+        document.getElementById('sales-rank-period').textContent = '· 최근 ' + periodLabel;
+
+        if (data.length === 0) return;
+
+        salesRankChart = new Chart(document.getElementById('sales-rank-chart'), {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.productName),
+                datasets: [{
+                    data: data.map(d => d.totalQuantity),
+                    maxBarThickness: 30
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {precision: 0},
+                        suggestedMax: 10,
+                        title: {
+                            display: true,
+                            text: '판매 수량(개)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
             }

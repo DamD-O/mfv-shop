@@ -19,4 +19,6 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
     
     Optional<Customer> findOneByCustomerId(String customerId);
 
+    Long countByWithdrawnFalse();
+    Long countByWithdrawnTrue();
 }
