@@ -43,26 +43,26 @@ public class CustomerService {
             throw new RuntimeException(userID + "는 이미 존재하는 아이디 입니다.");
         }
 
-        String userEmail = request.getEmail();
-        if (customerRepository.existsByEmail(userEmail))
-        {
-            log.warn("회원가입 실패 - 이미 사용중인 이메일 : {}", userEmail);
-            throw new RuntimeException(userEmail + "는 이미 사용중인 이메일 입니다.");
-        }
+        //비밀번호 인코딩
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        String userPhone = request.getPhone();
+        String userPhone = request.getPhone().trim();
         if (customerRepository.existsByPhone(userPhone))
         {
             log.warn("회원가입 실패 - 이미 사용중인 핸드폰 번호 : {}", userPhone);
             throw new RuntimeException(userPhone + "는 이미 사용중인 핸드폰 번호 입니다.");
         }
 
-        //비밀번호 인코딩
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        String userEmail = request.getEmail().trim();
+        if (customerRepository.existsByEmail(userEmail))
+        {
+            log.warn("회원가입 실패 - 이미 사용중인 이메일 : {}", userEmail);
+            throw new RuntimeException(userEmail + "는 이미 사용중인 이메일 입니다.");
+        }
 
         //customer에 저장
-        Customer customer = new Customer(request.getCustomerId(), encodedPassword, request.getName(), request.getPhone(), request.getEmail(),
-                                         request.getBirthDate(), AuthType.USER);
+        Customer customer = new Customer(userID, encodedPassword, request.getName().trim(), userPhone, userEmail, request.getBirthDate(),
+                                         AuthType.USER);
 
         //DB에 저장
         customerRepository.save(customer);

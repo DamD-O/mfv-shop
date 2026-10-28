@@ -121,3 +121,21 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
+
+function maskingName(str) {
+    if (str.length == 1) return "*";
+    else if (str.length == 2) return str.substring(0, 1) + "*";
+    else return str.substring(0, 1) + "*".repeat(str.length - 2) + str.substring(str.length - 1);
+}
+
+function maskingEmail(str) {
+    const localPart = str.substring(0, str.indexOf("@"));
+    const nonMaskLen = Math.floor(localPart.length / 2);
+
+    return str.substring(0, nonMaskLen) + "*".repeat(localPart.length - nonMaskLen) + str.substring(str.indexOf("@"));
+}
+
+function maskingPhone(str) {
+    return str.substring(0, str.indexOf('-') + 1) + "*".repeat(4) + str.substring(str.lastIndexOf('-'));
+
+}

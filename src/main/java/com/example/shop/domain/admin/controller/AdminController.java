@@ -1,18 +1,19 @@
 package com.example.shop.domain.admin.controller;
 
+import com.example.shop.domain.admin.dto.CustomerStatsResponse;
 import com.example.shop.domain.admin.dto.OrderStatsResponse;
 import com.example.shop.domain.admin.dto.SalesProductRankResponse;
 import com.example.shop.domain.admin.entity.DateGroupingUnit;
 import com.example.shop.domain.admin.entity.PeriodForDashboard;
 import com.example.shop.domain.admin.service.AdminService;
-import com.example.shop.domain.admin.dto.CustomerStatsResponse;
+import com.example.shop.domain.customer.dto.CustomerSelectResponse;
+import com.example.shop.domain.customer.dto.UpdateCustomerNameRequest;
+import com.example.shop.domain.customer.entity.CustomerStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -47,5 +48,26 @@ public class AdminController {
     public CustomerStatsResponse getCustomerStats()
     {
         return adminService.getCustomerStats();
+    }
+
+    @Operation(summary = "회원 목록 조회", description = "관리자페이지 회원정보 목록 조회")
+    @GetMapping("/customers")
+    public List<CustomerSelectResponse> getCustomerList(@RequestParam(required = false) CustomerStatus status)
+    {
+        return adminService.getCustomerList(status);
+    }
+
+    @Operation(summary = "회원 상세 정보 조회", description = "관리자페이지 회원 상세 정보 조회")
+    @GetMapping("/customers/{customerId}")
+    public CustomerSelectResponse getCustomerById(@PathVariable String customerId)
+    {
+        return adminService.getCustomerById(customerId);
+    }
+
+    @Operation(summary = "회원 이름 변경", description = "회원 이름 변경")
+    @PatchMapping("/customers/{customerId}/name")
+    public CustomerSelectResponse updateCustomerName(@PathVariable String customerId, @Valid @RequestBody UpdateCustomerNameRequest request)
+    {
+        return adminService.updateCustomerName(customerId, request);
     }
 }

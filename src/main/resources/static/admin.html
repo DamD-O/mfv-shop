@@ -44,7 +44,6 @@
                 </li>
             </ul>
         </div>
-
         <div class="col-9">
             <div id="dashboard" class="admin-section">
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
@@ -92,7 +91,6 @@
                 </div>
                 <p id="ranking-empty" class="text-muted small d-none">집계된 판매 내역이 없습니다.</p>
             </div>
-
             <div id="product" class="admin-section d-none">
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                     <h6 class="mb-0">상품 관리</h6>
@@ -121,24 +119,31 @@
                 </table>
                 <p id="product-empty" class="text-muted small d-none">등록된 상품이 없습니다.</p>
             </div>
-
             <div id="customer" class="admin-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">회원 관리</h6>
-                <table class="table align-middle small table-sm table-hover">
-                    <thead class="border-bottom border-dark">
-                    <tr>
-                        <th class="text-center">아이디</th>
-                        <th class="text-center">이름</th>
-                        <th class="text-center">이메일</th>
-                        <th class="text-center">연락처</th>
-                        <th class="text-center">상태</th>
-                    </tr>
-                    </thead>
-                    <tbody id="customer-list"></tbody>
-                </table>
+                <div class="d-flex flex-wrap gap-2 mb-3" id="customer-filter">
+                    <button type="button" class="btn btn-sm btn-success" data-value="">전체</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="ACTIVE">활성</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-value="WITHDRAWN">탈퇴</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle small table-sm table-hover text-nowrap">
+                        <thead class="border-bottom border-dark">
+                        <tr>
+                            <th class="text-center">아이디</th>
+                            <th class="text-center">이름</th>
+                            <th class="text-center">이메일</th>
+                            <th class="text-center">연락처</th>
+                            <th class="text-center">가입일</th>
+                            <th class="text-center">상태</th>
+                            <th class="text-center">상세</th>
+                        </tr>
+                        </thead>
+                        <tbody id="customer-list"></tbody>
+                    </table>
+                </div>
                 <p id="customer-empty" class="text-muted small d-none">회원이 없습니다.</p>
             </div>
-
             <div id="order" class="admin-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">주문 관리</h6>
                 <div class="d-flex flex-wrap gap-2 mb-3" id="order-filter">
@@ -167,7 +172,6 @@
                 </div>
                 <p id="admin-order-empty" class="text-muted small d-none">주문이 없습니다.</p>
             </div>
-
             <div id="qna" class="admin-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">Q&A 관리</h6>
                 <div class="d-flex flex-wrap gap-2 mb-3" id="qna-filter">
@@ -270,11 +274,29 @@
                     <label for="customer-detail-phone" class="form-label small fw-bold">연락처</label>
                     <input type="text" class="form-control" id="customer-detail-phone" readonly>
                 </div>
+                <div class="mb-3">
+                    <label for="customer-detail-birth" class="form-label small fw-bold">생년월일</label>
+                    <input type="text" class="form-control" id="customer-detail-birth" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="customer-detail-point" class="form-label small fw-bold">보유 포인트</label>
+                    <input type="text" class="form-control" id="customer-detail-point" readonly>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label for="customer-detail-created" class="form-label small fw-bold">가입일</label>
+                        <input type="text" class="form-control" id="customer-detail-created" readonly>
+                    </div>
+                    <div class="col-6">
+                        <label for="customer-detail-withdrawn" class="form-label small fw-bold">탈퇴일</label>
+                        <input type="text" class="form-control" id="customer-detail-withdrawn" readonly>
+                    </div>
+                </div>
                 <p class="text-danger small mb-0 d-none" id="customer-error"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
-                <button type="button" class="btn btn-success btn-sm" id="customer-name-btn" onclick="updateCustomerName()">이름 수정</button>
+                <button type="button" class="btn btn-success btn-sm" id="customer-name-btn">이름 수정</button>
             </div>
         </div>
     </div>
@@ -314,6 +336,7 @@
         initFilterGroup('#period-group', () => loadPeriodStats());
         initFilterGroup('#unit-group', () => loadOrderStats());
         initFilterGroup('#product-filter', loadProducts);
+        initFilterGroup('#customer-filter', loadCustomer)
         initFilterGroup('#order-filter', loadOrder);
         initFilterGroup('#qna-filter', loadQna);
 
@@ -321,40 +344,34 @@
             getUrl: (productId) => `/api/admin/products/${productId}/status`,
             onSuccess: () => loadProducts()
         });
-
         initOrderStatusChange('#admin-order-list', {
             getUrl: (id) => `/api/admin/orders/${id}/status`,
             onSuccess: () => loadOrder()
         });
-
         initQnaAnswer();
-
-        document.getElementById('product-image-input').addEventListener('change', e => {
-            const files = Array.from(e.target.files);
-            files.forEach(file => {
-                const tempNewImageId = tempImageId--;
-                newImages.set(tempNewImageId, file);
-                renderImagePreview(tempNewImageId, URL.createObjectURL(file));
-            });
-            document.getElementById('product-image-input').value = '';
-        });
-
-        document.getElementById('product-image-list').addEventListener('click', e => {
-            const imageBtn = e.target.closest('button[data-image-id]');
-            if (!imageBtn) return;
-            const imageId = Number(imageBtn.dataset.imageId);
-
-            if (existImages.has(imageId)) {
-                deleteImages.set(imageId, existImages.get(imageId));
-                existImages.delete(imageId);
-            } else {
-                newImages.delete(imageId);
-            }
-            imageBtn.parentElement.remove();
-        });
+        initProductImgChange();
 
         document.getElementById('product-modal').addEventListener('hide.bs.modal', () => {
             document.activeElement.blur();
+        });
+
+        initCustomerSelectOne();
+
+        document.getElementById('customer-modal').addEventListener('hide.bs.modal', () => {
+            document.activeElement.blur();
+        });
+
+        document.getElementById('customer-name-btn').addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            if (!btn) return;
+
+            btn.disabled = true;
+
+            try {
+                await updateCustomerName(document.getElementById('customer-detail-id').value);
+            } finally {
+                btn.disabled = false;
+            }
         });
     });
 
@@ -445,7 +462,6 @@
         document.getElementById('stat-customer-total').textContent = data.totalCount.toLocaleString();
         document.getElementById('stat-customer-active').textContent = data.activeCount.toLocaleString();
         document.getElementById('stat-customer-withdrawn').textContent = data.withdrawnCount.toLocaleString();
-
     }
 
     async function loadOrderStats() {
@@ -549,6 +565,18 @@
             emptyId: 'product-empty',
             renderRow: renderProductRow,
             errorMessage: '상품 조회 실패'
+        });
+    }
+
+    async function loadCustomer(status = getActiveFilter('#customer-filter')) {
+        const url = status ? `/api/admin/customers?status=${status}` : '/api/admin/customers';
+
+        await loadList({
+            url,
+            listId: 'customer-list',
+            emptyId: 'customer-empty',
+            renderRow: renderCustomerRow,
+            errorMessage: '회원 정보 조회 실패'
         });
     }
 
@@ -717,7 +745,6 @@
                         loadProducts();
                         return;
                     }
-
                     deleteImages.delete(imageId);
                 }
 
@@ -727,7 +754,6 @@
                         loadProducts();
                         return;
                     }
-
                     newImages.delete(tempId);
                 }
 
@@ -853,12 +879,78 @@
 
                 const error = await response.json().catch(() => ({}));
                 alert(error.message || '답변 등록 실패');
-
             } finally {
                 btn.disabled = false;
             }
         });
+    }
 
+    function initProductImgChange() {
+        document.getElementById('product-image-input').addEventListener('change', e => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const tempNewImageId = tempImageId--;
+                newImages.set(tempNewImageId, file);
+                renderImagePreview(tempNewImageId, URL.createObjectURL(file));
+            });
+            document.getElementById('product-image-input').value = '';
+        });
+
+        document.getElementById('product-image-list').addEventListener('click', e => {
+            const imageBtn = e.target.closest('button[data-image-id]');
+            if (!imageBtn) return;
+            const imageId = Number(imageBtn.dataset.imageId);
+
+            if (existImages.has(imageId)) {
+                deleteImages.set(imageId, existImages.get(imageId));
+                existImages.delete(imageId);
+            } else {
+                newImages.delete(imageId);
+            }
+            imageBtn.parentElement.remove();
+        });
+    }
+
+    function initCustomerSelectOne() {
+        document.getElementById('customer-list').addEventListener('click', async (e) => {
+            const btn = e.target.closest('button[data-customer-id]');
+            if (!btn) return;
+
+            const {customerId} = btn.dataset;
+
+            btn.disabled = true;
+
+            try {
+                const response = await fetchWithAuth(`/api/admin/customers/${customerId}`);
+
+                if (!response) return;
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    document.getElementById('customer-detail-id').value = data.customerId;
+                    document.getElementById('customer-detail-name').value = data.customerName;
+                    document.getElementById('customer-detail-email').value = data.email;
+                    document.getElementById('customer-detail-phone').value = data.phone;
+                    document.getElementById('customer-detail-birth').value = data.birthDate;
+                    document.getElementById('customer-detail-point').value = data.point.toLocaleString() + ' P';
+                    document.getElementById('customer-detail-created').value = data.createdAt.split('T')[0];
+                    document.getElementById('customer-detail-withdrawn').value = data.withdrawnAt ? data.withdrawnAt.split('T')[0] : '';
+                    document.getElementById('customer-detail-name').readOnly = data.withdrawn;
+                    document.getElementById('customer-name-btn').classList.toggle('d-none', data.withdrawn);
+
+                    bootstrap.Modal.getOrCreateInstance('#customer-modal').show();
+                    document.getElementById('customer-error').textContent = '';
+                    document.getElementById('customer-error').classList.add('d-none');
+                    return;
+                }
+
+                const error = await response.json().catch(() => ({}));
+                alert(error.message || '고객 상세 정보 조회 실패');
+            } finally {
+                btn.disabled = false;
+            }
+        });
     }
 
     function renderProductRow(product) {
@@ -898,6 +990,20 @@
             <button type="button" data-image-id="${imageId}" style="position:absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius:50%; border:none; background:#dc3545; color:white; font-size:12px; cursor:pointer;">×</button>
         `;
         container.appendChild(div);
+    }
+
+    function renderCustomerRow(customer) {
+        return `
+            <tr>
+                <td class="text-center">${escapeHtml(customer.customerId)}</td>
+                <td class="text-center">${escapeHtml(maskingName(customer.customerName))}</td>
+                <td class="text-center">${escapeHtml(maskingEmail(customer.email))}</td>
+                <td class="text-center">${escapeHtml(maskingPhone(customer.phone))}</td>
+                <td class="text-center">${customer.createdAt.split('T')[0]}</td>
+                <td class="text-center">${customer.withdrawnLabel}</td>
+                <td class="text-center"><button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#customer-modal" data-customer-id="${escapeHtml(customer.customerId)}">상세정보</button></td>
+            </tr>
+        `;
     }
 
     function renderOrderRow(order) {
@@ -978,6 +1084,27 @@
         if (!response) return false;
 
         return response.ok;
+    }
+
+    async function updateCustomerName(customerId) {
+        const response = await fetchWithAuth(`/api/admin/customers/${customerId}/name`, {
+            method: 'PATCH',
+            headers: {'content-type': 'application/json'},
+            body: JSON.stringify({customerName: document.getElementById('customer-detail-name').value})
+        });
+
+        if (!response) return;
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            document.getElementById('customer-error').classList.remove('d-none');
+            document.getElementById('customer-error').textContent = error.message || '고객 이름 변경 실패';
+            return;
+        }
+
+        alert('고객 이름 변경 성공');
+        bootstrap.Modal.getInstance('#customer-modal').hide();
+        loadCustomer();
     }
 </script>
 </body>

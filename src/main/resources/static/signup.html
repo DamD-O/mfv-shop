@@ -114,12 +114,12 @@
     })
 
     async function signup() {
-        const customerId = document.getElementById('customerId').value;
+        const customerId = document.getElementById('customerId').value.trim();
         const password = document.getElementById('password').value;
         const passwordConfirm = document.getElementById('passwordConfirm').value;
-        const name = document.getElementById('name').value;
-        const phone = document.getElementById('phone').value;
-        const email = document.getElementById('email').value;
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
         const birthDate = document.getElementById('birthDate').value;
         const errorDiv = document.getElementById('signupError');
         errorDiv.classList.add('d-none');

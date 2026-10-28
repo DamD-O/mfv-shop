@@ -3,6 +3,7 @@ package com.example.shop.domain.customer.dto;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 
@@ -24,7 +25,8 @@ public class CustomerSignupRequest {
     @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*])\\S{8,}$", message = "비밀번호는 영문, 숫자, 특수문자(!,@,#,$,%,^,&,*) 포함 8자 이상이며 공백은 사용할 수 없습니다.")
     private String password;
 
-    @NotBlank(message = "이름을 입력해주세요.")
+    @NotBlank(message = "이름을 입력해주세요. 최대 100자")
+    @Length(max = 100, message = "100자 이내로 입력해주세요.")
     private String name;
 
     @NotBlank(message = "핸드폰 번호를 입력해주세요.")

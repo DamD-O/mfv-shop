@@ -2,6 +2,7 @@ package com.example.shop.domain.customer.entity;
 
 import com.example.shop.domain.admin.entity.AuthType;
 import com.example.shop.global.entity.BaseTimeEntity;
+import com.example.shop.global.util.MaskingUtil;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -75,6 +76,11 @@ public class Customer extends BaseTimeEntity {
         this.email = email;
     }
 
+    public void updateCustomerName(String name)
+    {
+        this.name = name;
+    }
+
     //포인트 적립
     public void earnPoint(int point)
     {
@@ -97,6 +103,8 @@ public class Customer extends BaseTimeEntity {
         this.withdrawn = true;
         this.withdrawnAt = LocalDateTime.now();
         this.point = 0;
+        this.name = MaskingUtil.maskingName(this.name);
+        this.email = MaskingUtil.maskingEmail(this.email);
+        this.phone = MaskingUtil.maskingPhone(this.phone);
     }
-
 }
