@@ -1,5 +1,6 @@
 package com.example.shop.domain.order.controller;
 
+import com.example.shop.domain.order.dto.OrderCountProjection;
 import com.example.shop.domain.order.dto.OrderRequest;
 import com.example.shop.domain.order.dto.OrderResponse;
 import com.example.shop.domain.order.dto.OrderStatusUpdateRequest;
@@ -41,9 +42,9 @@ public class OrderController {
 
     @Operation(summary = "주문 조회")
     @GetMapping("/customers/orders")
-    public List<OrderResponse> getOrders(Authentication authentication)
+    public PageResponse<OrderResponse> getOrders(Authentication authentication, @RequestParam(required = false) OrderStatus status, @PageableDefault(size = 3) Pageable pageable)
     {
-        return orderService.getOrderList(authentication.getName()).stream().map(OrderResponse::new).toList();
+        return orderService.getOrderList(authentication.getName(), status, pageable);
     }
 
     @Operation(summary = "주문 상세조회")
@@ -79,5 +80,12 @@ public class OrderController {
     public PageResponse<OrderResponse> getAllOrders(@RequestParam(required = false) OrderStatus status, @PageableDefault(size = 10) Pageable pageable)
     {
         return orderService.getAllOrders(status, pageable);
+    }
+
+    @Operation(summary = "주문 상태별 건 수", description = "마이페이지 주문 상태별 건수 조회")
+    @GetMapping("/customers/orders/count")
+    public List<OrderCountProjection> getOrdersCount(Authentication authentication)
+    {
+        return orderService.getOrdersCount(authentication.getName());
     }
 }

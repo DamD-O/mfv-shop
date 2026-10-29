@@ -4,6 +4,7 @@ import com.example.shop.domain.address.entity.DeliveryAddress;
 import com.example.shop.domain.address.repository.DeliveryAddressRepository;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
+import com.example.shop.domain.order.dto.OrderCountProjection;
 import com.example.shop.domain.order.dto.OrderItemRequest;
 import com.example.shop.domain.order.dto.OrderRequest;
 import com.example.shop.domain.order.dto.OrderResponse;
@@ -111,9 +112,16 @@ public class OrderService {
     }
 
     //주문 목록 조회
-    public List<Orders> getOrderList(String customerId)
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderList(String customerId, OrderStatus status, Pageable pageable)
     {
-        return ordersRepository.findByCustomer_CustomerId(customerId);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+
+        Page<Orders> orders;
+        if (status != null) orders = ordersRepository.findByCustomer_CustomerIdAndOrderStatus(customerId, status, sortedPageable);
+        else orders = ordersRepository.findByCustomer_CustomerId(customerId, sortedPageable);
+
+        return new PageResponse<>(orders.map(OrderResponse::new));
     }
 
     //주문 상세조회
@@ -240,6 +248,11 @@ public class OrderService {
         else orders = ordersRepository.findAll(sortedPageable);
 
         return new PageResponse<>(orders.map(OrderResponse::new));
+    }
+
+    public List<OrderCountProjection> getOrdersCount(String customerId)
+    {
+        return ordersRepository.findOrderStatusCountsByCustomerId(customerId);
     }
 
     private void restoreStockAndPoint(Orders orders)

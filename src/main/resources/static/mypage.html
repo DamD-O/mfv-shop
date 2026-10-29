@@ -341,13 +341,17 @@
     }
 
     async function loadOrders() {
-        const response = await fetchWithAuth('/api/customers/orders');
-        if (!response) return;
+        const orderCountRes = await fetchWithAuth('/api/customers/orders/count');
+        if (!orderCountRes) return;
 
-        if (response.ok) {
-            const data = await response.json();
-            renderOrderCount(data);
-            renderOrderPreview(data)
+        const orderRes = await fetchWithAuth(`/api/customers/orders?size=5`);
+        if (!orderRes) return;
+
+        if (orderRes.ok && orderCountRes.ok) {
+            const orderData = await orderRes.json();
+            const orderCountData = await orderCountRes.json();
+            renderOrderCount(orderCountData);
+            renderOrderPreview(orderData.content)
         }
     }
 
@@ -357,9 +361,9 @@
             counts[el.dataset.count] = 0;
         });
 
-        //주문 상태 별 카운트 더하기
+        //주문 상태 별 카운트 표시
         data.forEach(i => {
-            counts[i.orderStatus] += 1
+            counts[i.orderStatus] = i.orderStatusCount;
         });
 
         //카운트 표시
@@ -372,11 +376,8 @@
         const container = document.getElementById('order-preview');
         container.innerHTML = '';
 
-        const orders = [...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        const currentOrders = orders.slice(0, 5);
-
-        if (currentOrders.length > 0) {
-            currentOrders.forEach(i => {
+        if (data.length > 0) {
+            data.forEach(i => {
                 const card = `
             <tr>
                 <td class="text-center">${i.createdAt.split('T')[0]}</td>

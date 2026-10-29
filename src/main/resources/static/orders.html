@@ -40,12 +40,14 @@
                 <tbody id="orders"></tbody>
             </table>
         </div>
+        <nav id="orders-pagination" class="d-none">
+            <ul class="pagination pagination-sm justify-content-center mt-3 mb-0"></ul>
+        </nav>
     </div>
 </section>
 
 <div id="footer"></div>
 
-<!-- Start Script -->
 <script src="assets/js/jquery-1.11.0.min.js"></script>
 <script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
 <script src="assets/js/templatemo.js"></script>
@@ -53,18 +55,22 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let orders = [];
+    let orderPage = 0;
+
     document.addEventListener("DOMContentLoaded", async () => {
         if (!await checkLogin()) return;
-        await getOrders();
 
         const status = new URLSearchParams(location.search).get('status');
-        let btn = null;
-        if (status) {
-            btn = document.querySelector(`#filter-btns [data-status="${status}"]`);
 
-            if (btn) filterOrders(status, btn);
+        let btn = document.querySelector(`#filter-btns [data-status="${status}"]`);
+
+        if (btn) {
+            filterOrders(status, btn)
+        } else {
+            await loadOrders(orderPage);
         }
 
+        initPagination('#orders-pagination', loadOrders);
     });
 
     function filterOrders(status, element) {
@@ -73,25 +79,34 @@
         })
         element.className = 'btn btn-sm btn-dark filter-btn';
 
-        const filtered = status == 'ALL' ? orders : orders.filter(o => o.orderStatus === status);
-
-        renderOrders(filtered);
-
         const url = new URL(location.href);
         url.searchParams.set('status', status);
         history.replaceState(null, '', url);
+
+        loadOrders();
     }
 
-    async function getOrders() {
-        const response = await fetchWithAuth(`/api/customers/orders`);
+    async function loadOrders(page = 0) {
+        orderPage = page;
+        let status = document.querySelector('#filter-btns .btn-dark')?.dataset.status;
+        status = status === 'ALL' ? '' : status;
+        const url = status ? `/api/customers/orders?page=${page}&status=${status}` : `/api/customers/orders?page=${page}`;
+
+        const response = await fetchWithAuth(url);
         if (!response) return;
 
-        if (response.ok) {
-            const data = await response.json();
-            orders = data;
-
-            renderOrders(data);
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || '주문 목록 가져오기 실패');
+            return;
         }
+
+        const data = await response.json();
+        orders = data.content;
+
+        renderOrders(orders);
+        document.getElementById('orders-pagination').querySelector('ul').innerHTML = renderPagination(data);
+        document.getElementById('orders-pagination').classList.toggle('d-none', data.totalPage < 2);
     }
 
     function renderOrders(data) {
@@ -148,7 +163,7 @@
                 <button class="btn btn-outline-success btn-sm w-100 mb-1" onclick="rePayment(${order.orderId})">재결제</button>
                 <button class="btn btn-outline-danger btn-sm w-100" onclick="cancelOrder(${order.orderId})">취소</button>
             `
-        } else if (order.orderStatus === 'PAYMENT_COMPLETE' || order.orderStatus === 'PREPARING') {
+        } else if (order.orderStatus === 'PAYMENT_COMPLETE') {
             return `<button class="btn btn-outline-danger btn-sm w-100" onclick="cancelOrder(${order.orderId})">취소</button>`
         } else if (order.orderStatus === 'SHIPPING') {
             return `<button class="btn btn-outline-dark btn-sm w-100" disabled>배송조회</button>`
@@ -187,7 +202,7 @@
         } else {
             const error = await response.json();
             alert(error.message || '주문 취소 실패하였습니다. 다시 시도해주세요.');
-            location.href = 'orders.html';
+            loadOrders(orderPage);
         }
     }
 
@@ -217,7 +232,7 @@
         if (!response) return;
 
         if (response.ok) {
-            location.href = 'orders.html';
+            loadOrders(orderPage);
         } else {
             const error = await response.json();
             alert(error.message || '리뷰 삭제 실패');

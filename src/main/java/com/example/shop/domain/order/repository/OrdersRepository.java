@@ -1,5 +1,6 @@
 package com.example.shop.domain.order.repository;
 
+import com.example.shop.domain.order.dto.OrderCountProjection;
 import com.example.shop.domain.order.dto.OrderStatsProjection;
 import com.example.shop.domain.order.entity.OrderStatus;
 import com.example.shop.domain.order.entity.Orders;
@@ -18,7 +19,9 @@ import java.util.List;
  * @description
  */
 public interface OrdersRepository extends JpaRepository<Orders, Long> {
-    List<Orders> findByCustomer_CustomerId(String customerId);
+    Page<Orders> findByCustomer_CustomerId(String customerId, Pageable pageable);
+
+    Page<Orders> findByCustomer_CustomerIdAndOrderStatus(String customerId, OrderStatus orderStatus, Pageable pageable);
 
     List<Orders> findByCustomer_CustomerIdAndOrderStatus(String customerId, OrderStatus orderStatus);
 
@@ -35,5 +38,13 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
              ORDER BY baseDate
             """, nativeQuery = true)
     List<OrderStatsProjection> findDateDeliveredCounts(@Param("pattern") String pattern, @Param("startDate") LocalDateTime startDate);
+
+    @Query(value = """
+            SELECT order_status AS orderStatus, count(order_status) AS orderStatusCount
+            FROM orders
+            WHERE customer_id = :customerId
+            GROUP BY orderStatus
+            """, nativeQuery = true)
+    List<OrderCountProjection> findOrderStatusCountsByCustomerId(String customerId);
 }
 
