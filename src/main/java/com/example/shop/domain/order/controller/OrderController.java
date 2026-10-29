@@ -5,11 +5,14 @@ import com.example.shop.domain.order.dto.OrderResponse;
 import com.example.shop.domain.order.dto.OrderStatusUpdateRequest;
 import com.example.shop.domain.order.entity.OrderStatus;
 import com.example.shop.domain.order.service.OrderService;
+import com.example.shop.global.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,8 +76,8 @@ public class OrderController {
 
     @Operation(summary = "관리자용 전체 주문 목록 조회")
     @GetMapping("/admin/orders")
-    public List<OrderResponse> getAllOrders(@RequestParam(required = false) OrderStatus status)
+    public PageResponse<OrderResponse> getAllOrders(@RequestParam(required = false) OrderStatus status, @PageableDefault(size = 10) Pageable pageable)
     {
-        return orderService.getAllOrders(status);
+        return orderService.getAllOrders(status, pageable);
     }
 }

@@ -14,9 +14,13 @@ import com.example.shop.domain.customer.repository.CustomerRepository;
 import com.example.shop.domain.order.dto.OrderStatsProjection;
 import com.example.shop.domain.order.repository.OrderDetailRepository;
 import com.example.shop.domain.order.repository.OrdersRepository;
+import com.example.shop.global.dto.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,15 +122,15 @@ public class AdminService {
         return new CustomerStatsResponse(totalCount, activeCount, withdrawnCount);
     }
 
-    public List<CustomerSelectResponse> getCustomerList(CustomerStatus status)
+    public PageResponse<CustomerSelectResponse> getCustomerList(CustomerStatus status, Pageable pageable)
     {
-        List<Customer> customerList;
-        Sort sort = Sort.by(Sort.Direction.ASC, "name", "customerId");
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, "name", "customerId"));
+        Page<Customer> customerPage;
 
-        if (status != null) customerList = customerRepository.findByWithdrawn(status.isWithdrawn(), sort);
-        else customerList = customerRepository.findAll(sort);
+        if (status != null) customerPage = customerRepository.findByWithdrawn(status.isWithdrawn(), sortedPageable);
+        else customerPage = customerRepository.findAll(sortedPageable);
 
-        return customerList.stream().map(CustomerSelectResponse::new).toList();
+        return new PageResponse<>(customerPage.map(CustomerSelectResponse::new));
     }
 
     public CustomerSelectResponse getCustomerById(String customerId)
@@ -146,9 +150,8 @@ public class AdminService {
             log.warn("회원 이름 변경 실패 - 존재하지 않는 사용자 입니다. customerId : {}", customerId);
             return new RuntimeException("회원 이름 변경 실패 : " + customerId + " 는 존재하지 않는 사용자입니다.");
         });
-        
-        if (customer.isWithdrawn())
-            throw new RuntimeException("탈퇴한 사용자는 이름변경이 불가 합니다.");
+
+        if (customer.isWithdrawn()) throw new RuntimeException("탈퇴한 사용자는 이름변경이 불가 합니다.");
 
         customer.updateCustomerName(request.getCustomerName().trim());
 

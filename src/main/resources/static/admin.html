@@ -118,6 +118,9 @@
                     <tbody id="product-list"></tbody>
                 </table>
                 <p id="product-empty" class="text-muted small d-none">등록된 상품이 없습니다.</p>
+                <nav id="product-pagination" class="d-none">
+                    <ul class="pagination pagination-sm justify-content-center mt-3 mb-0"></ul>
+                </nav>
             </div>
             <div id="customer" class="admin-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">회원 관리</h6>
@@ -143,6 +146,9 @@
                     </table>
                 </div>
                 <p id="customer-empty" class="text-muted small d-none">회원이 없습니다.</p>
+                <nav id="customer-pagination" class="d-none">
+                    <ul class="pagination pagination-sm justify-content-center mt-3 mb-0"></ul>
+                </nav>
             </div>
             <div id="order" class="admin-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">주문 관리</h6>
@@ -171,6 +177,9 @@
                     </table>
                 </div>
                 <p id="admin-order-empty" class="text-muted small d-none">주문이 없습니다.</p>
+                <nav id="order-pagination" class="d-none">
+                    <ul class="pagination pagination-sm justify-content-center mt-3 mb-0"></ul>
+                </nav>
             </div>
             <div id="qna" class="admin-section d-none">
                 <h6 class="border-bottom pb-3 mb-4">Q&A 관리</h6>
@@ -181,6 +190,9 @@
                 </div>
                 <div id="admin-qna-list" class="accordion"></div>
                 <p id="admin-qna-empty" class="text-muted small d-none">문의가 없습니다.</p>
+                <nav id="qna-pagination" class="d-none">
+                    <ul class="pagination pagination-sm justify-content-center mt-3 mb-0"></ul>
+                </nav>
             </div>
         </div>
     </div>
@@ -316,6 +328,10 @@
     let tempImageId = -1;
     let orderStatsChart;
     let salesRankChart;
+    let customerPage = 0;
+    let orderPage = 0;
+    let qnaPage = 0;
+    let productPage = 0;
 
     document.addEventListener('DOMContentLoaded', async function () {
         const loginUser = await checkLogin();
@@ -335,31 +351,32 @@
 
         initFilterGroup('#period-group', () => loadPeriodStats());
         initFilterGroup('#unit-group', () => loadOrderStats());
-        initFilterGroup('#product-filter', loadProducts);
-        initFilterGroup('#customer-filter', loadCustomer)
-        initFilterGroup('#order-filter', loadOrder);
-        initFilterGroup('#qna-filter', loadQna);
+        initFilterGroup('#product-filter', () => loadProducts());
+        initFilterGroup('#customer-filter', () => loadCustomer())
+        initFilterGroup('#order-filter', () => loadOrder());
+        initFilterGroup('#qna-filter', () => loadQna());
+
+        initPagination('#customer-pagination', loadCustomer);
+        initPagination('#order-pagination', loadOrder);
+        initPagination('#qna-pagination', loadQna);
+        initPagination('#product-pagination', loadProducts);
 
         initProductListActions('#product-list', {
             getUrl: (productId) => `/api/admin/products/${productId}/status`,
-            onSuccess: () => loadProducts()
+            onSuccess: () => loadProducts(productPage)
         });
+
         initOrderStatusChange('#admin-order-list', {
             getUrl: (id) => `/api/admin/orders/${id}/status`,
-            onSuccess: () => loadOrder()
+            onSuccess: () => loadOrder(orderPage)
         });
+
         initQnaAnswer();
         initProductImgChange();
-
-        document.getElementById('product-modal').addEventListener('hide.bs.modal', () => {
-            document.activeElement.blur();
-        });
-
         initCustomerSelectOne();
 
-        document.getElementById('customer-modal').addEventListener('hide.bs.modal', () => {
-            document.activeElement.blur();
-        });
+        initModalBlur('product-modal');
+        initModalBlur('customer-modal');
 
         document.getElementById('customer-name-btn').addEventListener('click', async (e) => {
             const btn = e.currentTarget;
@@ -418,7 +435,7 @@
      */
     const latestRequest = {};
 
-    async function loadList({url, listId, emptyId, renderRow, errorMessage}) {
+    async function loadPageList({url, listId, emptyId, paginationId, renderRow, errorMessage}) {
         const requestId = (latestRequest[listId] ?? 0) + 1;
         latestRequest[listId] = requestId;
 
@@ -434,8 +451,11 @@
         const data = await response.json();
         if (latestRequest[listId] !== requestId) return;
 
-        document.getElementById(listId).innerHTML = data.map(renderRow).join('');
-        document.getElementById(emptyId).classList.toggle('d-none', data.length > 0);
+        document.getElementById(listId).innerHTML = data.content.map(renderRow).join('');
+        document.getElementById(emptyId).classList.toggle('d-none', data.content.length > 0);
+
+        document.getElementById(paginationId).querySelector('ul').innerHTML = renderPagination(data);
+        document.getElementById(paginationId).classList.toggle('d-none', data.totalPage < 2);
     }
 
     function loadDashboard() {
@@ -557,48 +577,61 @@
         });
     }
 
-    async function loadProducts(category = getActiveFilter('#product-filter')) {
-        const url = category ? `/api/admin/products?category=${category}` : '/api/admin/products';
-        await loadList({
+    async function loadProducts(page = 0) {
+        productPage = page;
+        const category = getActiveFilter('#product-filter');
+        const url = category ? `/api/admin/products?page=${page}&category=${category}` : `/api/admin/products?page=${page}`;
+
+        await loadPageList({
             url,
             listId: 'product-list',
             emptyId: 'product-empty',
+            paginationId: 'product-pagination',
             renderRow: renderProductRow,
             errorMessage: '상품 조회 실패'
         });
     }
 
-    async function loadCustomer(status = getActiveFilter('#customer-filter')) {
-        const url = status ? `/api/admin/customers?status=${status}` : '/api/admin/customers';
+    async function loadCustomer(page = 0) {
+        customerPage = page;
+        const status = getActiveFilter('#customer-filter');
+        const url = status ? `/api/admin/customers?page=${page}&status=${status}` : `/api/admin/customers?page=${page}`;
 
-        await loadList({
+        await loadPageList({
             url,
             listId: 'customer-list',
             emptyId: 'customer-empty',
+            paginationId: 'customer-pagination',
             renderRow: renderCustomerRow,
             errorMessage: '회원 정보 조회 실패'
         });
     }
 
-    async function loadOrder(status = getActiveFilter('#order-filter')) {
-        const url = status ? `/api/admin/orders?status=${status}` : `/api/admin/orders`;
+    async function loadOrder(page = 0) {
+        orderPage = page;
+        const status = getActiveFilter('#order-filter');
+        const url = status ? `/api/admin/orders?page=${page}&status=${status}` : `/api/admin/orders?page=${page}`;
 
-        await loadList({
+        await loadPageList({
             url,
             listId: 'admin-order-list',
             emptyId: 'admin-order-empty',
+            paginationId: 'order-pagination',
             renderRow: renderOrderRow,
             errorMessage: '주문 목록 조회 실패'
         });
     }
 
-    async function loadQna(status = getActiveFilter('#qna-filter')) {
-        const url = status ? `/api/admin/qna?status=${status}` : `/api/admin/qna`;
+    async function loadQna(page = 0) {
+        qnaPage = page;
+        const status = getActiveFilter('#qna-filter');
+        const url = status ? `/api/admin/qna?page=${page}&status=${status}` : `/api/admin/qna?page=${page}`;
 
-        await loadList({
+        await loadPageList({
             url,
             listId: 'admin-qna-list',
             emptyId: 'admin-qna-empty',
+            paginationId: 'qna-pagination',
             renderRow: renderQnaRow,
             errorMessage: 'QnA 목록 조회 실패'
         });
@@ -742,7 +775,7 @@
                 for (const [imageId] of deleteImages) {
                     if (!await deleteProductImage(imageId)) {
                         showProductError('상품은 저장되었지만 이미지 삭제에 실패하였습니다.');
-                        loadProducts();
+                        loadProducts(productPage);
                         return;
                     }
                     deleteImages.delete(imageId);
@@ -751,7 +784,7 @@
                 for (const [tempId, file] of newImages) {
                     if (!await uploadProductImage(data.productId, file)) {
                         showProductError('상품은 저장되었지만 이미지 등록에 실패하였습니다.');
-                        loadProducts();
+                        loadProducts(productPage);
                         return;
                     }
                     newImages.delete(tempId);
@@ -759,7 +792,7 @@
 
                 alert(`상품 ${productId ? '수정' : '등록'} 성공`);
                 bootstrap.Modal.getInstance('#product-modal').hide();
-                loadProducts();
+                loadProducts(productPage);
                 return;
             }
 
@@ -873,7 +906,7 @@
                 if (!response) return;
 
                 if (response.ok) {
-                    loadQna();
+                    loadQna(qnaPage);
                     return;
                 }
 
@@ -950,6 +983,13 @@
             } finally {
                 btn.disabled = false;
             }
+        });
+    }
+
+    function initModalBlur(groupModal) {
+        const group = document.getElementById(groupModal);
+        group.addEventListener('hide.bs.modal', () => {
+            document.activeElement.blur();
         });
     }
 
@@ -1104,7 +1144,7 @@
 
         alert('고객 이름 변경 성공');
         bootstrap.Modal.getInstance('#customer-modal').hide();
-        loadCustomer();
+        loadCustomer(customerPage);
     }
 </script>
 </body>

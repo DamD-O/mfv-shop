@@ -1,12 +1,17 @@
 package com.example.shop.domain.product.service;
 
 import com.example.shop.domain.product.dto.ProductRequest;
+import com.example.shop.domain.product.dto.ProductResponse;
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.entity.ProductCategory;
 import com.example.shop.domain.product.entity.ProductStatus;
 import com.example.shop.domain.product.repository.ProductRepository;
+import com.example.shop.global.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +30,6 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
 
-    //상품 생성
     @Transactional
     public Product createProduct(ProductRequest request)
     {
@@ -37,7 +41,6 @@ public class ProductService {
         return product;
     }
 
-    //상품 수정
     @Transactional
     public Product updateProduct(Long productId, ProductRequest request)
     {
@@ -52,7 +55,6 @@ public class ProductService {
         return product;
     }
 
-    //상품 판매상태 변경
     @Transactional
     public Product changeProductStatus(Long productId, ProductStatus status)
     {
@@ -67,50 +69,48 @@ public class ProductService {
         return product;
     }
 
-    //판매중지 상품 안보이게 - 관리자/고객 분리
-    public List<Product> getAllProducts(ProductCategory category)
+    public PageResponse<ProductResponse> getAllProducts(ProductCategory category, Pageable pageable)
     {
-        //카테고리 별 검색
-        if (category == null) return productRepository.findAll();
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, "name", "id"));
+        Page<Product> page;
+        //판매중지 상품 안보이게 - 관리자/고객 분리
+        if (category == null) page = productRepository.findAll(sortedPageable);
+        else page = productRepository.findByCategory(category, sortedPageable);
 
-        return productRepository.findByCategory(category);
+        return new PageResponse<>(page.map(ProductResponse::new));
     }
 
-    public List<Product> getSaleProductList(ProductCategory category, String sort)
+    public PageResponse<ProductResponse> getSaleProductList(ProductCategory category, String sort, String keyword, Pageable pageable)
     {
+        Page<Product> page;
+
         Sort sorting = switch (sort)
         {
-            case "priceAsc" -> Sort.by("price").ascending();
-            case "priceDesc" -> Sort.by("price").descending();
-            default -> Sort.by("name").ascending();
+            case "priceAsc" -> Sort.by("price", "name", "id").ascending();
+            case "priceDesc" -> Sort.by("price").descending().and(Sort.by("name", "id"));
+            default -> Sort.by("name", "id").ascending();
         };
 
-        if (category == null) return productRepository.findByStatus(ProductStatus.ON_SALE, sorting);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorting);
 
-        return productRepository.findByStatusAndCategory(ProductStatus.ON_SALE, category, sorting);
+        if (category == null) page = productRepository.findByStatusAndNameContaining(ProductStatus.ON_SALE, keyword, sortedPageable);
+        else page = productRepository.findByStatusAndCategoryAndNameContaining(ProductStatus.ON_SALE, category, keyword, sortedPageable);
 
+        return new PageResponse<>(page.map(ProductResponse::new));
     }
 
-    //상품 상세조회
     public Product getProduct(Long productId)
     {
         return productRepository.findById(productId).orElseThrow(() -> {
-            log.warn("상품 조회 실패 - 존재하지 않는 productId: {}", productId);
+            log.warn("상품 상세 조회 실패 - 존재하지 않는 productId: {}", productId);
             return new RuntimeException("해당 상품을 찾을 수 없습니다.");
         });
     }
 
-    //최근 등록 상품 조회
     public List<Product> getRandomProducts()
     {
         List<Product> allProducts = productRepository.findByStatus(ProductStatus.ON_SALE);
         Collections.shuffle(allProducts);
-        return allProducts.stream().limit(6).toList();
-    }
-
-    //상품 검색
-    public List<Product> searchProducts(String keyword)
-    {
-        return productRepository.findByStatusAndNameContaining(ProductStatus.ON_SALE, keyword);
+        return allProducts.stream().limit(3).toList();
     }
 }

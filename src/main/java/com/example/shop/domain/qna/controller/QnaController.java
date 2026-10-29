@@ -5,12 +5,15 @@ import com.example.shop.domain.qna.dto.QnaCreateRequest;
 import com.example.shop.domain.qna.dto.QnaResponse;
 import com.example.shop.domain.qna.entity.QnaStatus;
 import com.example.shop.domain.qna.service.QnaService;
+import com.example.shop.global.dto.PageResponse;
 import com.example.shop.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,9 +77,9 @@ public class QnaController {
 
     @Operation(summary = "관리자용 문의 목록 조회")
     @GetMapping("/admin/qna")
-    public List<QnaResponse> getAllQna(@RequestParam(required = false) QnaStatus status)
+    public PageResponse<QnaResponse> getAllQna(@RequestParam(required = false) QnaStatus status, @PageableDefault(size = 10) Pageable pageable)
     {
-        return qnaService.getAllQna(status);
+        return qnaService.getAllQna(status, pageable);
     }
 
 }

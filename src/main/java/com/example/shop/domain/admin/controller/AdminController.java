@@ -9,10 +9,13 @@ import com.example.shop.domain.admin.service.AdminService;
 import com.example.shop.domain.customer.dto.CustomerSelectResponse;
 import com.example.shop.domain.customer.dto.UpdateCustomerNameRequest;
 import com.example.shop.domain.customer.entity.CustomerStatus;
+import com.example.shop.global.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,9 +55,9 @@ public class AdminController {
 
     @Operation(summary = "회원 목록 조회", description = "관리자페이지 회원정보 목록 조회")
     @GetMapping("/customers")
-    public List<CustomerSelectResponse> getCustomerList(@RequestParam(required = false) CustomerStatus status)
+    public PageResponse<CustomerSelectResponse> getCustomerList(@RequestParam(required = false) CustomerStatus status, @PageableDefault(size = 10) Pageable pageable)
     {
-        return adminService.getCustomerList(status);
+        return adminService.getCustomerList(status, pageable);
     }
 
     @Operation(summary = "회원 상세 정보 조회", description = "관리자페이지 회원 상세 정보 조회")

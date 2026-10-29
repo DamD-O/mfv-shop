@@ -62,7 +62,7 @@ async function checkLoginStatus() {
 function search() {
     const keyword = document.getElementById('search-input').value;
     if (!keyword) return;
-    window.location.href = `shop.html?keyword=${keyword}`;
+    window.location.href = `shop.html?keyword=${encodeURIComponent(keyword)}`;
 }
 
 document.addEventListener('keydown', function (e) {
@@ -137,5 +137,42 @@ function maskingEmail(str) {
 
 function maskingPhone(str) {
     return str.substring(0, str.indexOf('-') + 1) + "*".repeat(4) + str.substring(str.lastIndexOf('-'));
+}
 
+function initPagination(groupSelector, onLoad) {
+    const group = document.querySelector(groupSelector);
+    if (!group) return;
+
+    group.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-page]');
+        if (!btn) return;
+
+        onLoad(Number(btn.dataset.page))
+    });
+}
+
+function renderPagination(data) {
+    let html = '';
+
+    html += `
+        <li class="page-item ${!data.hasPrevious ? 'disabled' : ''}">
+                <button type="button" class="page-link" data-page="${data.currentPage - 1}">이전</button>
+        </li>
+        `;
+
+    for (let page = 0; page < data.totalPage; page++) {
+        html += `
+            <li class="page-item ${page === data.currentPage ? 'active' : ''}">
+                <button type="button" class="page-link" data-page="${page}">${page + 1}</button>
+            </li>
+            `;
+    }
+
+    html += `
+        <li class="page-item ${!data.hasNext ? 'disabled' : ''}">
+                <button type="button" class="page-link" data-page="${data.currentPage + 1}">다음</button>
+        </li>
+        `;
+
+    return html;
 }

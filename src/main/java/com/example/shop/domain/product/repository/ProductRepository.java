@@ -3,7 +3,8 @@ package com.example.shop.domain.product.repository;
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.entity.ProductCategory;
 import com.example.shop.domain.product.entity.ProductStatus;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,15 +17,13 @@ import java.util.Optional;
  */
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    List<Product> findByStatus(ProductStatus status, Sort sort);
+    Page<Product> findByStatusAndCategoryAndNameContaining(ProductStatus status, ProductCategory category, String keyword, Pageable pageable);
 
-    List<Product> findByStatusAndCategory(ProductStatus status, ProductCategory category, Sort sort);
+    Page<Product> findByStatusAndNameContaining(ProductStatus status, String keyword, Pageable pageable);
 
-    List<Product> findByCategory(ProductCategory category);
+    Page<Product> findByCategory(ProductCategory category, Pageable pageable);
 
     List<Product> findByStatus(ProductStatus status);
-
-    List<Product> findByStatusAndNameContaining(ProductStatus status, String keyword);
 
     Optional<Product> findByIdAndStatus(Long id, ProductStatus status);
 }

@@ -3,6 +3,8 @@ package com.example.shop.domain.order.repository;
 import com.example.shop.domain.order.dto.OrderStatsProjection;
 import com.example.shop.domain.order.entity.OrderStatus;
 import com.example.shop.domain.order.entity.Orders;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,7 +24,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 
     boolean existsByCustomer_CustomerIdAndOrderStatusIn(String customerId, List<OrderStatus> orderStatuses);
 
-    List<Orders> findByOrderStatusOrderByCreatedAtDesc(OrderStatus status);
+    Page<Orders> findByOrderStatus(OrderStatus status, Pageable pageable);
 
     @Query(value = """ 
             SELECT DATE_FORMAT(created_at, :pattern) AS baseDate, count(created_at) AS orderCount

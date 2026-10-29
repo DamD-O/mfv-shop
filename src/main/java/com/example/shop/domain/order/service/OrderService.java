@@ -18,8 +18,12 @@ import com.example.shop.domain.point.service.PointHistoryService;
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.entity.ProductStatus;
 import com.example.shop.domain.product.repository.ProductRepository;
+import com.example.shop.global.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,9 +132,8 @@ public class OrderService {
     /**
      *
      * @param orderId
-     * @param status
-     * 관리자 주문 상태 변경
-     * 변경 가능 규칙 - OrderStatus#canChangeTo 참고
+     * @param status  관리자 주문 상태 변경
+     *                변경 가능 규칙 - OrderStatus#canChangeTo 참고
      */
     @Transactional
     public Orders updateOrderStatus(Long orderId, OrderStatus status)
@@ -162,8 +165,7 @@ public class OrderService {
     /**
      *
      * @param customerId
-     * @param orderId
-     * 고객 주문 취소
+     * @param orderId    고객 주문 취소
      */
     @Transactional
     public void cancelOrder(String customerId, Long orderId)
@@ -228,14 +230,16 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponse> getAllOrders(OrderStatus status)
+    public PageResponse<OrderResponse> getAllOrders(OrderStatus status, Pageable pageable)
     {
-        List<Orders> orders;
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        if (status != null) orders = ordersRepository.findByOrderStatusOrderByCreatedAtDesc(status);
-        else orders = ordersRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Orders> orders;
 
-        return orders.stream().map(OrderResponse::new).toList();
+        if (status != null) orders = ordersRepository.findByOrderStatus(status, sortedPageable);
+        else orders = ordersRepository.findAll(sortedPageable);
+
+        return new PageResponse<>(orders.map(OrderResponse::new));
     }
 
     private void restoreStockAndPoint(Orders orders)

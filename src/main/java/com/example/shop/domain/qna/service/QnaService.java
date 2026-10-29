@@ -10,8 +10,12 @@ import com.example.shop.domain.qna.dto.QnaResponse;
 import com.example.shop.domain.qna.entity.Qna;
 import com.example.shop.domain.qna.entity.QnaStatus;
 import com.example.shop.domain.qna.repository.QnaRepository;
+import com.example.shop.global.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,14 +133,15 @@ public class QnaService {
      * 관리자용 QnA 목록 조회
      */
     @Transactional(readOnly = true)
-    public List<QnaResponse> getAllQna(QnaStatus status)
+    public PageResponse<QnaResponse> getAllQna(QnaStatus status, Pageable pageable)
     {
-        List<Qna> qna;
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Qna> qna;
 
-        if (status != null) qna = qnaRepository.findByStatusOrderByCreatedAtDesc(status);
-        else qna = qnaRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        if (status != null) qna = qnaRepository.findByStatus(status, sortedPageable);
+        else qna = qnaRepository.findAll(sortedPageable);
 
-        return qna.stream().map(QnaResponse::new).toList();
+        return new PageResponse<>(qna.map(QnaResponse::new));
     }
 
     private boolean isViewable(Qna qna, String customerId, String role)

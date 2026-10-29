@@ -5,11 +5,14 @@ import com.example.shop.domain.product.dto.ProductResponse;
 import com.example.shop.domain.product.dto.ProductStatusUpdateRequest;
 import com.example.shop.domain.product.entity.ProductCategory;
 import com.example.shop.domain.product.service.ProductService;
+import com.example.shop.global.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,16 +54,16 @@ public class ProductController {
 
     @Operation(summary = "관리자용 상품 전체 목록 조회")
     @GetMapping("/admin/products")
-    public List<ProductResponse> getProducts(@RequestParam(required = false) ProductCategory category)
+    public PageResponse<ProductResponse> getProducts(@RequestParam(required = false) ProductCategory category, @PageableDefault(size = 10) Pageable pageable)
     {
-        return productService.getAllProducts(category).stream().map(ProductResponse::new).toList();
+        return productService.getAllProducts(category, pageable);
     }
 
     @Operation(summary = "판매 중 목록 조회")
     @GetMapping("/products")
-    public List<ProductResponse> getSaleProductList(@RequestParam(required = false) ProductCategory category, @RequestParam(required = false, defaultValue = "name") String sort)
+    public PageResponse<ProductResponse> getSaleProductList(@RequestParam(required = false) ProductCategory category, @RequestParam(required = false, defaultValue = "name") String sort, @RequestParam(defaultValue = "") String keyword, @PageableDefault(size = 3) Pageable pageable)
     {
-        return productService.getSaleProductList(category, sort).stream().map(ProductResponse::new).toList();
+        return productService.getSaleProductList(category, sort, keyword.trim(), pageable);
     }
 
     @Operation(summary = "상품 상세 조회")
@@ -75,12 +78,5 @@ public class ProductController {
     public List<ProductResponse> getRandomProducts()
     {
         return productService.getRandomProducts().stream().map(ProductResponse::new).toList();
-    }
-
-    @Operation(summary = "상품 검색")
-    @GetMapping("/products/search")
-    public List<ProductResponse> getSearchProducts(@RequestParam String keyword)
-    {
-        return productService.searchProducts(keyword).stream().map(ProductResponse::new).toList();
     }
 }
