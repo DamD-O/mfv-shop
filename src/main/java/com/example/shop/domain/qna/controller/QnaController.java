@@ -40,7 +40,7 @@ public class QnaController {
 
     @Operation(summary = "고객별 문의 조회")
     @GetMapping("/customers/qna")
-    public PageResponse<QnaResponse> getQnaListByCustomer(Authentication authentication, @PageableDefault(size = 10) Pageable pageable)
+    public PageResponse<QnaResponse> getQnaListByCustomer(Authentication authentication, @PageableDefault(size = 5) Pageable pageable)
     {
         return qnaService.getQnaListByCustomer(authentication.getName(), pageable);
     }
