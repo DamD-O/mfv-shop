@@ -1,9 +1,8 @@
 package com.example.shop.domain.point.dto;
 
+import com.example.shop.global.dto.PageResponse;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author madey
@@ -15,9 +14,9 @@ import java.util.List;
 @NoArgsConstructor
 public class PointSummaryResponse {
     private int availPoint;
-    private List<PointHistoryResponse> historyList;
+    private PageResponse<PointHistoryResponse> historyList;
 
-    public PointSummaryResponse(int availPoint, List<PointHistoryResponse> historyList)
+    public PointSummaryResponse(int availPoint, PageResponse<PointHistoryResponse> historyList)
     {
         this.availPoint = availPoint;
         this.historyList = historyList;

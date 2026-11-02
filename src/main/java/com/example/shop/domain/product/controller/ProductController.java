@@ -61,7 +61,7 @@ public class ProductController {
 
     @Operation(summary = "판매 중 목록 조회")
     @GetMapping("/products")
-    public PageResponse<ProductResponse> getSaleProductList(@RequestParam(required = false) ProductCategory category, @RequestParam(required = false, defaultValue = "name") String sort, @RequestParam(defaultValue = "") String keyword, @PageableDefault(size = 3) Pageable pageable)
+    public PageResponse<ProductResponse> getSaleProductList(@RequestParam(required = false) ProductCategory category, @RequestParam(required = false, defaultValue = "name") String sort, @RequestParam(defaultValue = "") String keyword, @PageableDefault(size = 10) Pageable pageable)
     {
         return productService.getSaleProductList(category, sort, keyword.trim(), pageable);
     }

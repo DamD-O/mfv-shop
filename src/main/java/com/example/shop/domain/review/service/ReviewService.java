@@ -10,12 +10,15 @@ import com.example.shop.domain.review.dto.ReviewRequest;
 import com.example.shop.domain.review.dto.ReviewResponse;
 import com.example.shop.domain.review.entity.Review;
 import com.example.shop.domain.review.repository.ReviewRepository;
+import com.example.shop.global.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * @author madey
@@ -58,21 +61,22 @@ public class ReviewService {
 
     //상품별 리뷰 목록 조회 - 상품 상세페이지
     @Transactional(readOnly = true)
-    public List<ReviewResponse> getReviewsByProductId(Long productId)
+    public PageResponse<ReviewResponse> getReviewsByProductId(Long productId, Pageable pageable)
     {
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+
         productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품별 리뷰 목록 조회 - 존재하지 않는 상품 입니다. product id : {}", productId);
             return new RuntimeException("상품 별 리뷰 목록 조회 - 존재하지 않는 상품입니다.");
         });
 
-        List<Review> reviewList = reviewRepository.findByOrderDetail_Product_IdOrderByCreatedAtDesc(productId);
+        Page<Review> reviewList = reviewRepository.findByOrderDetail_Product_Id(productId, sortedPageable);
 
-
-        return reviewList.stream().map(review -> {
+        return new PageResponse<>(reviewList.map(review -> {
             ReviewResponse reviewResponse = new ReviewResponse(review);
             reviewResponse.maskReview();
             return reviewResponse;
-        }).toList();
+        }));
     }
 
     //리뷰 수정
@@ -119,8 +123,10 @@ public class ReviewService {
 
     // 지연 로딩을 위해 세션 유지
     @Transactional(readOnly = true)
-    public List<ReviewResponse> getUserReview(String customerId)
+    public PageResponse<ReviewResponse> getUserReview(String customerId, Pageable pageable)
     {
-        return reviewRepository.findByCustomer_CustomerIdOrderByCreatedAtDesc(customerId).stream().map(ReviewResponse::new).toList();
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+
+        return new PageResponse<>(reviewRepository.findByCustomer_CustomerId(customerId, sortedPageable).map(ReviewResponse::new));
     }
 }

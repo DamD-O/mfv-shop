@@ -8,11 +8,14 @@ import com.example.shop.domain.order.repository.OrdersRepository;
 import com.example.shop.domain.point.dto.PointHistoryResponse;
 import com.example.shop.domain.point.dto.PointSummaryResponse;
 import com.example.shop.domain.point.repository.PointHistoryRepository;
+import com.example.shop.global.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author madey
@@ -29,19 +32,19 @@ public class PointHistoryService {
     private final OrdersRepository ordersRepository;
 
     //사용자 포인트 이력 및 사용가능한 포인트
-    public PointSummaryResponse getPointSummary(String customerId)
+    public PointSummaryResponse getPointSummary(String customerId, Pageable pageable)
     {
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
             log.warn("포인트 조회 실패 - 존재하지 않는 customerId : {}", customerId);
             return new RuntimeException("회원 정보를 찾을 수 없습니다.");
         });
 
-        List<PointHistoryResponse> history = pointHistoryRepository.findByCustomer_CustomerIdOrderByCreatedAtDesc(customerId)
-                                                                   .stream()
-                                                                   .map(PointHistoryResponse::new)
-                                                                   .toList();
+        Page<PointHistoryResponse> history = pointHistoryRepository.findByCustomer_CustomerId(customerId, sortedPageable)
+                                                                   .map(PointHistoryResponse::new);
 
-        return new PointSummaryResponse(getAvailPoint(customer), history);
+        return new PointSummaryResponse(getAvailPoint(customer), new PageResponse<>(history));
     }
 
     public int getAvailPoint(Customer customer)

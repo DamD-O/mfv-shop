@@ -20,8 +20,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 /**
  * @author madey
  * @DATE 2026-08-31
@@ -73,21 +71,23 @@ public class QnaService {
 
     //상품별 문의 목록 조회
     @Transactional(readOnly = true)
-    public List<QnaResponse> getQnaListByProduct(Long productId, String customerId, String role)
+    public PageResponse<QnaResponse> getQnaListByProduct(Long productId, String customerId, String role, Pageable pageable)
     {
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+
         productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품별 문의 목록 조회 - 존재하지 않는 상품 입니다. product id : {}", productId);
             return new RuntimeException("상품 별 문의 목록 조회 - 존재하지 않는 상품입니다.");
         });
 
-        List<Qna> qnaList = qnaRepository.findByProduct_IdOrderByCreatedAtDesc(productId);
+        Page<Qna> qnaList = qnaRepository.findByProduct_Id(productId, sortedPageable);
 
-        return qnaList.stream().map(qna -> {
+        return new PageResponse<>(qnaList.map(qna -> {
             QnaResponse qnaResponse = new QnaResponse(qna);
             boolean canView = isViewable(qna, customerId, role);
             qnaResponse.maskQna(canView);
             return qnaResponse;
-        }).toList();
+        }));
     }
 
     //목록 상세 조회
@@ -108,9 +108,11 @@ public class QnaService {
 
     //사용자 상품별 문의사항 목록
     @Transactional(readOnly = true)
-    public List<Qna> getQnaListByCustomer(String customerId)
+    public PageResponse<QnaResponse> getQnaListByCustomer(String customerId, Pageable pageable)
     {
-        return qnaRepository.findByCustomer_CustomerIdOrderByCreatedAtDesc(customerId);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+
+        return new PageResponse<>(qnaRepository.findByCustomer_CustomerId(customerId, sortedPageable).map(QnaResponse::new));
     }
 
     //문의 삭제 - 답변이 안된 경우만
@@ -135,7 +137,7 @@ public class QnaService {
     @Transactional(readOnly = true)
     public PageResponse<QnaResponse> getAllQna(QnaStatus status, Pageable pageable)
     {
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt", "id"));
         Page<Qna> qna;
 
         if (status != null) qna = qnaRepository.findByStatus(status, sortedPageable);

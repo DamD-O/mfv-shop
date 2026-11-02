@@ -34,7 +34,6 @@
 </head>
 <body>
 <div id="header"></div>
-<!-- Modal -->
 <div class="modal fade bg-white" id="templatemo_search" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="w-100 pt-1 mb-5 text-right">
@@ -100,6 +99,9 @@
         <div class="tab-content pt-4">
             <div class="tab-pane fade show active" id="review-pane" role="tabpanel">
                 <div id="review-list"></div>
+                <div class="text-center mt-3">
+                    <button type="button" id="review-more" class="btn btn-outline-success btn-sm d-none">리뷰 더보기</button>
+                </div>
                 <p id="review-empty" class="text-muted text-center py-5 d-none">등록된 리뷰가 없습니다.</p>
             </div>
             <div class="tab-pane fade" id="qna-pane" role="tabpanel">
@@ -125,6 +127,9 @@
                     </div>
                 </div>
                 <div class="accordion" id="qna-list"></div>
+                <div class="text-center mt-3">
+                    <button type="button" id="qna-more" class="btn btn-outline-success btn-sm d-none">문의 더보기</button>
+                </div>
                 <p id="qna-empty" class="text-muted text-center py-5 d-none">등록된 문의가 없습니다.</p>
             </div>
         </div>
@@ -136,12 +141,40 @@
 <script src="assets/js/templatemo.js"></script>
 <script src="js/common.js"></script>
 <script>
+    let reviewPage = 0;
+    let qnaPage = 0;
+
     const productId = new URLSearchParams(window.location.search).get('productId');
     document.addEventListener('DOMContentLoaded', () => {
         getProduct();
         loadReviews();
         checkQnaLogin();
         loadQna();
+
+        document.querySelector('#review-more').addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            if (!btn) return;
+            btn.disabled = true;
+
+            try {
+                await loadReviews(reviewPage + 1);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.querySelector('#qna-more').addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            if (!btn) return;
+
+            btn.disabled = true;
+
+            try {
+                await loadQna(qnaPage + 1);
+            } finally {
+                btn.disabled = false;
+            }
+        })
     });
 
     async function getProduct() {
@@ -187,19 +220,25 @@
         alert('장바구니에 추가되었습니다.')
     }
 
-    async function loadReviews() {
-        const response = await fetch(`/api/products/${productId}/reviews`);
+    async function loadReviews(page = 0) {
+        const response = await fetch(`/api/products/${productId}/reviews?page=${page}`);
 
         if (response.ok) {
+            reviewPage = page;
+
             const data = await response.json();
             const container = document.getElementById('review-list');
-            container.innerHTML = '';
 
-            if (data.length > 0) {
+            if (page === 0)
+                container.innerHTML = '';
+
+            document.getElementById('review-more').classList.toggle('d-none', !data.hasNext);
+
+            if (data.totalCount > 0) {
                 document.getElementById('review-empty').classList.add('d-none');
-                document.getElementById('review-count').textContent = data.length;
+                document.getElementById('review-count').textContent = data.totalCount;
 
-                data.forEach(i => {
+                data.content.forEach(i => {
                     const rating = i.rating;
                     const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
                     const images = !i.reviewImages?.length ? '' :
@@ -235,19 +274,24 @@
         }
     }
 
-    async function loadQna() {
-        const response = await fetch(`/api/products/${productId}/qna`);
+    async function loadQna(page = 0) {
+        const response = await fetch(`/api/products/${productId}/qna?page=${page}`);
 
         if (response.ok) {
+            qnaPage = page;
             const data = await response.json();
             const container = document.getElementById('qna-list');
-            container.innerHTML = '';
 
-            if (data.length > 0) {
+            if (page === 0)
+                container.innerHTML = '';
+
+            document.getElementById('qna-more').classList.toggle('d-none', !data.hasNext);
+
+            if (data.totalCount > 0) {
                 document.getElementById('qna-empty').classList.add('d-none');
-                document.getElementById('qna-count').textContent = data.length;
+                document.getElementById('qna-count').textContent = data.totalCount;
 
-                data.forEach(i => {
+                data.content.forEach(i => {
                     const locked = i.secret && !i.content;
                     const card = `
                         <div class="accordion-item">

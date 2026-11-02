@@ -81,7 +81,7 @@
                 <p class="text-muted small fw-bold mb-2">문의</p>
                 <ul class="list-unstyled">
                     <li class="mb-2">
-                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('qna')" data-section="qna">상품 Q&A 내역</a>
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item small" onclick="showSection('qna')" data-section="qna">나의 QnA 내역</a>
                     </li>
                 </ul>
             </div>
@@ -157,6 +157,9 @@
                         </thead>
                         <tbody id="point-history"></tbody>
                     </table>
+                    <nav id="point-pagination" class="d-none">
+                        <ul class="pagination pagination-sm justify-content-center mt-3 mb-0"></ul>
+                    </nav>
                 </div>
             </div>
             <!--review : 리뷰-->
@@ -164,6 +167,9 @@
                 <h6 class="border-bottom pb-3 mb-4">리뷰</h6>
                 <div id="review-list"></div>
                 <p id="review-empty" class="text-muted d-none">작성한 리뷰가 없습니다.</p>
+                <nav id="review-pagination" class="d-none">
+                    <ul class="pagination pagination-sm justify-content-center mt-3 mb-0"></ul>
+                </nav>
             </div>
             <!--info : 회원 정보-->
             <div id="info" class="mypage-section d-none">
@@ -250,6 +256,9 @@
                 <h6 class="border-bottom pb-3 mb-4">상품 Q&A 내역</h6>
                 <div id="qna-list" class="accordion"></div>
                 <p id="qna-empty" class="text-muted d-none">작성한 문의가 없습니다.</p>
+                <nav id="qna-pagination" class="d-none">
+                    <ul class="pagination pagination-sm justify-content-center mt-3 mb-0"></ul>
+                </nav>
             </div>
         </div>
     </div>
@@ -274,6 +283,10 @@
         if (hash) {
             showSection(hash);
         }
+
+        initPagination('#point-pagination', page => loadPoints('point', page));
+        initPagination('#review-pagination', loadReviews);
+        initPagination('#qna-pagination', loadQna);
 
         //탈퇴 체크박스
         document.getElementById('withdraw-agree').addEventListener('change', (e) => {
@@ -310,23 +323,28 @@
         if (type === 'qna') loadQna();
     }
 
-    async function loadPoints(type = '') {
-        const response = await fetchWithAuth('/api/customers/points');
+    async function loadPoints(type = '', page = 0) {
+        const response = await fetchWithAuth(`/api/customers/points?page=${page}`);
         if (!response) return;
 
-        const data = await response.json();
-        const body = document.getElementById('point-history');
-        body.innerHTML = '';
+        if (response.ok) {
+            const data = await response.json();
+            const body = document.getElementById('point-history');
 
-        if (data) {
-            document.getElementById('user-point').innerText = data.availPoint;
+            body.innerHTML = '';
 
-            if (type) {
-                document.getElementById('point').classList.remove('d-none');
-                document.getElementById('point-available').innerText = data.availPoint;
+            if (data) {
+                document.getElementById('user-point').innerText = data.availPoint;
 
-                data.historyList.forEach(i => {
-                    const pointList = `
+                document.getElementById('point-pagination').querySelector('ul').innerHTML = renderPagination(data.historyList);
+                document.getElementById('point-pagination').classList.toggle('d-none', data.historyList.totalPage < 2);
+
+                if (type) {
+                    document.getElementById('point').classList.remove('d-none');
+                    document.getElementById('point-available').innerText = data.availPoint;
+
+                    data.historyList.content.forEach(i => {
+                        const pointList = `
                     <tr>
                         <td class="text-center">${i.createdAt.split('T')[0]}</td>
                         <td class="text-center">#${i.orderId}</td>
@@ -334,8 +352,9 @@
                         <td class="text-center ${i.type === 'USE' ? 'text-danger' : 'text-success'}">${i.type === 'USE' ? '-' : '+'}${i.point.toLocaleString()}</td>
                     </tr>
                 `;
-                    body.innerHTML += pointList
-                });
+                        body.innerHTML += pointList
+                    });
+                }
             }
         }
     }
@@ -355,45 +374,9 @@
         }
     }
 
-    function renderOrderCount(data) {
-        const counts = {};
-        document.querySelectorAll('#order-summary [data-count]').forEach(el => {
-            counts[el.dataset.count] = 0;
-        });
-
-        //주문 상태 별 카운트 표시
-        data.forEach(i => {
-            counts[i.orderStatus] = i.orderStatusCount;
-        });
-
-        //카운트 표시
-        document.querySelectorAll('#order-summary [data-count]').forEach(el => {
-            el.textContent = counts[el.dataset.count];
-        });
-    }
-
-    function renderOrderPreview(data) {
-        const container = document.getElementById('order-preview');
-        container.innerHTML = '';
-
-        if (data.length > 0) {
-            data.forEach(i => {
-                const card = `
-            <tr>
-                <td class="text-center">${i.createdAt.split('T')[0]}</td>
-                <td class="text-center"><a class="text-success" href="order.html?orderId=${i.orderId}">#${i.orderId}</a></td>
-                <td class="text-center">${i.totalAmount.toLocaleString()}원</td>
-                <td class="text-center">${escapeHtml(i.orderStatusLabel)}</td>
-            </tr>`;
-                container.innerHTML += card;
-            });
-        } else {
-            container.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">주문내역이 없습니다.</td></tr>`;
-        }
-    }
-
-    async function loadReviews() {
-        const response = await fetchWithAuth('/api/customers/reviews/my');
+    async function loadReviews(page = 0) {
+        reviewPage = page;
+        const response = await fetchWithAuth(`/api/customers/reviews/my?page=${page}`);
         if (!response) return;
 
         if (response.ok) {
@@ -401,9 +384,12 @@
             const container = document.getElementById('review-list');
             container.innerHTML = '';
 
-            if (data.length > 0) {
+            document.getElementById('review-pagination').querySelector('ul').innerHTML = renderPagination(data);
+            document.getElementById('review-pagination').classList.toggle('d-none', data.totalPage < 2);
+
+            if (data.content.length > 0) {
                 document.getElementById('review-empty').classList.add('d-none');
-                const list = data.map(i => `
+                const list = data.content.map(i => `
                     <a href="review.html?type=update&reviewId=${i.reviewId}&orderDetailId=${i.orderDetailId}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         <div>
                             <div class="fw-bold">${escapeHtml(i.productName)}</div>
@@ -445,41 +431,6 @@
         }
     }
 
-    async function updateInfo() {
-        document.getElementById('info-error').classList.add('d-none');
-        document.getElementById('info-error').textContent = '';
-
-        if (!validateInfo()) return;
-
-        const body = {
-            email: document.getElementById('info-email').value.trim(),
-            phone: document.getElementById('info-phone').value.trim(),
-            oldPassword: document.getElementById('info-old-password').value,
-        };
-
-        const newPwd = document.getElementById('info-new-password').value;
-        if (newPwd) body.newPassword = newPwd;
-
-        const response = await fetchWithAuth('/api/customers/info', {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(body)
-        })
-
-        if (!response) return;
-
-        if (response.ok) {
-            alert('회원 정보 수정 성공');
-            document.getElementById('info-old-password').value = '';
-            document.getElementById('info-new-password').value = '';
-            document.getElementById('info-new-password-confirm').value = '';
-        } else {
-            const error = await response.json();
-            document.getElementById('info-error').classList.remove('d-none');
-            document.getElementById('info-error').textContent = error.message || '회원 정보 수정 실패';
-        }
-    }
-
     async function loadAddressList() {
         const response = await fetchWithAuth(`/api/customers/address`);
         if (!response) return;
@@ -513,27 +464,6 @@
         }
     }
 
-    async function deleteAddress(deliveryId, isDefault) {
-        if (isDefault) {
-            alert('기본배송지는 삭제 할 수 없습니다.');
-            return;
-        }
-
-        if (!confirm('배송지를 삭제하시겠습니까?')) return;
-
-        const response = await fetchWithAuth(`/api/customers/address/${deliveryId}`, {
-            method: 'DELETE',
-        });
-
-        if (!response) return;
-        if (response.ok) {
-            loadAddressList();
-        } else {
-            const error = await response.json();
-            alert(error.message || '배송지 삭제 실패');
-        }
-    }
-
     function loadWithDraw() {
         document.getElementById('withdraw-password').value = '';
         document.getElementById('withdraw-error').classList.add('d-none');
@@ -542,35 +472,8 @@
         document.getElementById('withdraw-btn').disabled = true;
     }
 
-    async function withdraw() {
-        if (document.getElementById('withdraw-password').value === '') {
-            alert('비밀번호를 입력해주세요.');
-            return;
-        }
-
-        if (!confirm('회원탈퇴를 하시겠습니까?')) return;
-
-        const response = await fetchWithAuth(`/api/customers/withdrawn`, {
-            method: 'DELETE',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({password: document.getElementById('withdraw-password').value})
-        });
-
-        if (!response) return;
-
-        if (!response.ok) {
-            const error = await response.json();
-            document.getElementById('withdraw-error').classList.remove('d-none');
-            document.getElementById('withdraw-error').textContent = error.message || '탈퇴를 실패하였습니다.';
-            return;
-        }
-
-        alert('탈퇴되었습니다.');
-        window.location.href = 'index.html';
-    }
-
-    async function loadQna() {
-        const response = await fetchWithAuth(`/api/customers/qna`);
+    async function loadQna(page = 0) {
+        const response = await fetchWithAuth(`/api/customers/qna?page=${page}`);
         if (!response) return;
 
         if (response.ok) {
@@ -578,9 +481,12 @@
             const container = document.getElementById('qna-list');
             container.innerHTML = '';
 
-            if (data.length > 0) {
+            document.getElementById('qna-pagination').querySelector('ul').innerHTML = renderPagination(data);
+            document.getElementById('qna-pagination').classList.toggle('d-none', data.totalPage < 2);
+
+            if (data.content.length > 0) {
                 document.getElementById('qna-empty').classList.add('d-none');
-                data.forEach(i => {
+                data.content.forEach(i => {
                     const card = `
                         <div class="accordion-item">
                             <h2 class="accordion-header">
@@ -618,6 +524,126 @@
             const error = await response.json();
             alert(error.message || '문의 조회 실패, 다시 시도해주세요.');
         }
+    }
+
+    function renderOrderCount(data) {
+        const counts = {};
+        document.querySelectorAll('#order-summary [data-count]').forEach(el => {
+            counts[el.dataset.count] = 0;
+        });
+
+        //주문 상태 별 카운트 표시
+        data.forEach(i => {
+            counts[i.orderStatus] = i.orderStatusCount;
+        });
+
+        //카운트 표시
+        document.querySelectorAll('#order-summary [data-count]').forEach(el => {
+            el.textContent = counts[el.dataset.count];
+        });
+    }
+
+    function renderOrderPreview(data) {
+        const container = document.getElementById('order-preview');
+        container.innerHTML = '';
+
+        if (data.length > 0) {
+            data.forEach(i => {
+                const card = `
+            <tr>
+                <td class="text-center">${i.createdAt.split('T')[0]}</td>
+                <td class="text-center"><a class="text-success" href="order.html?orderId=${i.orderId}">#${i.orderId}</a></td>
+                <td class="text-center">${i.totalAmount.toLocaleString()}원</td>
+                <td class="text-center">${escapeHtml(i.orderStatusLabel)}</td>
+            </tr>`;
+                container.innerHTML += card;
+            });
+        } else {
+            container.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">주문내역이 없습니다.</td></tr>`;
+        }
+    }
+
+    async function updateInfo() {
+        document.getElementById('info-error').classList.add('d-none');
+        document.getElementById('info-error').textContent = '';
+
+        if (!validateInfo()) return;
+
+        const body = {
+            email: document.getElementById('info-email').value.trim(),
+            phone: document.getElementById('info-phone').value.trim(),
+            oldPassword: document.getElementById('info-old-password').value,
+        };
+
+        const newPwd = document.getElementById('info-new-password').value;
+        if (newPwd) body.newPassword = newPwd;
+
+        const response = await fetchWithAuth('/api/customers/info', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        })
+
+        if (!response) return;
+
+        if (response.ok) {
+            alert('회원 정보 수정 성공');
+            document.getElementById('info-old-password').value = '';
+            document.getElementById('info-new-password').value = '';
+            document.getElementById('info-new-password-confirm').value = '';
+        } else {
+            const error = await response.json();
+            document.getElementById('info-error').classList.remove('d-none');
+            document.getElementById('info-error').textContent = error.message || '회원 정보 수정 실패';
+        }
+    }
+
+    async function deleteAddress(deliveryId, isDefault) {
+        if (isDefault) {
+            alert('기본배송지는 삭제 할 수 없습니다.');
+            return;
+        }
+
+        if (!confirm('배송지를 삭제하시겠습니까?')) return;
+
+        const response = await fetchWithAuth(`/api/customers/address/${deliveryId}`, {
+            method: 'DELETE',
+        });
+
+        if (!response) return;
+        if (response.ok) {
+            loadAddressList();
+        } else {
+            const error = await response.json();
+            alert(error.message || '배송지 삭제 실패');
+        }
+    }
+
+    async function withdraw() {
+        if (document.getElementById('withdraw-password').value === '') {
+            alert('비밀번호를 입력해주세요.');
+            return;
+        }
+
+        if (!confirm('회원탈퇴를 하시겠습니까?')) return;
+
+        const response = await fetchWithAuth(`/api/customers/withdrawn`, {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({password: document.getElementById('withdraw-password').value})
+        });
+
+        if (!response) return;
+
+        if (!response.ok) {
+            const error = await response.json();
+            document.getElementById('withdraw-error').classList.remove('d-none');
+            document.getElementById('withdraw-error').textContent = error.message || '탈퇴를 실패하였습니다.';
+            return;
+        }
+
+        alert('탈퇴되었습니다.');
+        window.location.href = 'index.html';
     }
 
     function validateInfo() {

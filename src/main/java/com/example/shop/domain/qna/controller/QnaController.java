@@ -17,8 +17,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * @author madey
  * @DATE 2026-08-31
@@ -42,16 +40,16 @@ public class QnaController {
 
     @Operation(summary = "고객별 문의 조회")
     @GetMapping("/customers/qna")
-    public List<QnaResponse> getQnaListByCustomer(Authentication authentication)
+    public PageResponse<QnaResponse> getQnaListByCustomer(Authentication authentication, @PageableDefault(size = 10) Pageable pageable)
     {
-        return qnaService.getQnaListByCustomer(authentication.getName()).stream().map(QnaResponse::new).toList();
+        return qnaService.getQnaListByCustomer(authentication.getName(), pageable);
     }
 
     @Operation(summary = "상품별 문의 조회")
     @GetMapping("/products/{productId}/qna")
-    public List<QnaResponse> getQnaByProduct(@PathVariable Long productId, Authentication authentication)
+    public PageResponse<QnaResponse> getQnaByProduct(@PathVariable Long productId, Authentication authentication, @PageableDefault(size = 3) Pageable pageable)
     {
-        return qnaService.getQnaListByProduct(productId, AuthUtil.getCustomerId(authentication), AuthUtil.getRole(authentication));
+        return qnaService.getQnaListByProduct(productId, AuthUtil.getCustomerId(authentication), AuthUtil.getRole(authentication), pageable);
     }
 
     @Operation(summary = "문의 상세조회")

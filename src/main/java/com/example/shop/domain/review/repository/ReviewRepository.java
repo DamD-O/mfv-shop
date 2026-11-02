@@ -1,9 +1,9 @@
 package com.example.shop.domain.review.repository;
 
 import com.example.shop.domain.review.entity.Review;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
 
 /**
  * @author madey
@@ -11,7 +11,10 @@ import java.util.List;
  * @description
  */
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    List<Review> findByOrderDetail_Product_IdOrderByCreatedAtDesc(Long productId);
 
-    List<Review> findByCustomer_CustomerIdOrderByCreatedAtDesc(String customerCustomerId);
+    Page<Review> findByOrderDetail_Product_Id(Long productId, Pageable pageable);
+    
+    Page<Review> findByCustomer_CustomerId(String customerCustomerId, Pageable pageable);
+
+
 }

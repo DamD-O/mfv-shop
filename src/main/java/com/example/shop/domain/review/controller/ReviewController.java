@@ -3,15 +3,16 @@ package com.example.shop.domain.review.controller;
 import com.example.shop.domain.review.dto.ReviewRequest;
 import com.example.shop.domain.review.dto.ReviewResponse;
 import com.example.shop.domain.review.service.ReviewService;
+import com.example.shop.global.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * @author madey
@@ -36,9 +37,9 @@ public class ReviewController {
 
     @Operation(summary = "상품별 리뷰 조회")
     @GetMapping("/products/{productId}/reviews")
-    public List<ReviewResponse> getReviews(@PathVariable Long productId)
+    public PageResponse<ReviewResponse> getReviews(@PathVariable Long productId, @PageableDefault(size = 3) Pageable pageable)
     {
-        return reviewService.getReviewsByProductId(productId);
+        return reviewService.getReviewsByProductId(productId, pageable);
     }
 
     @Operation(summary = "리뷰 수정")
@@ -64,8 +65,8 @@ public class ReviewController {
 
     @Operation(summary = "사용자 리뷰 목록 조회")
     @GetMapping("/customers/reviews/my")
-    public List<ReviewResponse> getUserReviews(Authentication authentication)
+    public PageResponse<ReviewResponse> getUserReviews(Authentication authentication, @PageableDefault(size = 10) Pageable pageable)
     {
-        return reviewService.getUserReview(authentication.getName());
+        return reviewService.getUserReview(authentication.getName(), pageable);
     }
 }

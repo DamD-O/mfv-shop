@@ -240,7 +240,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getAllOrders(OrderStatus status, Pageable pageable)
     {
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt", "id"));
 
         Page<Orders> orders;
 

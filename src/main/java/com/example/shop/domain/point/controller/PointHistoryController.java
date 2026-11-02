@@ -5,6 +5,8 @@ import com.example.shop.domain.point.service.PointHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,8 +27,8 @@ public class PointHistoryController {
 
     @Operation(summary = "포인트 이력 조회")
     @GetMapping("/points")
-    public PointSummaryResponse getPointHistoryList(Authentication authentication)
+    public PointSummaryResponse getPointHistoryList(Authentication authentication, @PageableDefault(size = 10) Pageable pageable)
     {
-        return service.getPointSummary(authentication.getName());
+        return service.getPointSummary(authentication.getName(), pageable);
     }
 }
