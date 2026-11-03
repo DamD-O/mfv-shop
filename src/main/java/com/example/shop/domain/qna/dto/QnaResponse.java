@@ -1,8 +1,10 @@
 package com.example.shop.domain.qna.dto;
 
+import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.entity.ProductImage;
 import com.example.shop.domain.qna.entity.Qna;
 import com.example.shop.domain.qna.entity.QnaStatus;
+import com.example.shop.domain.qna.entity.QnaType;
 import com.example.shop.global.util.MaskingUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,14 +31,20 @@ public class QnaResponse {
     private QnaStatus status;
     private String statusLabel;
     private boolean secret;
+    private QnaType type;
+    private String typeLabel;
     private LocalDateTime createdAt;
 
     public QnaResponse(Qna qna)
     {
+        Product product = qna.getProduct();
         this.qnaId = qna.getId();
-        this.productId = qna.getProduct().getId();
-        this.productName = qna.getProduct().getName();
-        this.productImage = qna.getProduct().getProductImages().stream().findFirst().map(ProductImage::getImagePath).orElse(null);
+        if (product != null)
+        {
+            this.productId = product.getId();
+            this.productName = product.getName();
+            this.productImage = product.getProductImages().stream().findFirst().map(ProductImage::getImagePath).orElse(null);
+        }
         this.customerId = qna.getCustomer().getCustomerId();
         this.title = qna.getTitle();
         this.content = qna.getContent();
@@ -45,6 +53,8 @@ public class QnaResponse {
         this.statusLabel = qna.getStatus().getLabel();
         this.secret = qna.isSecret();
         this.createdAt = qna.getCreatedAt();
+        this.type = qna.getType();
+        this.typeLabel = qna.getType().getLabel();
     }
 
     public void maskQna(boolean canView)

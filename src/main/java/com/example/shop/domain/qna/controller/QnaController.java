@@ -1,7 +1,8 @@
 package com.example.shop.domain.qna.controller;
 
+import com.example.shop.domain.qna.dto.PersonalQnaCreateRequest;
+import com.example.shop.domain.qna.dto.ProductQnaCreateRequest;
 import com.example.shop.domain.qna.dto.QnaAnswerRequest;
-import com.example.shop.domain.qna.dto.QnaCreateRequest;
 import com.example.shop.domain.qna.dto.QnaResponse;
 import com.example.shop.domain.qna.entity.QnaStatus;
 import com.example.shop.domain.qna.service.QnaService;
@@ -33,9 +34,9 @@ public class QnaController {
 
     @Operation(summary = "문의 등록")
     @PostMapping("/customers/qna")
-    public QnaResponse createQna(@Valid @RequestBody QnaCreateRequest request, Authentication authentication)
+    public QnaResponse createProductQna(@Valid @RequestBody ProductQnaCreateRequest request, Authentication authentication)
     {
-        return new QnaResponse(qnaService.createQna(authentication.getName(), request));
+        return new QnaResponse(qnaService.createProductQna(authentication.getName(), request));
     }
 
     @Operation(summary = "고객별 문의 조회")
@@ -80,4 +81,10 @@ public class QnaController {
         return qnaService.getAllQna(status, pageable);
     }
 
+    @Operation(summary = "1:1 문의 등록", description = "고객 1:1 문의 등록")
+    @PostMapping("/customers/qna/personal")
+    public QnaResponse createPersonalQna(Authentication authentication, @Valid @RequestBody PersonalQnaCreateRequest request)
+    {
+        return new QnaResponse(qnaService.createPersonalQna(authentication.getName(), request));
+    }
 }

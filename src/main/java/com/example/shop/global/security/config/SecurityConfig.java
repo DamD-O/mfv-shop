@@ -42,14 +42,10 @@ public class SecurityConfig {
     {
         return http.authorizeHttpRequests(
                            auth -> auth.requestMatchers("/api/customers/signup", "/api/login", "/api/logout", "/error", "/api/products/**", "/api/qna/**",
-                                                        "/api/ai/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/components/**")
-                                       .permitAll()
-                                       .requestMatchers("/api/admin/**")
-                                       .hasRole("ADMIN") // ROLE_ADMIN 권한 필요
-                                       .requestMatchers("/api/customers/**")
-                                       .hasAnyRole("ADMIN", "USER") // USER 또는 ADMIN 권한 필요
-                                       .anyRequest()
-                                       .authenticated())
+                                                        "/api/ai/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/components/**",
+                                                        "/api/notice/**").permitAll().requestMatchers("/api/admin/**").hasRole("ADMIN") // ROLE_ADMIN 권한 필요
+                                       .requestMatchers("/api/customers/**").hasAnyRole("ADMIN", "USER") // USER 또는 ADMIN 권한 필요
+                                       .anyRequest().authenticated())
                    .formLogin(formLogin -> formLogin.loginProcessingUrl("/api/login")
                                                     .successHandler(new LoginSuccessHandler())
                                                     .failureHandler(new LoginFailureHandler()))

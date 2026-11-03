@@ -26,7 +26,7 @@ public class Qna extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -51,6 +51,10 @@ public class Qna extends BaseTimeEntity {
     @Column(name = "secret", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean secret;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'PRODUCT'")
+    private QnaType type;
+
     public Qna(Product product, Customer customer, String title, String content, boolean secret)
     {
         this.product = product;
@@ -59,6 +63,7 @@ public class Qna extends BaseTimeEntity {
         this.content = content;
         this.status = QnaStatus.WAITING;
         this.secret = secret;
+        this.type = product == null ? QnaType.PERSONAL : QnaType.PRODUCT;
     }
 
     public void answer(String adminAnswer)

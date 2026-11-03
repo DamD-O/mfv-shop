@@ -1,4 +1,3 @@
-
 package com.example.shop.domain.qna.entity;
 
 /**
@@ -12,7 +11,7 @@ public enum QnaStatus {
 
     private final String label;
 
-    private QnaStatus(String label)
+    QnaStatus(String label)
     {
         this.label = label;
     }

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class QnaCreateRequest {
+public class ProductQnaCreateRequest {
 
     @NotNull(message = "상품을 선택해주세요.")
     private Long productId;
@@ -26,7 +26,7 @@ public class QnaCreateRequest {
 
     private boolean secret;
 
-    public QnaCreateRequest(Long productId, String title, String content, boolean secret)
+    public ProductQnaCreateRequest(Long productId, String title, String content, boolean secret)
     {
         this.productId = productId;
         this.title = title;

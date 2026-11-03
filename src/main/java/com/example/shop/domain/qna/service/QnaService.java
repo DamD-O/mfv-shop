@@ -4,8 +4,9 @@ import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.repository.ProductRepository;
+import com.example.shop.domain.qna.dto.PersonalQnaCreateRequest;
+import com.example.shop.domain.qna.dto.ProductQnaCreateRequest;
 import com.example.shop.domain.qna.dto.QnaAnswerRequest;
-import com.example.shop.domain.qna.dto.QnaCreateRequest;
 import com.example.shop.domain.qna.dto.QnaResponse;
 import com.example.shop.domain.qna.entity.Qna;
 import com.example.shop.domain.qna.entity.QnaStatus;
@@ -36,15 +37,15 @@ public class QnaService {
 
     //Qna 등록
     @Transactional
-    public Qna createQna(String customerId, QnaCreateRequest request)
+    public Qna createProductQna(String customerId, ProductQnaCreateRequest request)
     {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
-            log.warn("문의 등록 - 존재하지 않는 사용자 customerId : {}", customerId);
+            log.warn("상품 문의 등록 - 존재하지 않는 사용자 customerId : {}", customerId);
             return new RuntimeException("존재하지 않는 사용자 입니다.");
         });
 
         Product product = productRepository.findById(request.getProductId()).orElseThrow(() -> {
-            log.warn("문의 등록 - 존재하지 않는 상품 product id : {}", request.getProductId());
+            log.warn("상품 문의 등록 - 존재하지 않는 상품 product id : {}", request.getProductId());
             return new RuntimeException("존재하지 않는 상품입니다.");
         });
 
@@ -144,6 +145,21 @@ public class QnaService {
         else qna = qnaRepository.findAll(sortedPageable);
 
         return new PageResponse<>(qna.map(QnaResponse::new));
+    }
+
+    @Transactional
+    public Qna createPersonalQna(String customerId, PersonalQnaCreateRequest request)
+    {
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
+            log.warn("1:1 문의 등록 - 존재하지 않는 사용자 customerId : {}", customerId);
+            return new RuntimeException("존재하지 않는 사용자 입니다.");
+        });
+
+        Qna qna = new Qna(null, customer, request.getTitle(), request.getContent(), true);
+
+        qnaRepository.save(qna);
+
+        return qna;
     }
 
     private boolean isViewable(Qna qna, String customerId, String role)
