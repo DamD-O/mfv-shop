@@ -40,6 +40,34 @@
 
 ## 스크린샷
 
+### 관리자
+
+<!-- 데이터 채운 뒤 다시 캡처 예정
+**대시보드**
+
+![대시보드](docs/screenshots/admin_dashboard.png)
+
+**주문 관리**
+
+![주문 관리](docs/screenshots/admin_order.png)
+
+**Q&A 관리**
+
+![Q&A 관리](docs/screenshots/admin_qna.png)
+-->
+
+**상품 관리**
+
+![상품 관리](docs/screenshots/admin_product.png)
+
+**회원 관리**
+
+![회원 관리](docs/screenshots/admin_customer.png)
+
+**공지사항 관리**
+
+![공지사항 관리](docs/screenshots/admin_notice.png)
+
 ## 기술 스택
 
 | 구분     | 사용 기술                                                                  |
