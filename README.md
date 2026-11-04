@@ -6,29 +6,76 @@
 
 신선식품 카테고리 (정육·과일·채소)를 한 곳에서 주문하고, AI가 상품 기반 레시피를 추천해 주는 웹 애플리케이션입니다.
 
+## 데모 (배포 서버)
+
+> 포트폴리오용 데모 서버입니다. 실제 개인정보 (이름, 연락처, 주소, 비밀번호)는 입력하지 마세요. 결제는 실제로 이루어지지 않습니다.
+
+| 구분               | 주소                                            |
+|--------------------|-------------------------------------------------|
+| 사이트             | http://161.33.137.45:8080/index.html            |
+| API 문서 (Swagger) | http://161.33.137.45:8080/swagger-ui/index.html |
+
+**데모 계정** (고객): `testUser01` / `test202611@`
+
 ## 주요 기능
 
-- 회원가입 / 로그인 / 회원탈퇴 (Spring Security 세션 인증)
-- 상품 조회 및 관리
-- 주문 / 결제 / 포인트 적립·사용
-- 상품 Q&A
-- 구매 후기 작성 (사진 첨부, 수정, 삭제)
-- 마이페이지 (주문, 포인트, 리뷰 내역)
-- AI 레시피 추천 (Google Gemini)
+**고객**
+
+- 회원가입 / 로그인 / 회원정보 수정 / 회원탈퇴 (Spring Security 세션 인증)
+- 상품 목록 (카테고리 / 검색 / 정렬 / 페이징), 상품 상세
+- 장바구니, 주문 / 결제 (모의 결제), 주문 취소, 포인트 사용·적립·환불
+- 배송지 관리 (카카오 우편번호 API)
+- 구매 후기 (별점, 사진 첨부, 수정, 삭제)
+- 상품 Q&A (비밀글), 고객센터 (공지사항, 1:1 문의)
+- 마이페이지 (주문 / 포인트 / 리뷰 / Q&A 내역)
+- AI 레시피 추천: 모든 페이지 오른쪽 아래 버튼, 판매 중인 상품을 기준으로 레시피와 구매 가능한 상품 추천 (Google Gemini)
+
+**관리자**
+
+- 대시보드: 주문 추이 (일별 / 월별), 상품 판매 순위, 회원 수 (Chart.js)
+- 상품 관리 (등록 / 수정 / 판매 중단, 이미지 여러 장)
+- 주문 관리 (상태 변경, 판매사 취소)
+- 회원 관리 (목록 / 상세 / 이름 변경)
+- Q&A 답변, 공지사항 등록 / 수정
 
 ## 스크린샷
 
 ## 기술 스택
 
-| 구분     | 사용 기술                                                            |
-|----------|----------------------------------------------------------------------|
-| Frontend | HTML, CSS, JavaScript, Bootstrap 5.3.3 (ZayShop 템플릿 기반)         |
-| Backend  | Java 17, Spring Boot 4.1.0, Spring Security, Spring Data JPA, Gradle |
-| Database | MySQL 9.7 (Docker)                                                   |
-| AI       | Spring AI 2.0.0, Google Gemini                                       |
-| 배포     | <!-- 배포 완료 후 작성 -->                                           |
+| 구분     | 사용 기술                                                                  |
+|----------|----------------------------------------------------------------------------|
+| Frontend | HTML, CSS, JavaScript, Bootstrap 5.3.3 (ZayShop 템플릿 기반), Chart.js     |
+| Backend  | Java 17, Spring Boot 4.1.0, Spring Security, Spring Data JPA, Gradle       |
+| Database | MySQL 9.7 (Docker)                                                         |
+| AI       | Spring AI 2.0.0, Google Gemini                                             |
+| API 문서 | springdoc-openapi (Swagger UI)                                             |
+| 배포     | Oracle Cloud (Ubuntu 22.04), Docker (MySQL), systemd                       |
 
-## 시작하기
+## 배포 구성
+
+```
+브라우저 ──▶ Oracle Cloud VM (Ubuntu 22.04, 1GB RAM)
+              ├── Spring Boot (jar, systemd 서비스로 상시 실행, 포트 8080)
+              └── MySQL 9.7 (Docker 컨테이너, 외부 접속 차단)
+```
+
+- DB 계정 / API 키는 서버 환경변수 파일로 관리 (저장소에 포함하지 않음)
+- 업로드 이미지는 서버 로컬 폴더에 저장
+
+## 주요 구현 / 설계
+
+| 주제               | 내용                                                                                                   |
+|--------------------|--------------------------------------------------------------------------------------------------------|
+| 주문 상태 전이     | 허용된 상태 변경만 가능 (예: 결제 완료 → 배송 준비 중). 취소 시 재고 / 포인트 복구                    |
+| 포인트             | 결제 시 사용, 배송 완료 시 적립 (주문당 1회), 결제 완료 / 배송 준비 중 취소 시 환불                   |
+| 회원 탈퇴          | soft delete + 개인정보 (이름 / 이메일 / 연락처) 마스킹, 진행 중 주문이 있으면 탈퇴 불가               |
+| 개인정보 보호      | 비밀글은 작성자 / 관리자만 원문, 작성자 아이디 마스킹                                                  |
+| XSS 방지           | 화면에 출력하는 사용자 입력은 `escapeHtml` 처리                                                        |
+| 페이징             | 공통 응답 형식 (`PageResponse`), 정렬은 서버에서 고정 (+ id 2차 정렬로 페이지 간 중복 / 누락 방지)     |
+| 통계               | DB에서 집계 (native query + `GROUP BY`), 주문 없는 날짜는 0으로 채움                                   |
+| AI 추천            | 판매 중인 상품 목록을 프롬프트에 넣어 추천, 질문 길이 검증, AI 호출 실패 시 안내 문구                 |
+
+## 로컬 실행
 
 ### 사전 요구사항
 
@@ -38,7 +85,7 @@
 ### 설치
 
 ```bash
-git clone  https://github.com/DamD-O/mfv-shop.git
+git clone https://github.com/DamD-O/mfv-shop.git
 cd mfv-shop
 ```
 
@@ -54,7 +101,7 @@ Docker로 MySQL 9.7 컨테이너를 실행하고 `shop` 데이터베이스를 �
 | `DB_PASSWORD`    | DB 비밀번호          |
 | `GEMINI_API_KEY` | Google Gemini API 키 |
 
-`application.yml`은 저장소에 포함되어 있지 않으므로 직접 생성해 위 변수를 참조하도록 설정합니다.
+`src/main/resources/application.yaml`은 저장소에 포함되어 있지 않으므로 직접 생성해 위 변수를 참조하도록 설정합니다.
 
 ### 실행
 
@@ -62,7 +109,7 @@ Docker로 MySQL 9.7 컨테이너를 실행하고 `shop` 데이터베이스를 �
 ./gradlew bootRun
 ```
 
-http://localhost:8080 으로 접속합니다. <!-- 포트를 바꿨다면 수정 -->
+http://localhost:8080 으로 접속합니다.
 API 문서 (Swagger UI)는 http://localhost:8080/swagger-ui/index.html 에서 확인할 수 있습니다.
 
 ## 폴더 구조
