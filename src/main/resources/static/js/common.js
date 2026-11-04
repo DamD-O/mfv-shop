@@ -13,6 +13,8 @@ async function loadFooter() {
 document.addEventListener('DOMContentLoaded', async () => {
     await loadHeader();
     await loadFooter();
+    initAiWidget();
+
     checkLoginStatus();
     updateCartCount();
 });
@@ -175,4 +177,56 @@ function renderPagination(data) {
         `;
 
     return html;
+}
+
+async function initAiWidget() {
+    document.getElementById('ai-question').addEventListener('input', e => {
+        document.getElementById('ai-count').textContent = e.target.value.length;
+    });
+
+    document.querySelector('#ai-submit').addEventListener('click', async (e) => {
+        const btn = e.currentTarget;
+
+        const question = document.getElementById('ai-question').value.trim();
+
+        if (!question) {
+            document.getElementById('ai-error').textContent = '질문을 입력해주세요.';
+            document.getElementById('ai-error').classList.remove('d-none');
+            return;
+        }
+
+        btn.disabled = true;
+        document.getElementById('ai-loading').classList.remove('d-none');
+        document.getElementById('ai-error').classList.add('d-none');
+        document.getElementById('ai-result').classList.add('d-none');
+
+        try {
+            const response = await fetch(`/api/ai/recipe/recommend`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({question})
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                document.getElementById('ai-answer').textContent = data.answer;
+                document.getElementById('ai-result').classList.remove('d-none');
+
+            } else {
+                const error = await response.json().catch(() => ({}));
+                document.getElementById('ai-error').textContent = error.message || 'ai 답변 중 에러가 발생하였습니다. 다시 시도해주세요.';
+                document.getElementById('ai-error').classList.remove('d-none');
+            }
+        } catch (error) {
+            document.getElementById('ai-error').textContent = 'ai 답변 중 에러가 발생하였습니다. 다시 시도해주세요.';
+            document.getElementById('ai-error').classList.remove('d-none');
+            console.error(error);
+        } finally {
+            document.getElementById('ai-loading').classList.add('d-none');
+
+            btn.disabled = false;
+        }
+    });
 }

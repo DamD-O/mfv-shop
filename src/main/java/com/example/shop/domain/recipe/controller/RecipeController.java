@@ -5,6 +5,7 @@ import com.example.shop.domain.recipe.dto.RecipeResponse;
 import com.example.shop.domain.recipe.service.RecipeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +28,7 @@ public class RecipeController {
 
     @Operation(summary = "AI 레시피 추천")
     @PostMapping("/recipe/recommend")
-    public ResponseEntity<RecipeResponse> questionToAi(@RequestBody RecipeRequest request)
+    public ResponseEntity<RecipeResponse> questionToAi(@Valid @RequestBody RecipeRequest request)
     {
         return ResponseEntity.ok(recipeService.questionToAi(request));
     }

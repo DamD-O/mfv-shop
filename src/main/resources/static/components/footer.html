@@ -5,12 +5,10 @@
                 <h2 class="h3 text-success border-bottom pb-3 border-light logo">MFV Shop</h2>
                 <ul class="list-unstyled text-light footer-link-list">
                     <li>
-                        <i class="fa fa-phone fa-fw"></i>
-                        <span class="text-decoration-none">010-0000-0000</span>
+                        <i class="fa fa-phone fa-fw"></i> <span class="text-decoration-none">010-0000-0000</span>
                     </li>
                     <li>
-                        <i class="fa fa-envelope fa-fw"></i>
-                        <span class="text-decoration-none">info@mfv.com</span>
+                        <i class="fa fa-envelope fa-fw"></i> <span class="text-decoration-none">info@mfv.com</span>
                     </li>
                 </ul>
             </div>
@@ -38,11 +36,53 @@
             <div class="row pt-2">
                 <div class="col-12">
                     <p class="text-left text-light">
-                        Copyright &copy; 2026 MFV Shop
-                        | Designed by <a rel="sponsored" href="https://templatemo.com" target="_blank">TemplateMo</a>
+                        Copyright &copy; 2026 MFV Shop | Designed by
+                        <a rel="sponsored" href="https://templatemo.com" target="_blank">TemplateMo</a>
                     </p>
                 </div>
             </div>
         </div>
     </div>
 </footer>
+<!--AI modal-->
+<button type="button" id="ai-float-btn" class="btn btn-outline-success rounded-circle shadow d-flex flex-column align-items-center justify-content-center p-0"
+        style="position: fixed; right: 24px; bottom: 24px; width: 64px; height: 64px; z-index: 1040;"
+        data-bs-toggle="modal" data-bs-target="#ai-modal" title="AI 레시피 추천">
+    <i class="fa fa-comment-dots fa-lg"></i>
+    <span class="fw-bold" style="font-size: 12px; line-height: 1; margin-top: 4px;">AI 추천</span>
+</button>
+
+<div class="modal fade" id="ai-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title"><i class="fa fa-utensils text-success me-2"></i>AI 레시피 추천</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">먹고 싶은 요리나 가진 재료를 입력하면, 우리 가게 상품으로 만들 수 있는 레시피를 추천해 드립니다.</p>
+                <textarea class="form-control" id="ai-question" rows="3" maxlength="200" placeholder="예: 삼겹살로 만들 수 있는 요리 알려줘 또는 제육볶음 레시피 알려줘"></textarea>
+                <div class="text-end small text-muted mt-1"><span id="ai-count">0</span> / 200</div>
+                <p class="text-danger small mb-0 d-none" id="ai-error"></p>
+
+                <div id="ai-loading" class="text-center text-muted py-5 d-none">
+                    <div class="spinner-border text-success mb-3" role="status"></div>
+                    <p class="mb-0 small">AI가 레시피를 만들고 있어요. 잠시만 기다려 주세요.</p>
+                </div>
+
+                <div id="ai-result" class="d-none">
+                    <hr>
+                    <p class="fw-bold mb-2">추천 결과</p>
+                    <div id="ai-answer" class="text-break small" style="white-space: pre-wrap;"></div>
+                    <p class="text-muted small mt-3 mb-0">
+                        <i class="fa fa-info-circle me-1"></i> AI 답변은 부정확할 수 있습니다. 재료 상태나 알레르기 정보는 직접 확인해 주세요.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="shop.html" class="btn btn-outline-success btn-sm me-auto">상품 보러 가기</a>
+                <button type="button" class="btn btn-success btn-sm" id="ai-submit">추천 받기</button>
+            </div>
+        </div>
+    </div>
+</div>
