@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="assets/css/templatemo.css">
     <link rel="icon" href="assets/img/favicon.ico">
 
-    <!-- Load fonts style after rendering the layout styles -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
     <link rel="stylesheet" href="assets/css/fontawesome.min.css">
 
@@ -18,7 +17,6 @@
 <body>
 <div id="header"></div>
 
-<!--START CONTENT-->
 <section class="py-5 bg-light">
     <div class="col-12 col-md-10 mx-auto">
         <h2>결제하기</h2>
@@ -150,17 +148,15 @@
                 <div id="address-list"></div>
                 <hr>
                 <div id="address-form">
-                    <a class="btn btn-outline-success w-100" href="address-form.html?type=add">배송지 등록</a>
+                    <a class="btn btn-outline-success w-100" href="address-form.html?type=add&from=payment">배송지 등록</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!--END CONTENT-->
 <div id="footer"></div>
 
-<!-- Start Script -->
 <script src="assets/js/jquery-1.11.0.min.js"></script>
 <script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
 <script src="assets/js/templatemo.js"></script>
@@ -170,6 +166,7 @@
     let productTotal = 0;
     let selectedAddress = null; //모달에서 선택한 배송지
     let currentDeliveryId = null; //화면에 선택된 배송지
+    const params = new URLSearchParams(location.search);
 
     document.addEventListener("DOMContentLoaded", async () => {
         const orderItems = JSON.parse(sessionStorage.getItem("selectedItems")) || [];
@@ -184,7 +181,7 @@
         loadOrderItems();
         await loadPoint();
         calcTotal();
-    })
+    });
 
     document.getElementById('addressModal').addEventListener('show.bs.modal', () => {
         loadAddressList();
@@ -259,7 +256,7 @@
 
             container.innerHTML = `
               <p class="text-muted">등록된 배송지가 없습니다. 배송지를 등록하세요.</p>
-              <a href="address-form.html?type=add" class="btn btn-outline-info btn-sm">배송지 등록</a>
+              <a href="address-form.html?type=add&from=payment" class="btn btn-outline-info btn-sm">배송지 등록</a>
             `;
         } else {
             let address;
@@ -267,7 +264,8 @@
             if (selectedAddress)
                 address = selectedAddress;
             else {
-                address = data.find(item => item.default) || data[0];
+
+                address = data.find(item => item.deliveryId == params.get('deliveryId')) || data.find(item => item.default) || data[0];
             }
 
             currentDeliveryId = address.deliveryId;
@@ -304,7 +302,7 @@
                             <p>${address.contact}</p>
                         </div>
                         <div class="d-flex flex-column align-item-end gap-1 text-nowrap">
-                            <a class="text-muted small" href="address-form.html?type=update&deliveryId=${address.deliveryId}">수정</a>
+                            <a class="text-muted small" href="address-form.html?type=update&from=payment&deliveryId=${address.deliveryId}">수정</a>
                             <a class="text-danger small" onclick="deleteAddress(${address.deliveryId}, ${address.default})">삭제</a>
                         </div>
                     </div>
@@ -313,7 +311,7 @@
                 container.innerHTML += card;
             });
 
-            const targetId = selectedAddress ? selectedAddress.deliveryId : (data.find(a => a.default)?.deliveryId ?? data[0].deliveryId);
+            const targetId = selectedAddress?.deliveryId ?? data.find(item => item.deliveryId == params.get('deliveryId'))?.deliveryId ?? (data.find(a => a.default)?.deliveryId ?? data[0].deliveryId);
             const checkId = document.querySelector(`input[name="addressSelect"][value="${targetId}"]`);
             if (checkId) {
                 checkId.checked = true;
@@ -330,7 +328,7 @@
         } else {
             container.innerHTML = `
               <p class="text-muted">등록된 배송지가 없습니다. 배송지를 등록하세요.</p>
-              <a href="address-form.html?type=add" class="btn btn-outline-info btn-sm">배송지 등록</a>
+              <a href="address-form.html?type=add&from=payment" class="btn btn-outline-info btn-sm">배송지 등록</a>
             `;
         }
     }
@@ -490,6 +488,5 @@
     }
 
 </script>
-<!-- End Script -->
 </body>
 </html>

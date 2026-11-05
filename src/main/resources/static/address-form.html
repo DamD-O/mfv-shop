@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="assets/css/templatemo.css">
     <link rel="icon" href="assets/img/favicon.ico">
 
-    <!-- Load fonts style after rendering the layout styles -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
     <link rel="stylesheet" href="assets/css/fontawesome.min.css">
 
@@ -83,7 +82,6 @@
 
 <div id="footer"></div>
 
-<!-- Start Script -->
 <script src="assets/js/jquery-1.11.0.min.js"></script>
 <script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
 <script src="assets/js/templatemo.js"></script>
@@ -93,8 +91,8 @@
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
         const params = new URLSearchParams(location.search);
-        const type = params.get("type"); // add  or update
-        const deliveryId = params.get("deliveryId");
+        const type = params.get('type'); // add  or update
+        const deliveryId = params.get('deliveryId');
 
         let data = null;
         if (type === 'update') {
@@ -117,7 +115,7 @@
             } else {
                 const error = await response.json();
                 alert(error.message || '정보 불러오기 실패');
-                goBack();
+                goBack(data.deliveryId);
             }
 
         }
@@ -146,12 +144,14 @@
 
     })
 
-    function goBack() {
+    function goBack(deliveryId = '') {
         const params = new URLSearchParams(location.search);
         const from = params.get("from");
 
         if (from === 'mypage') {
             location.href = 'mypage.html#address';
+        } else if (from === 'payment') {
+            location.href = `payment.html?deliveryId=${deliveryId}`;
         } else {
             history.back()
         }
@@ -213,7 +213,7 @@
                 });
             }
 
-            goBack();
+            goBack(data.deliveryId);
         } else {
             const error = await response.json();
             alert(error.message || '배송지 등록 실패');

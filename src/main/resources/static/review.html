@@ -94,9 +94,9 @@
 
                 document.getElementById('product-info').innerHTML = `
                 <div class="d-flex align-items-center gap-3">
-                    ${data.productImageUrl ? `<img src="${data.productImageUrl}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;">`
+                    ${data.productImageUrl ? `<img src="${escapeHtml(data.productImageUrl)}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;">`
                     : `<div style="width:56px; height:56px; background:#f0f0f0; border-radius:8px;"></div>`}
-                    <p class="fw-bold mb-0">${data.productName}</p>
+                    <p class="fw-bold mb-0">${escapeHtml(data.productName)}</p>
                 </div>
                 `;
 
@@ -153,9 +153,9 @@
 
         document.getElementById('product-info').innerHTML = `
         <div class="d-flex align-items-center gap-3">
-            ${reviewProduct.imageUrl ? `<img src="${reviewProduct.imageUrl}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;">`
+            ${reviewProduct.imageUrl ? `<img src="${escapeHtml(reviewProduct.imageUrl)}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;">`
             : `<div style="width:56px; height:56px; background:#f0f0f0; border-radius:8px;"></div>`}
-            <p class="fw-bold mb-0">${reviewProduct.productName}</p>
+            <p class="fw-bold mb-0">${escapeHtml(reviewProduct.productName)}</p>
         </div>
         `;
     }
@@ -188,15 +188,23 @@
             const data = await response.json();
 
             for (const [imageId] of deleteImages) {
-                await fetchWithAuth(`/api/customers/reviews/images/${imageId}`, {
+                const delResponse = await fetchWithAuth(`/api/customers/reviews/images/${imageId}`, {
                     method: 'DELETE'
                 });
+                if (!delResponse) return;
+
+                if (!delResponse.ok) {
+                    alert('이미지 삭제 실패, 일부 사진이 삭제되지 않았습니다. 확인 후 다시 삭제해주세요.');
+                    location.href = `review.html?type=update&reviewId=${data.reviewId}&orderDetailId=${orderDetailId}`;
+                    return;
+                }
             }
 
             for (const [_, file] of newImages) {
-                const success = await uploadReviewImage(data.reviewId, file);
-                if (!success) {
-                    alert('이미지 업로드 실패');
+                const uploadResponse = await uploadReviewImage(data.reviewId, file);
+                if (!uploadResponse) {
+                    alert('이미지 업로드 실패, 일부 사진이 업로드 되지 않았습니다. 확인 후 다시 시도해주세요.');
+                    location.href = `review.html?type=update&reviewId=${data.reviewId}&orderDetailId=${orderDetailId}`;
                     return;
                 }
             }
@@ -216,6 +224,7 @@
             method: 'POST',
             body: formData
         });
+        if (!response) return;
 
         return response.ok
     }
@@ -244,7 +253,7 @@
         const div = document.createElement('div');
         div.style.cssText = 'position:relative; width:80px; height:80px;';
         div.innerHTML = `
-            <img src="${url}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+            <img src="${escapeHtml(url)}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
             <button type="button" onclick="removeImage(this, ${imageId})"
                 style="position:absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius:50%; border:none; background:#dc3545; color:white; font-size:12px; cursor:pointer;">×</button>
         `;
