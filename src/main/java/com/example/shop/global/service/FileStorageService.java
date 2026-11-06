@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @Component
 public class FileStorageService {
+    private static final Set<String> EXT_LIST = Set.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -32,10 +34,16 @@ public class FileStorageService {
         Files.createDirectories(uploadPath);
 
         String originalFilename = file.getOriginalFilename();
-        String ext = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String saveName = UUID.randomUUID() + ext; //중복 방지
 
-        Path filePath= Paths.get(uploadDir, subFolderName, saveName);
+        if (originalFilename == null || !originalFilename.contains(".")) throw new RuntimeException("파일이름이 없거나 확장자가 없습니다.");
+
+        String ext = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+
+        if (!EXT_LIST.contains(ext.toLowerCase())) throw new RuntimeException("jpg, jpeg, png, gif, bmp, webp 파일만 업로드 할 수 있습니다.");
+
+        String saveName = UUID.randomUUID() + "." + ext.toLowerCase(); //중복 방지
+
+        Path filePath = Paths.get(uploadDir, subFolderName, saveName);
         file.transferTo(filePath); //실제 파일 저장
 
         return "/images/" + subFolderName + "/" + saveName;
@@ -44,7 +52,7 @@ public class FileStorageService {
     public void delete(String filePath) throws IOException
     {
         //이미지 삭제
-        Path fullPath = Paths.get(uploadDir, filePath.replace("/images/",""));
+        Path fullPath = Paths.get(uploadDir, filePath.replace("/images/", ""));
         Files.deleteIfExists(fullPath);
     }
 }

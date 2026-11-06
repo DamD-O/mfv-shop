@@ -230,3 +230,13 @@ async function initAiWidget() {
         }
     });
 }
+
+const ALLOWED_IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']);
+
+function isAllowedImage(file) {
+
+    const filename = file.name;
+    const fileExt = filename.substring(filename.lastIndexOf('.') + 1);
+
+    return ALLOWED_IMAGE_EXT.has(fileExt.toLowerCase());
+}

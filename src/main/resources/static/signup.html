@@ -9,14 +9,12 @@
     <link rel="stylesheet" href="assets/css/templatemo.css">
     <link rel="icon" href="assets/img/favicon.ico">
 
-    <!-- Load fonts style after rendering the layout styles -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
     <link rel="stylesheet" href="assets/css/fontawesome.min.css">
 </head>
 <body>
 <div id="header"></div>
 
-<!-- Start Signup Section -->
 <section class="container my-5">
     <div class="container border border-dark rounded p-4">
         <h2 class="text-center text-success mb-4">회원가입</h2>
@@ -90,10 +88,8 @@
         </div>
     </div>
 </section>
-<!-- End Signup Section -->
 <div id="footer"></div>
 
-<!-- Start Script -->
 <script src="assets/js/jquery-1.11.0.min.js"></script>
 <script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
 <script src="assets/js/templatemo.js"></script>
@@ -211,7 +207,7 @@
                 alert('회원가입 완료');
                 window.location.href = 'index.html';
             } else {
-                const error = await response.json();
+                const error = await response.json().catch(() => ({}));
                 errorDiv.textContent = error.message || '회원가입 실패';
                 errorDiv.classList.remove('d-none');
             }

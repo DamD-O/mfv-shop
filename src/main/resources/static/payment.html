@@ -245,37 +245,42 @@
         const response = await fetchWithAuth(`/api/customers/address`);
         if (!response) return;
 
-        const data = await response.json();
+        if (response.ok) {
+            const data = await response.json();
 
-        const container = document.getElementById('address-info');
-        container.innerHTML = '';
+            const container = document.getElementById('address-info');
+            container.innerHTML = '';
 
-        if (data.length === 0) {
-            currentDeliveryId = null;
-            selectedAddress = null;
+            if (data.length === 0) {
+                currentDeliveryId = null;
+                selectedAddress = null;
 
-            container.innerHTML = `
+                container.innerHTML = `
               <p class="text-muted">등록된 배송지가 없습니다. 배송지를 등록하세요.</p>
               <a href="address-form.html?type=add&from=payment" class="btn btn-outline-info btn-sm">배송지 등록</a>
             `;
-        } else {
-            let address;
+            } else {
+                let address;
 
-            if (selectedAddress)
-                address = selectedAddress;
-            else {
+                if (selectedAddress)
+                    address = selectedAddress;
+                else {
 
-                address = data.find(item => item.deliveryId == params.get('deliveryId')) || data.find(item => item.default) || data[0];
-            }
+                    address = data.find(item => item.deliveryId == params.get('deliveryId')) || data.find(item => item.default) || data[0];
+                }
 
-            currentDeliveryId = address.deliveryId;
+                currentDeliveryId = address.deliveryId;
 
-            container.innerHTML = `
-                <p class="fw-normal mb-2 fs-6">${address.addressName} (${address.receiver})  ${address.default ? '<span class="badge rounded-pill bg-success ms-1" style="font-size: 12px;">기본배송지</span>' : ''}</p>
-                <p class="fw-light mb-2 fs-6">(${address.zipcode}) ${address.roadAddress}</p>
-                <p class="fw-light mb-2 fs-6">${address.detailAddress}</p>
-                <p style="font-size: 11px">${address.contact}</p>
+                container.innerHTML = `
+                <p class="fw-normal mb-2 fs-6">${escapeHtml(address.addressName)} (${escapeHtml(address.receiver)})  ${address.default ? '<span class="badge rounded-pill bg-success ms-1" style="font-size: 12px;">기본배송지</span>' : ''}</p>
+                <p class="fw-light mb-2 fs-6">(${escapeHtml(address.zipcode)}) ${escapeHtml(address.roadAddress)}</p>
+                <p class="fw-light mb-2 fs-6">${escapeHtml(address.detailAddress)}</p>
+                <p style="font-size: 11px">${escapeHtml(address.contact)}</p>
             `;
+            }
+        } else {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || '배송지 조회 실패');
         }
     }
 
@@ -283,23 +288,24 @@
         const response = await fetchWithAuth(`/api/customers/address`);
         if (!response) return;
 
-        const data = await response.json();
+        if (response.ok) {
+            const data = await response.json();
 
-        const container = document.getElementById('address-list');
-        container.innerHTML = '';
+            const container = document.getElementById('address-list');
+            container.innerHTML = '';
 
-        if (data.length > 0) {
-            data.forEach(address => {
-                const card = `
+            if (data.length > 0) {
+                data.forEach(address => {
+                    const card = `
                     <div class="d-flex align-items-start py-3 border-top">
                         <input type="radio" name="addressSelect" class="me-3 mt-1" value="${address.deliveryId}" ${address.default ? 'checked' : ''}>
                         <div class="flex-grow-1">
-                            <p class="fw-bold mb-1">${address.addressName} (${address.receiver})
+                            <p class="fw-bold mb-1">${escapeHtml(address.addressName)} (${escapeHtml(address.receiver)})
                             ${address.default ? '<span class="badge bg-secondary">기본배송지</span>' : ''}
                             </p>
-                            <p class="mb-1">(${address.zipcode}) ${address.roadAddress}</p>
-                            <p class="mb-1">${address.detailAddress}</p>
-                            <p>${address.contact}</p>
+                            <p class="mb-1">(${escapeHtml(address.zipcode)}) ${escapeHtml(address.roadAddress)}</p>
+                            <p class="mb-1">${escapeHtml(address.detailAddress)}</p>
+                            <p>${escapeHtml(address.contact)}</p>
                         </div>
                         <div class="d-flex flex-column align-item-end gap-1 text-nowrap">
                             <a class="text-muted small" href="address-form.html?type=update&from=payment&deliveryId=${address.deliveryId}">수정</a>
@@ -308,28 +314,32 @@
                     </div>
                 `;
 
-                container.innerHTML += card;
-            });
-
-            const targetId = selectedAddress?.deliveryId ?? data.find(item => item.deliveryId == params.get('deliveryId'))?.deliveryId ?? (data.find(a => a.default)?.deliveryId ?? data[0].deliveryId);
-            const checkId = document.querySelector(`input[name="addressSelect"][value="${targetId}"]`);
-            if (checkId) {
-                checkId.checked = true;
-            }
-
-            document.querySelectorAll('input[name="addressSelect"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    selectedAddress = data.find(a => a.deliveryId == e.target.value);
-                    loadDeliveryAddress();
-
-                    document.querySelector('#addressModal .btn-close').click();
+                    container.innerHTML += card;
                 });
-            });
-        } else {
-            container.innerHTML = `
+
+                const targetId = selectedAddress?.deliveryId ?? data.find(item => item.deliveryId == params.get('deliveryId'))?.deliveryId ?? (data.find(a => a.default)?.deliveryId ?? data[0].deliveryId);
+                const checkId = document.querySelector(`input[name="addressSelect"][value="${targetId}"]`);
+                if (checkId) {
+                    checkId.checked = true;
+                }
+
+                document.querySelectorAll('input[name="addressSelect"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        selectedAddress = data.find(a => a.deliveryId == e.target.value);
+                        loadDeliveryAddress();
+
+                        document.querySelector('#addressModal .btn-close').click();
+                    });
+                });
+            } else {
+                container.innerHTML = `
               <p class="text-muted">등록된 배송지가 없습니다. 배송지를 등록하세요.</p>
               <a href="address-form.html?type=add&from=payment" class="btn btn-outline-info btn-sm">배송지 등록</a>
             `;
+            }
+        } else {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || '배송지 목록 조회 실패');
         }
     }
 
@@ -356,7 +366,7 @@
             loadDeliveryAddress();
             loadAddressList();
         } else {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({}));
             alert(error.message || '배송지 삭제 실패');
         }
     }
@@ -373,7 +383,7 @@
             orderItems.forEach(item => {
                 const img = item.imageUrl ? `
                     <div style="width:80px; height:80px; background:#f8f9fa; border-radius:8px; padding:5px;">
-                        <img src="${item.imageUrl}" class="img-fluid" style="width:100%; height:100%; object-fit:cover;">
+                        <img src="${escapeHtml(item.imageUrl)}" class="img-fluid" style="width:100%; height:100%; object-fit:cover;">
                     </div>`
                     : `<div style="width:80px; height:80px; background:#f8f9fa; border-radius:8px;"></div>`;
 
@@ -381,8 +391,8 @@
                     <div class="row align-items-center py-3 border-bottom">
                        <div class="col-12 col-md-2 d-flex align-items-center">${img}</div>
                             <div class="col-12 col-md-6">
-                                <p class="fw-bold mb-0">${item.productName} </p>
-                                <p class="text-muted small mb-0">${item.unit} 당 ${item.productPrice}원</p>
+                                <p class="fw-bold mb-0">${escapeHtml(item.productName)} </p>
+                                <p class="text-muted small mb-0">${escapeHtml(item.unit)} 당 ${item.productPrice}원</p>
                             </div>
                             <div class="col-12 col-md-4 text-end">
                                 <p class="fw-bold mb-0">${(item.productPrice * item.quantity).toLocaleString()}원</p>
@@ -424,8 +434,13 @@
         const response = await fetchWithAuth(`/api/customers/points`);
         if (!response) return;
 
-        const data = await response.json();
-        document.getElementById("point").innerText = data.availPoint.toLocaleString();
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById("point").innerText = data.availPoint.toLocaleString();
+        } else {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || '포인트 목록 조회 실패');
+        }
     }
 
     function showDirectInput() {
@@ -477,12 +492,12 @@
             if (payResponse.ok) {
                 location.href = `order.html?orderId=${data.orderId}`;
             } else {
-                const error = await payResponse.json();
+                const error = await payResponse.json().catch(() => ({}));
                 alert(error.message || '결제에 실패하였습니다. 다시 시도해주세요.');
                 location.href = `order.html?orderId=${data.orderId}`;
             }
         } else {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({}));
             alert(error.message || '주문서 생성에 실패했습니다.');
         }
     }

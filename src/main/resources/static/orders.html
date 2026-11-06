@@ -126,9 +126,9 @@
                             </td>` : ''}
                            <td class="border-top border-end">
                                 <div class="d-flex align-items-center">
-                                    ${detail.imageUrl ? `<img src="${detail.imageUrl}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;" class="me-2">`
+                                    ${detail.imageUrl ? `<img src="${escapeHtml(detail.imageUrl)}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;" class="me-2">`
                         : `<div style="width:50px; height:50px; background:#f0f0f0; border-radius:4px; flex-shrink:0;" class="me-2"></div>`}
-                                    <p class="mb-0">${detail.productName}</p>
+                                    <p class="mb-0">${escapeHtml(detail.productName)}</p>
                                 </div>
                                 ${order.orderStatus === 'DELIVERED' ?
                         detail.reviewId ? `
@@ -183,7 +183,7 @@
         if (response.ok) {
             location.href = `order.html?orderId=${orderId}`;
         } else {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({}));
             alert(error.message || '결제에 실패하였습니다. 다시 시도해주세요.');
             location.href = 'orders.html';
         }
@@ -200,7 +200,7 @@
         if (response.ok) {
             location.href = 'orders.html';
         } else {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({}));
             alert(error.message || '주문 취소 실패하였습니다. 다시 시도해주세요.');
             loadOrders(orderPage);
         }
@@ -234,7 +234,7 @@
         if (response.ok) {
             loadOrders(orderPage);
         } else {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({}));
             alert(error.message || '리뷰 삭제 실패');
         }
     }
