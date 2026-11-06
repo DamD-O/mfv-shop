@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * @author madey
@@ -16,9 +17,11 @@ import lombok.NoArgsConstructor;
 public class DeliveryAddressRequest {
 
     @NotBlank(message = "배송지명을 입력해주세요.")
+    @Length(max = 100, message = "배송지명은 100자 이내로 입력해주세요.")
     private String addressName;
 
     @NotBlank(message = "수령인을 입력해주세요.")
+    @Length(max = 50, message = "수령인은 50자 이내로 입력해주세요")
     private String receiver;
 
     @NotBlank(message = "연락처를 입력해주세요.")
@@ -26,11 +29,14 @@ public class DeliveryAddressRequest {
     private String contact;
 
     @NotBlank(message = "우편번호를 입력해주세요.")
+    @Pattern(regexp = "^\\d{5}$", message = "우편번호는 숫자 5개여야 합니다.")
     private String zipcode;
 
     @NotBlank(message = "주소를 선택해주세요.")
+    @Length(max = 255, message = "주소는 255자 이내로 입력해주세요.")
     private String roadAddress;
 
+    @Length(max = 255, message = "상세주소는 255자 이내로 입력해주세요.")
     private String detailAddress;
 
     public DeliveryAddressRequest(String addressName, String receiver, String contact, String zipcode, String roadAddress, String detailAddress)

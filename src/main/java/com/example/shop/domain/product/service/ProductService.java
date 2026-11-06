@@ -7,6 +7,7 @@ import com.example.shop.domain.product.entity.ProductCategory;
 import com.example.shop.domain.product.entity.ProductStatus;
 import com.example.shop.domain.product.repository.ProductRepository;
 import com.example.shop.global.dto.PageResponse;
+import com.example.shop.global.exception.MfvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -46,7 +47,7 @@ public class ProductService {
     {
         Product product = productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품 수정 실패 - 존재하지 않는 productId: {}", productId);
-            return new RuntimeException("해당 상품을 찾을 수 없습니다. 목록을 새로고침 후 다시 시도해주세요.");
+            return new MfvException("해당 상품을 찾을 수 없습니다. 목록을 새로고침 후 다시 시도해주세요.");
         });
 
         product.update(request.getProductName(), request.getProductPrice(), request.getProductStock(), request.getProductCategory(),
@@ -60,7 +61,7 @@ public class ProductService {
     {
         Product product = productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품 판매 상태 변경 실패 - 존재하지 않는 productId: {}", productId);
-            return new RuntimeException("해당 상품을 찾을 수 없습니다. 목록을 새로고침 후 다시 시도해주세요.");
+            return new MfvException("해당 상품을 찾을 수 없습니다. 목록을 새로고침 후 다시 시도해주세요.");
         });
 
         if (status == ProductStatus.STOPPED) product.stopSale();
@@ -103,7 +104,7 @@ public class ProductService {
     {
         return productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품 상세 조회 실패 - 존재하지 않는 productId: {}", productId);
-            return new RuntimeException("해당 상품을 찾을 수 없습니다.");
+            return new MfvException("해당 상품을 찾을 수 없습니다.");
         });
     }
 

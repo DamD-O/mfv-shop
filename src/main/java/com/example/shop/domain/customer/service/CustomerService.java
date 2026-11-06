@@ -9,6 +9,7 @@ import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
 import com.example.shop.domain.order.entity.OrderStatus;
 import com.example.shop.domain.order.repository.OrdersRepository;
+import com.example.shop.global.exception.MfvException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class CustomerService {
         if (customerRepository.existsById(userID))
         {
             log.warn("회원가입 실패 - 이미 존재하는 아이디: {}", userID);
-            throw new RuntimeException(userID + "는 이미 존재하는 아이디 입니다.");
+            throw new MfvException(userID + "는 이미 존재하는 아이디 입니다.");
         }
 
         //비밀번호 인코딩
@@ -50,14 +51,14 @@ public class CustomerService {
         if (customerRepository.existsByPhone(userPhone))
         {
             log.warn("회원가입 실패 - 이미 사용중인 핸드폰 번호 : {}", userPhone);
-            throw new RuntimeException(userPhone + "는 이미 사용중인 핸드폰 번호 입니다.");
+            throw new MfvException(userPhone + "는 이미 사용중인 핸드폰 번호 입니다.");
         }
 
         String userEmail = request.getEmail().trim();
         if (customerRepository.existsByEmail(userEmail))
         {
             log.warn("회원가입 실패 - 이미 사용중인 이메일 : {}", userEmail);
-            throw new RuntimeException(userEmail + "는 이미 사용중인 이메일 입니다.");
+            throw new MfvException(userEmail + "는 이미 사용중인 이메일 입니다.");
         }
 
         //customer에 저장
@@ -78,16 +79,16 @@ public class CustomerService {
 
         Customer customer = customerRepository.findByCustomerIdAndWithdrawnFalse(customerId).orElseThrow(() -> {
             log.warn("탈퇴실패 - 존재하지 않는 사용자 customerId: {}", customerId);
-            return new RuntimeException("탈퇴실패하였습니다. 사유 : 존재하지 않는 사용자 입니다.");
+            return new MfvException("탈퇴실패하였습니다. 사유 : 존재하지 않는 사용자 입니다.");
         });
 
         if (!passwordEncoder.matches(request.getPassword(), customer.getPassword()))
         {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new MfvException("비밀번호가 일치하지 않습니다.");
         }
 
         if (ordersRepository.existsByCustomer_CustomerIdAndOrderStatusIn(customerId, OrderStatus.notAvailWithdrawnStatus()))
-            throw new RuntimeException("진행 중인 주문이 있어 탈퇴할 수 없습니다. 배송 완료 또는 주문 취소 후 다시 시도해주세요.");
+            throw new MfvException("진행 중인 주문이 있어 탈퇴할 수 없습니다. 배송 완료 또는 주문 취소 후 다시 시도해주세요.");
 
         customer.setWithdrawn();
 
@@ -103,7 +104,7 @@ public class CustomerService {
     {
         Customer customer = customerRepository.findByCustomerIdAndWithdrawnFalse(customerId).orElseThrow(() -> {
             log.warn("사용자 정보 조회 실패, customerId: {}", customerId);
-            return new RuntimeException("사용자 정보를 가져오기 실패하였습니다.");
+            return new MfvException("사용자 정보를 가져오기 실패하였습니다.");
         });
 
         return new CustomerResponse(customer);
@@ -114,17 +115,17 @@ public class CustomerService {
     {
         Customer customer = customerRepository.findByCustomerIdAndWithdrawnFalse(customerId).orElseThrow(() -> {
             log.warn("사용자 정보 수정 실패, customerId: {}", customerId);
-            return new RuntimeException("사용자 정보 수정 - 존재하지 않는 사용자 입니다.");
+            return new MfvException("사용자 정보 수정 - 존재하지 않는 사용자 입니다.");
         });
 
-        if (!passwordEncoder.matches(request.getOldPassword(), customer.getPassword())) throw new RuntimeException("현재 비밀번호가 일치하지 않습니다.");
+        if (!passwordEncoder.matches(request.getOldPassword(), customer.getPassword())) throw new MfvException("현재 비밀번호가 일치하지 않습니다.");
 
         if (!customer.getEmail().equals(request.getEmail()))
         {
             if (customerRepository.existsByEmail(request.getEmail()))
             {
                 log.warn("회원 정보 수정 실패 - 이미 사용중인 이메일 : {}", request.getEmail());
-                throw new RuntimeException(request.getEmail() + "는 이미 사용중인 이메일 입니다.");
+                throw new MfvException(request.getEmail() + "는 이미 사용중인 이메일 입니다.");
             }
         }
 
@@ -133,7 +134,7 @@ public class CustomerService {
             if (customerRepository.existsByPhone(request.getPhone()))
             {
                 log.warn("회원 정보 수정 실패 - 이미 사용중인 핸드폰 번호 : {}", request.getPhone());
-                throw new RuntimeException(request.getPhone() + "는 이미 사용중인 핸드폰 번호 입니다.");
+                throw new MfvException(request.getPhone() + "는 이미 사용중인 핸드폰 번호 입니다.");
             }
         }
 

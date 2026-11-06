@@ -5,6 +5,7 @@ import com.example.shop.domain.product.entity.ProductStatus;
 import com.example.shop.domain.product.repository.ProductRepository;
 import com.example.shop.domain.recipe.dto.RecipeRequest;
 import com.example.shop.domain.recipe.dto.RecipeResponse;
+import com.example.shop.global.exception.MfvException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class RecipeService {
     {
         List<Product> products = productRepository.findByStatus(ProductStatus.ON_SALE);
 
-        if (products.isEmpty()) throw new RuntimeException("판매중인 상품이 존재하지 않습니다.");
+        if (products.isEmpty()) throw new MfvException("판매중인 상품이 존재하지 않습니다.");
 
         String product = products.stream().map(Product::getName).collect(Collectors.joining(","));
 
@@ -108,7 +109,7 @@ public class RecipeService {
         catch (Exception e)
         {
             log.error("AI 답변 호출 오류", e);
-            throw new RuntimeException("현재 AI 추천을 이용할 수 없습니다. 잠시후 다시 시도해주세요.");
+            throw new MfvException("현재 AI 추천을 이용할 수 없습니다. 잠시후 다시 시도해주세요.");
         }
     }
 }

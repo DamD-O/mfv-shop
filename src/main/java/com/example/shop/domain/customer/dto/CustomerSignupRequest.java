@@ -34,7 +34,8 @@ public class CustomerSignupRequest {
     private String phone;
 
     @NotBlank(message = "이메일을 입력해주세요.")
-    @Email
+    @Email(message = "올바른 이메일 형식이 아닙니다.")
+    @Length(max = 255, message = "이메일은 255자 이내로 입력해주세요.")
     private String email;
 
     @NotNull(message = "생년월일을 입력해주세요.")

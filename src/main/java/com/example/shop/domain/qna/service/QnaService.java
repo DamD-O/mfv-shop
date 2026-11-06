@@ -12,6 +12,7 @@ import com.example.shop.domain.qna.entity.Qna;
 import com.example.shop.domain.qna.entity.QnaStatus;
 import com.example.shop.domain.qna.repository.QnaRepository;
 import com.example.shop.global.dto.PageResponse;
+import com.example.shop.global.exception.MfvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -41,12 +42,12 @@ public class QnaService {
     {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
             log.warn("상품 문의 등록 - 존재하지 않는 사용자 customerId : {}", customerId);
-            return new RuntimeException("존재하지 않는 사용자 입니다.");
+            return new MfvException("존재하지 않는 사용자 입니다.");
         });
 
         Product product = productRepository.findById(request.getProductId()).orElseThrow(() -> {
             log.warn("상품 문의 등록 - 존재하지 않는 상품 product id : {}", request.getProductId());
-            return new RuntimeException("존재하지 않는 상품입니다.");
+            return new MfvException("존재하지 않는 상품입니다.");
         });
 
         Qna qna = new Qna(product, customer, request.getTitle(), request.getContent(), request.isSecret());
@@ -62,7 +63,7 @@ public class QnaService {
     {
         Qna qna = qnaRepository.findById(qnaId).orElseThrow(() -> {
             log.warn("존재하지 않는 문의 qnaId: {}", qnaId);
-            return new RuntimeException("존재 하지 않는 문의 사항입니다.");
+            return new MfvException("존재 하지 않는 문의 사항입니다.");
         });
 
         qna.answer(request.getAnswer());
@@ -78,7 +79,7 @@ public class QnaService {
 
         productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품별 문의 목록 조회 - 존재하지 않는 상품 입니다. product id : {}", productId);
-            return new RuntimeException("상품 별 문의 목록 조회 - 존재하지 않는 상품입니다.");
+            return new MfvException("상품 별 문의 목록 조회 - 존재하지 않는 상품입니다.");
         });
 
         Page<Qna> qnaList = qnaRepository.findByProduct_Id(productId, sortedPageable);
@@ -97,7 +98,7 @@ public class QnaService {
     {
         Qna qna = qnaRepository.findById(qnaId).orElseThrow(() -> {
             log.warn("문의 상세조회 실패 - 존재하지 않는 qnaId: {}", qnaId);
-            return new RuntimeException("존재하지 않는 문의 사항입니다.");
+            return new MfvException("존재하지 않는 문의 사항입니다.");
         });
 
         boolean canView = isViewable(qna, customerId, role);
@@ -122,12 +123,12 @@ public class QnaService {
     {
         Qna qna = qnaRepository.findById(qnaId).orElseThrow(() -> {
             log.warn("QnA 삭제 실패 - 존재하지 않는 문의 입니다. qnaId: {}", qnaId);
-            return new RuntimeException("QnA 삭제 실패 - 존재하지 않는 문의입니다.");
+            return new MfvException("QnA 삭제 실패 - 존재하지 않는 문의입니다.");
         });
 
-        if (!qna.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 문의사항만 삭제 할 수 있습니다.");
+        if (!qna.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인의 문의사항만 삭제 할 수 있습니다.");
 
-        if (qna.getStatus().equals(QnaStatus.ANSWERED)) throw new RuntimeException("답변이 완료된 문의는 삭제 할 수 없습니다.");
+        if (qna.getStatus().equals(QnaStatus.ANSWERED)) throw new MfvException("답변이 완료된 문의는 삭제 할 수 없습니다.");
 
         qnaRepository.delete(qna);
     }
@@ -152,7 +153,7 @@ public class QnaService {
     {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
             log.warn("1:1 문의 등록 - 존재하지 않는 사용자 customerId : {}", customerId);
-            return new RuntimeException("존재하지 않는 사용자 입니다.");
+            return new MfvException("존재하지 않는 사용자 입니다.");
         });
 
         Qna qna = new Qna(null, customer, request.getTitle(), request.getContent(), true);

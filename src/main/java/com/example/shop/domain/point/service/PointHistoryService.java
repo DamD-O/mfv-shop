@@ -9,6 +9,7 @@ import com.example.shop.domain.point.dto.PointHistoryResponse;
 import com.example.shop.domain.point.dto.PointSummaryResponse;
 import com.example.shop.domain.point.repository.PointHistoryRepository;
 import com.example.shop.global.dto.PageResponse;
+import com.example.shop.global.exception.MfvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -38,7 +39,7 @@ public class PointHistoryService {
 
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
             log.warn("포인트 조회 실패 - 존재하지 않는 customerId : {}", customerId);
-            return new RuntimeException("회원 정보를 찾을 수 없습니다.");
+            return new MfvException("회원 정보를 찾을 수 없습니다.");
         });
 
         Page<PointHistoryResponse> history = pointHistoryRepository.findByCustomer_CustomerId(customerId, sortedPageable)

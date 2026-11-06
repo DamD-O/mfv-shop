@@ -19,7 +19,7 @@ public class PersonalQnaCreateRequest {
     private String title;
 
     @NotBlank(message = "문의 내용을 입력해주세요.")
-    @Length(max = 1000, message = "1000자 이내로 작성해주세요.")
+    @Length(max = 5000, message = "5000자 이내로 작성해주세요.")
     private String content;
 
     public PersonalQnaCreateRequest(String title, String content)

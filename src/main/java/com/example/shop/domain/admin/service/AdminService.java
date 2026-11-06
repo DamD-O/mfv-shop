@@ -15,6 +15,7 @@ import com.example.shop.domain.order.dto.OrderStatsProjection;
 import com.example.shop.domain.order.repository.OrderDetailRepository;
 import com.example.shop.domain.order.repository.OrdersRepository;
 import com.example.shop.global.dto.PageResponse;
+import com.example.shop.global.exception.MfvException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -137,7 +138,7 @@ public class AdminService {
     {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
             log.warn("회원 상세 정보 조회 실패 - 존재하지 않는 사용자 입니다. customerId : {}", customerId);
-            return new RuntimeException("회원 상세 정보 조회 실패 : " + customerId + " 는 존재하지 않는 사용자입니다.");
+            return new MfvException("회원 상세 정보 조회 실패 : " + customerId + " 는 존재하지 않는 사용자입니다.");
         });
 
         return new CustomerSelectResponse(customer);
@@ -148,10 +149,10 @@ public class AdminService {
     {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
             log.warn("회원 이름 변경 실패 - 존재하지 않는 사용자 입니다. customerId : {}", customerId);
-            return new RuntimeException("회원 이름 변경 실패 : " + customerId + " 는 존재하지 않는 사용자입니다.");
+            return new MfvException("회원 이름 변경 실패 : " + customerId + " 는 존재하지 않는 사용자입니다.");
         });
 
-        if (customer.isWithdrawn()) throw new RuntimeException("탈퇴한 사용자는 이름변경이 불가 합니다.");
+        if (customer.isWithdrawn()) throw new MfvException("탈퇴한 사용자는 이름변경이 불가 합니다.");
 
         customer.updateCustomerName(request.getCustomerName().trim());
 

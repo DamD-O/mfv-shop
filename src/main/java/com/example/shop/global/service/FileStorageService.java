@@ -1,6 +1,7 @@
 package com.example.shop.global.service;
 
 import com.example.shop.global.entity.ImageCategory;
+import com.example.shop.global.exception.MfvException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,11 +36,11 @@ public class FileStorageService {
 
         String originalFilename = file.getOriginalFilename();
 
-        if (originalFilename == null || !originalFilename.contains(".")) throw new RuntimeException("파일이름이 없거나 확장자가 없습니다.");
+        if (originalFilename == null || !originalFilename.contains(".")) throw new MfvException("파일이름이 없거나 확장자가 없습니다.");
 
         String ext = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
 
-        if (!EXT_LIST.contains(ext.toLowerCase())) throw new RuntimeException("jpg, jpeg, png, gif, bmp, webp 파일만 업로드 할 수 있습니다.");
+        if (!EXT_LIST.contains(ext.toLowerCase())) throw new MfvException("jpg, jpeg, png, gif, bmp, webp 파일만 업로드 할 수 있습니다.");
 
         String saveName = UUID.randomUUID() + "." + ext.toLowerCase(); //중복 방지
 

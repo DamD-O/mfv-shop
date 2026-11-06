@@ -5,6 +5,7 @@ import com.example.shop.domain.product.entity.ProductImage;
 import com.example.shop.domain.product.repository.ProductImageRepository;
 import com.example.shop.domain.product.repository.ProductRepository;
 import com.example.shop.global.entity.ImageCategory;
+import com.example.shop.global.exception.MfvException;
 import com.example.shop.global.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,7 @@ public class ProductImageService {
         // 4. 리턴
         Product product = productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품 이미지 업로드 실패 - 존재하지 않는 productId: {}", productId);
-            return new RuntimeException("상품 이미지 업로드 실패 - 해당 상품을 찾을 수 없습니다. 목록을 새로고침 후 다시 시도해주세요.");
+            return new MfvException("상품 이미지 업로드 실패 - 해당 상품을 찾을 수 없습니다. 목록을 새로고침 후 다시 시도해주세요.");
         });
 
         String imagePath = fileStorageService.store(file, ImageCategory.PRODUCT);
@@ -54,7 +55,7 @@ public class ProductImageService {
         // 3. productImageRepository.delete()로 DB row 삭제
         ProductImage productImage = productImageRepository.findById(imageId).orElseThrow(() -> {
             log.warn("상품 이미지 삭제 실패 - imageId: {}", imageId);
-            return new RuntimeException("상품 이미지 삭제 실패 - 존재하지 않는 이미지입니다. 다시 확인 부탁드립니다.");
+            return new MfvException("상품 이미지 삭제 실패 - 존재하지 않는 이미지입니다. 다시 확인 부탁드립니다.");
         });
 
         String filePath = productImage.getImagePath();

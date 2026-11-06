@@ -5,6 +5,7 @@ import com.example.shop.domain.notice.dto.NoticeResponse;
 import com.example.shop.domain.notice.entity.Notice;
 import com.example.shop.domain.notice.repository.NoticeRepository;
 import com.example.shop.global.dto.PageResponse;
+import com.example.shop.global.exception.MfvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -45,7 +46,7 @@ public class NoticeService {
     {
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> {
             log.warn("공지사항 상세 조회 - 존재하지 않는 공지사항 입니다. noticeId: {}", noticeId);
-            return new RuntimeException("공지사항 상세조회 실패, 존재하지 않는 공지사항입니다.");
+            return new MfvException("공지사항 상세조회 실패, 존재하지 않는 공지사항입니다.");
         });
 
         return new NoticeResponse(notice);
@@ -56,7 +57,7 @@ public class NoticeService {
     {
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> {
             log.warn("공지사항 수정 - 존재하지 않는 공지사항 입니다. noticeId: {}", noticeId);
-            return new RuntimeException("공지사항 수정 실패, 존재하지 않는 공지사항입니다.");
+            return new MfvException("공지사항 수정 실패, 존재하지 않는 공지사항입니다.");
         });
 
         notice.updateNotice(request.getTitle(), request.getContent());

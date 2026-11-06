@@ -5,6 +5,7 @@ import com.example.shop.domain.review.entity.ReviewImage;
 import com.example.shop.domain.review.repository.ReviewImageRepository;
 import com.example.shop.domain.review.repository.ReviewRepository;
 import com.example.shop.global.entity.ImageCategory;
+import com.example.shop.global.exception.MfvException;
 import com.example.shop.global.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +34,10 @@ public class ReviewImageService {
     {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
             log.warn("리뷰 이미지 업로드 - 존재하지 않는 리뷰, reviewId : {}", reviewId);
-            return new RuntimeException("리뷰 이미지 업로드 실패 - 존재하지 않는 리뷰 입니다.");
+            return new MfvException("리뷰 이미지 업로드 실패 - 존재하지 않는 리뷰 입니다.");
         });
 
-        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인이 작성한 리뷰에만 이미지를 업로드 할 수 있습니다.");
+        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰에만 이미지를 업로드 할 수 있습니다.");
 
         String imagePath = fileStorageService.store(file, ImageCategory.REVIEW);
         ReviewImage reviewImage = new ReviewImage(review, imagePath);
@@ -49,10 +50,10 @@ public class ReviewImageService {
     {
         ReviewImage reviewImage = reviewImageRepository.findById(imageId).orElseThrow(() -> {
             log.warn("리뷰 이미지 삭제 실패 - imageId: {}", imageId);
-            return new RuntimeException("리뷰 이미지 삭제 실패 - 존재하지 않는 이미지입니다. 다시 확인 부탁드립니다.");
+            return new MfvException("리뷰 이미지 삭제 실패 - 존재하지 않는 이미지입니다. 다시 확인 부탁드립니다.");
         });
 
-        if (!reviewImage.getReview().getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인이 작성한 리뷰 이미지만 삭제할 수 있습니다.");
+        if (!reviewImage.getReview().getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰 이미지만 삭제할 수 있습니다.");
 
         String filePath = reviewImage.getImagePath();
 

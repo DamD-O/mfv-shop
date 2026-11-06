@@ -2,6 +2,7 @@ package com.example.shop.domain.customer.entity;
 
 import com.example.shop.domain.admin.entity.AuthType;
 import com.example.shop.global.entity.BaseTimeEntity;
+import com.example.shop.global.exception.MfvException;
 import com.example.shop.global.util.MaskingUtil;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -92,7 +93,7 @@ public class Customer extends BaseTimeEntity {
         //포인트 사용
         if (this.point < point)
         {
-            throw new IllegalStateException("포인트가 부족합니다.");
+            throw new MfvException("포인트가 부족합니다.");
         }
         this.point -= point;
     }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * @author madey
@@ -22,7 +23,8 @@ public class CustomerUpdateRequest {
     private String newPassword;
 
     @NotBlank(message = "이메일을 입력해주세요.")
-    @Email
+    @Email(message = "올바른 이메일 형식이 아닙니다.")
+    @Length(max = 255, message = "이메일은 255자 이내로 입력해주세요.")
     private String email;
 
     @NotBlank(message = "핸드폰 번호를 입력해주세요.")

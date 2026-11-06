@@ -1,9 +1,6 @@
 package com.example.shop.domain.review.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -25,7 +22,8 @@ public class ReviewRequest {
     @Max(value = 5, message = "평점은 5점 이하여야 합니다.")
     private Integer rating;
 
-    @Size(min = 10, message = "리뷰 내용은 최소 10글자 이상이어야 합니다.")
+    @NotBlank(message = "리뷰 내용을 입력해주세요.")
+    @Size(min = 10, max = 1000, message = "리뷰 내용은 최소 10자 이상 1000자 이내여야 합니다.")
     private String content;
 
     public ReviewRequest(Long orderDetailId, Integer rating, String content)

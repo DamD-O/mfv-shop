@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class OrderRequest {
     @PositiveOrZero(message = "사용 포인트는 0 이상이어야 합니다.")
     private Integer usePoint; //사용 포인트
 
+    @Length(max = 5000, message = "배송 요청은 5000자 이내로 입력해주세요.")
     private String deliveryRequest;
 
     public OrderRequest(Long deliveryId, List<OrderItemRequest> orderItemRequest, Integer usePoint, String deliveryRequest)

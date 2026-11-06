@@ -11,6 +11,7 @@ import com.example.shop.domain.review.dto.ReviewResponse;
 import com.example.shop.domain.review.entity.Review;
 import com.example.shop.domain.review.repository.ReviewRepository;
 import com.example.shop.global.dto.PageResponse;
+import com.example.shop.global.exception.MfvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -41,17 +42,17 @@ public class ReviewService {
     {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
             log.warn("리뷰 등록 - 존재하지 않는 사용자 customerId : {}", customerId);
-            return new RuntimeException("존재하지 않는 사용자 입니다.");
+            return new MfvException("존재하지 않는 사용자 입니다.");
         });
 
         OrderDetail orderDetail = orderDetailRepository.findById(request.getOrderDetailId()).orElseThrow(() -> {
             log.warn("리뷰 등록 - 존재하지 않는 상세주문 orderDetailId : {}", request.getOrderDetailId());
-            return new RuntimeException("존재하지 않는 상세 주문 입니다.");
+            return new MfvException("존재하지 않는 상세 주문 입니다.");
         });
 
-        if (!orderDetail.getOrders().getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인이 주문한 상품만 리뷰 작성 가능합니다.");
+        if (!orderDetail.getOrders().getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 주문한 상품만 리뷰 작성 가능합니다.");
 
-        if (!orderDetail.getOrders().getOrderStatus().equals(OrderStatus.DELIVERED)) throw new RuntimeException("배송이 완료된 상품에 한해서 리뷰 작성 가능합니다.");
+        if (!orderDetail.getOrders().getOrderStatus().equals(OrderStatus.DELIVERED)) throw new MfvException("배송이 완료된 상품에 한해서 리뷰 작성 가능합니다.");
 
         Review review = new Review(customer, orderDetail, request.getRating(), request.getContent());
         reviewRepository.save(review);
@@ -67,7 +68,7 @@ public class ReviewService {
 
         productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품별 리뷰 목록 조회 - 존재하지 않는 상품 입니다. product id : {}", productId);
-            return new RuntimeException("상품 별 리뷰 목록 조회 - 존재하지 않는 상품입니다.");
+            return new MfvException("상품 별 리뷰 목록 조회 - 존재하지 않는 상품입니다.");
         });
 
         Page<Review> reviewList = reviewRepository.findByOrderDetail_Product_Id(productId, sortedPageable);
@@ -85,10 +86,10 @@ public class ReviewService {
     {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
             log.warn("리뷰 수정 - 존재하지 않는 리뷰 reviewId : {}", reviewId);
-            return new RuntimeException("존재하지 않는 리뷰 입니다.");
+            return new MfvException("존재하지 않는 리뷰 입니다.");
         });
 
-        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인이 작성한 리뷰만 수정 가능합니다.");
+        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰만 수정 가능합니다.");
 
         review.updateContent(request.getRating(), request.getContent());
 
@@ -101,10 +102,10 @@ public class ReviewService {
     {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
             log.warn("리뷰삭제 - 존재하지 않는 리뷰, reviewId : {}", reviewId);
-            return new RuntimeException("존재하지 않는 리뷰입니다.");
+            return new MfvException("존재하지 않는 리뷰입니다.");
         });
 
-        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인이 작성한 리뷰만 삭제 가능합니다.");
+        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰만 삭제 가능합니다.");
 
         reviewRepository.delete(review);
     }
@@ -113,10 +114,10 @@ public class ReviewService {
     {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
             log.warn("리뷰 단건 조회 - 존재하지 않는 리뷰, reviewId : {}", reviewId);
-            return new RuntimeException("존재하지 않는 리뷰입니다.");
+            return new MfvException("존재하지 않는 리뷰입니다.");
         });
 
-        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인이 작성한 리뷰만 조회 가능합니다.");
+        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰만 조회 가능합니다.");
 
         return review;
     }

@@ -20,6 +20,7 @@ import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.entity.ProductStatus;
 import com.example.shop.domain.product.repository.ProductRepository;
 import com.example.shop.global.dto.PageResponse;
+import com.example.shop.global.exception.MfvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -57,7 +58,7 @@ public class OrderService {
                                                                                                                      request.getDeliveryId())
                                                            .orElseThrow(() -> {
                                                                log.warn("deliveryAddress not found");
-                                                               return new RuntimeException("존재하지 않는 배송지 입니다. 다시 선택해주세요.");
+                                                               return new MfvException("존재하지 않는 배송지 입니다. 다시 선택해주세요.");
                                                            });
 
         //주소 스냅샷 - 수령인(연락처) / 배송지(우편번호)
@@ -71,9 +72,9 @@ public class OrderService {
         for (OrderItemRequest item : request.getOrderItemRequest())
         {
             Long productId = item.getProductId();
-            Product product = productRepository.findByIdAndStatus(productId, ProductStatus.ON_SALE).orElseThrow(() -> {
+            Product product = productRepository.findWithLockByIdAndStatus(productId, ProductStatus.ON_SALE).orElseThrow(() -> {
                 log.warn("주문 생성 - 판매 중지되었거나 존재하지 않는 상품이 있습니다. productId : {}", productId);
-                return new RuntimeException("판매 중지되었거나 존재하지 않는 상품이 포함되어 있습니다.");
+                return new MfvException("판매 중지되었거나 존재하지 않는 상품이 포함되어 있습니다.");
             });
 
             //상세 주문 생성
@@ -88,15 +89,15 @@ public class OrderService {
 
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
             log.warn("주문 생성 실패 - 존재하지 않는 customerId: {}", customerId);
-            return new RuntimeException("회원 정보를 찾을 수 없으므로, 주문 실패하였습니다.");
+            return new MfvException("회원 정보를 찾을 수 없으므로, 주문 실패하였습니다.");
         });
 
         //포인트 사용
         Integer usePoint = request.getUsePoint() != null ? request.getUsePoint() : 0;
 
-        if (usePoint > pointHistoryService.getAvailPoint(customer)) throw new RuntimeException("사용 가능한 포인트가 부족합니다.");
+        if (usePoint > pointHistoryService.getAvailPoint(customer)) throw new MfvException("사용 가능한 포인트가 부족합니다.");
 
-        if (usePoint > totalAmount) throw new RuntimeException("사용 포인트가 상품 금액을 초과 할 수 없습니다.");
+        if (usePoint > totalAmount) throw new MfvException("사용 포인트가 상품 금액을 초과 할 수 없습니다.");
 
         int finalAmount = totalAmount - usePoint;
 
@@ -129,10 +130,10 @@ public class OrderService {
     {
         Orders orders = ordersRepository.findById(orderId).orElseThrow(() -> {
             log.warn("주문 상세조회 - 존재하지 않는 orderId: {}", orderId);
-            return new RuntimeException("존재 하지 않는 주문으로 주문 상세조회 실패");
+            return new MfvException("존재 하지 않는 주문으로 주문 상세조회 실패");
         });
 
-        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 주문만 조회 가능합니다.");
+        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인의 주문만 조회 가능합니다.");
 
         return orders;
     }
@@ -148,7 +149,7 @@ public class OrderService {
     {
         Orders orders = ordersRepository.findById(orderId).orElseThrow(() -> {
             log.warn("주문 상태변경 - 존재하지 않는 orderId: {}", orderId);
-            return new RuntimeException("존재 하지 않는 주문으로 주문 상태변경 실패");
+            return new MfvException("존재 하지 않는 주문으로 주문 상태변경 실패");
         });
 
         OrderStatus currentStatus = orders.getOrderStatus();
@@ -180,16 +181,16 @@ public class OrderService {
     {
         Orders orders = ordersRepository.findById(orderId).orElseThrow(() -> {
             log.warn("주문 취소 - 존재하지 않는 orderId: {}", orderId);
-            return new RuntimeException("존재 하지 않는 주문으로 주문 취소 실패");
+            return new MfvException("존재 하지 않는 주문으로 주문 취소 실패");
         });
 
-        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 주문만 취소할 수 있습니다.");
+        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인의 주문만 취소할 수 있습니다.");
 
         //취소 가능상태 체크
         OrderStatus status = orders.getOrderStatus();
         if (status != OrderStatus.PAYMENT_PENDING && status != OrderStatus.PAYMENT_COMPLETE)
         {
-            throw new RuntimeException("배송 준비 중 이후 상태의 주문은 취소할 수 없습니다. \n 주문 상태 : " + status.getLabel());
+            throw new MfvException("배송 준비 중 이후 상태의 주문은 취소할 수 없습니다. \n 주문 상태 : " + status.getLabel());
         }
 
         restoreStockAndPoint(orders);
@@ -203,14 +204,14 @@ public class OrderService {
     {
         Orders orders = ordersRepository.findById(orderId).orElseThrow(() -> {
             log.warn("결제 실패 - 존재하지 않는 주문 : {}", orderId);
-            return new RuntimeException("결제 실패 - 존재하지 않는 주문입니다.");
+            return new MfvException("결제 실패 - 존재하지 않는 주문입니다.");
         });
 
-        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new RuntimeException("본인의 주문만 결제할 수 있습니다.");
+        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인의 주문만 결제할 수 있습니다.");
 
         //결제대기만 결제 가능 그외 예외처리
         if (!orders.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING))
-            throw new RuntimeException("결제 대기 상태의 주문만 결제 가능합니다. \n 주문 상태 : " + orders.getOrderStatus().getLabel());
+            throw new MfvException("결제 대기 상태의 주문만 결제 가능합니다. \n 주문 상태 : " + orders.getOrderStatus().getLabel());
 
         // 65% 성공확률
         boolean isSuccess = Math.random() < 0.65;
@@ -231,7 +232,7 @@ public class OrderService {
         }
         else
         {
-            throw new RuntimeException("결제에 실패했습니다. 다시 시도해주세요.");
+            throw new MfvException("결제에 실패했습니다. 다시 시도해주세요.");
         }
 
         return orders;
@@ -260,7 +261,7 @@ public class OrderService {
         //재고 원복
         for (OrderDetail detail : orders.getOrderDetails())
         {
-            detail.getProduct().increaseStock(detail.getQuantity());
+            productRepository.restoreProductStock(detail.getProduct().getId(), detail.getQuantity());
         }
 
         //사용한 포인트 원복

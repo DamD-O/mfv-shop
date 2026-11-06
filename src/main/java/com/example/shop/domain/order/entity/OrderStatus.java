@@ -1,5 +1,7 @@
 package com.example.shop.domain.order.entity;
 
+import com.example.shop.global.exception.MfvException;
+
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
@@ -25,15 +27,15 @@ public enum OrderStatus {
         this.label = label;
     }
 
-    public String getLabel()
-    {
-        return label;
-    }
-
     public static List<OrderStatus> notAvailWithdrawnStatus()
     {
         EnumSet<OrderStatus> excludeStatus = EnumSet.of(OrderStatus.CANCELED, OrderStatus.DELIVERED);
         return Arrays.stream(OrderStatus.values()).filter(status -> !excludeStatus.contains(status)).toList();
+    }
+
+    public String getLabel()
+    {
+        return label;
     }
 
     public boolean canChangeTo(OrderStatus next)
@@ -58,7 +60,7 @@ public enum OrderStatus {
     {
         if (!canChangeTo(next))
         {
-            throw new IllegalStateException(String.format("[%s] 상태에서 [%s] 상태로 변경 할 수 없습니다.", this.getLabel(), next.getLabel()));
+            throw new MfvException(String.format("[%s] 상태에서 [%s] 상태로 변경 할 수 없습니다.", this.getLabel(), next.getLabel()));
         }
     }
 }

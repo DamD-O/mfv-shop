@@ -1,6 +1,7 @@
 package com.example.shop.domain.product.entity;
 
 import com.example.shop.global.entity.BaseTimeEntity;
+import com.example.shop.global.exception.MfvException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -20,36 +21,28 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "product")
 public class Product extends BaseTimeEntity {
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OrderBy
+    private final List<ProductImage> productImages = new ArrayList<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
     private Long id;
-
     @Column(name = "name", nullable = false, length = 500)
     private String name;
-
     @Column(name = "price", nullable = false)
     private int price;
-
     @Column(name = "stock", nullable = false) //재고
     private int stock;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false, length = 30)
     private ProductCategory category;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private ProductStatus status = ProductStatus.ON_SALE;
-
     //상품 단위
     @Column(name = "unit", nullable = false, length = 20)
     private String unit;
-
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    @OrderBy
-    private final List<ProductImage> productImages = new ArrayList<>();
-
     // 원산지
     @Column(name = "origin", length = 100)
     private String origin;
@@ -79,15 +72,10 @@ public class Product extends BaseTimeEntity {
     {
         if (this.stock < quantity)
         {
-            throw new IllegalStateException(this.name + "상품의 재고가 부족합니다. 현재 주문 가능 재고: " + this.stock);
+            throw new MfvException(this.name + "상품의 재고가 부족합니다. 현재 주문 가능 재고: " + this.stock);
         }
 
         this.stock -= quantity;
-    }
-
-    public void increaseStock(int quantity)
-    {
-        this.stock += quantity;
     }
 
     //상품 수정
