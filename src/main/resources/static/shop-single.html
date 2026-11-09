@@ -144,8 +144,8 @@
     let qnaPage = 0;
 
     const productId = new URLSearchParams(window.location.search).get('productId');
-    document.addEventListener('DOMContentLoaded', () => {
-        getProduct();
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!await getProduct()) return;
         loadReviews();
         checkQnaLogin();
         loadQna();
@@ -224,10 +224,12 @@
 
                 addToCart(productId, name, price, unit, image, quantity, stock)
             });
+            return true;
         } else {
             const error = await response.json().catch(() => ({}));
             alert(error.message || '상품 정보 불러오기 실패');
             location.href = 'shop.html';
+            return false;
         }
     }
 
@@ -311,7 +313,7 @@
             }
 
         } else {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({}));
             alert(error.message || '리뷰 목록 조회 실패');
 
         }
@@ -370,7 +372,7 @@
             }
 
         } else {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({}));
             alert(error.message || 'QnA 목록 조회 실패');
 
         }
@@ -410,7 +412,7 @@
             bootstrap.Collapse.getOrCreateInstance(document.getElementById('qna-form')).hide();
             loadQna();
         } else {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({}));
             alert(error.message || 'QnA 등록 실패');
         }
     }
