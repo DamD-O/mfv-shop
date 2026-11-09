@@ -1,7 +1,6 @@
 package com.example.shop.domain.order.entity;
 
 import com.example.shop.domain.product.entity.Product;
-import com.example.shop.domain.review.entity.Review;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,9 +35,6 @@ public class OrderDetail {
 
     @Column(name = "price_at_order", nullable = false) // 주문시점 가격
     private int priceAtOrder;
-
-    @OneToOne(mappedBy = "orderDetail", fetch = FetchType.LAZY)
-    private Review review;
 
     public OrderDetail(Product product, int quantity, int priceAtOrder)
     {

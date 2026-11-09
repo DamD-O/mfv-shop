@@ -19,6 +19,7 @@ import com.example.shop.domain.point.service.PointHistoryService;
 import com.example.shop.domain.product.entity.Product;
 import com.example.shop.domain.product.entity.ProductStatus;
 import com.example.shop.domain.product.repository.ProductRepository;
+import com.example.shop.domain.review.repository.ReviewRepository;
 import com.example.shop.global.dto.PageResponse;
 import com.example.shop.global.exception.MfvException;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author madey
@@ -49,6 +52,7 @@ public class OrderService {
     private final CustomerRepository customerRepository;
     private final PointHistoryRepository pointHistoryRepository;
     private final PointHistoryService pointHistoryService;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public Orders createOrders(String customerId, OrderRequest request)
@@ -122,7 +126,12 @@ public class OrderService {
         if (status != null) orders = ordersRepository.findByCustomer_CustomerIdAndOrderStatus(customerId, status, sortedPageable);
         else orders = ordersRepository.findByCustomer_CustomerId(customerId, sortedPageable);
 
-        return new PageResponse<>(orders.map(OrderResponse::new));
+        List<OrderDetail> orderDetail = orders.getContent().stream().flatMap(order -> order.getOrderDetails().stream()).toList();
+        Map<Long, Long> reviewIdMap = reviewRepository.findByOrderDetailIn(orderDetail)
+                                                      .stream()
+                                                      .collect(Collectors.toMap(review -> review.getOrderDetail().getId(), review -> review.getId()));
+
+        return new PageResponse<>(orders.map(o -> new OrderResponse(o, reviewIdMap)));
     }
 
     //주문 상세조회

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author madey
@@ -44,5 +45,14 @@ public class OrderResponse {
         this.createdAt = orders.getCreatedAt();
         this.updatedAt = orders.getUpdatedAt();
         this.orderStatusLabel = orders.getOrderStatus().getLabel();
+    }
+
+    public OrderResponse(Orders orders, Map<Long, Long> reviewIdMap)
+    {
+        this(orders);
+        this.orderDetails = orders.getOrderDetails()
+                                  .stream()
+                                  .map(detail -> new OrderDetailResponse(detail, reviewIdMap.get(detail.getId())))
+                                  .toList();
     }
 }

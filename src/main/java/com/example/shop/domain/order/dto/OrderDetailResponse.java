@@ -30,6 +30,12 @@ public class OrderDetailResponse {
         this.quantity = orderDetail.getQuantity();
         this.priceAtOrder = orderDetail.getPriceAtOrder();
         this.imageUrl = orderDetail.getProduct().getProductImages().stream().findFirst().map(ProductImage::getImagePath).orElse(null);
-        this.reviewId = orderDetail.getReview() != null ? orderDetail.getReview().getId() : null;
+        this.reviewId = null;
+    }
+
+    public OrderDetailResponse(OrderDetail orderDetail, Long reviewId)
+    {
+        this(orderDetail);
+        this.reviewId = reviewId;
     }
 }

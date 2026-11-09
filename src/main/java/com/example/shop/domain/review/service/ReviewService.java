@@ -9,9 +9,12 @@ import com.example.shop.domain.product.repository.ProductRepository;
 import com.example.shop.domain.review.dto.ReviewRequest;
 import com.example.shop.domain.review.dto.ReviewResponse;
 import com.example.shop.domain.review.entity.Review;
+import com.example.shop.domain.review.entity.ReviewImage;
+import com.example.shop.domain.review.repository.ReviewImageRepository;
 import com.example.shop.domain.review.repository.ReviewRepository;
 import com.example.shop.global.dto.PageResponse;
 import com.example.shop.global.exception.MfvException;
+import com.example.shop.global.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,6 +23,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author madey
@@ -35,6 +41,8 @@ public class ReviewService {
     private final CustomerRepository customerRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final ProductRepository productRepository;
+    private final ReviewImageRepository reviewImageRepository;
+    private final FileStorageService fileStorageService;
 
     //리뷰 작성
     @Transactional
@@ -107,7 +115,21 @@ public class ReviewService {
 
         if (!review.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰만 삭제 가능합니다.");
 
+        List<String> reviewImages = review.getReviewImages().stream().map(ReviewImage::getImagePath).toList();
         reviewRepository.delete(review);
+        reviewRepository.flush();
+
+        for (String path : reviewImages)
+        {
+            try
+            {
+                fileStorageService.delete(path);
+            }
+            catch (IOException e)
+            {
+                log.warn("리뷰 이미지 파일 삭제 실패 : {}", path, e);
+            }
+        }
     }
 
     public Review getReview(String customerId, Long reviewId)
