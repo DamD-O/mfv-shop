@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="assets/css/templatemo.css">
     <link rel="icon" href="assets/img/favicon.ico">
 
-    <!-- Load fonts style after rendering the layout styles -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
     <link rel="stylesheet" href="assets/css/fontawesome.min.css">
 
@@ -58,7 +57,6 @@
                     <img class="card-img img-fluid" id="product-detail">
                 </div>
             </div>
-            <!-- col end -->
             <div class="col-lg-7 mt-5">
                 <div class="card">
                     <div class="card-body">
@@ -75,6 +73,7 @@
                             <input type="number" id="quantity" value="1" min="1" class="form-control border-success" style="width: 80px;">
                             <button class="btn btn-success" id="btn-add-to-cart">장바구니 담기</button>
                         </div>
+                        <div class="mt-3 fs-5 fw-bold" id="product-stock"></div>
                     </div>
                 </div>
             </div>
@@ -179,40 +178,84 @@
 
     async function getProduct() {
         const response = await fetch(`/api/products/${productId}`);
-        const data = await response.json();
 
-        let name = data.productName;
-        let price = data.productPrice;
-        let unit = data.unit;
-        let image = data.productImageUrl;
+        if (response.ok) {
+            const data = await response.json();
 
-        document.getElementById('product-detail').src = image || '';
-        document.getElementById('product-detail').alt = name;
-        document.getElementById('product-name').innerText = name;
-        document.getElementById('product-price').innerText = unit + '당 \t' + price + '원';
-        document.getElementById('product-origin').innerText = data.origin;
-        document.getElementById('product-storage').innerText = data.storageMethod;
-        document.getElementById('product-description').innerText = data.description;
+            let name = data.productName;
+            let price = data.productPrice;
+            let unit = data.unit;
+            let image = data.productImageUrl;
+            let stock = data.productStock;
+            let status = data.productStatus;
 
-        document.getElementById('btn-add-to-cart').addEventListener('click', () => {
-            const quantity = document.getElementById('quantity').value;
-            addToCart(productId, name, price, unit, image, quantity)
-        })
+            document.getElementById('product-detail').src = image || '';
+            document.getElementById('product-detail').alt = name;
+            document.getElementById('product-name').innerText = name;
+            document.getElementById('product-price').innerText = unit + '당 \t' + price + '원';
+            document.getElementById('product-origin').innerText = data.origin;
+            document.getElementById('product-storage').innerText = data.storageMethod;
+            document.getElementById('product-description').innerText = data.description;
+
+            if (status === 'STOPPED') {
+                document.getElementById('product-stock').innerHTML = '<p class="mt-3 fs-5 fw-bold text-danger">판매중지</p>';
+                document.getElementById('product-stock').classList.add('text-danger');
+            } else {
+                document.getElementById('product-stock').innerHTML = renderStock(stock);
+            }
+
+            document.getElementById('quantity').disabled = stock === 0 || status === 'STOPPED';
+            document.getElementById('btn-add-to-cart').disabled = stock === 0 || status === 'STOPPED';
+
+            document.getElementById('quantity').addEventListener('input', function () {
+                const value = parseInt(this.value);
+
+                if (value > stock)
+                    this.value = stock;
+            });
+
+            document.getElementById('btn-add-to-cart').addEventListener('click', () => {
+                const quantity = document.getElementById('quantity').value;
+
+                if (!parseInt(quantity) || parseInt(quantity) < 1) {
+                    alert('수량은 1개 이상 입력 가능합니다.');
+                    return;
+                }
+
+                addToCart(productId, name, price, unit, image, quantity, stock)
+            });
+        } else {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || '상품 정보 불러오기 실패');
+            location.href = 'shop.html';
+        }
     }
 
     //장바구니 추가 : btn-add-to-cart
-    function addToCart(productId, productName, productPrice, unit, imageUrl, quantity) {
+    function addToCart(productId, productName, productPrice, unit, imageUrl, quantity, stock) {
 
         //기존 장바구니 가져오기
         const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
 
-        //이미 담겨있으면 수량만 증가
         const existingCart = cart.find(item => item.productId === productId);
 
-        if (existingCart)
-            existingCart.quantity += parseInt(quantity);
-        else
-            cart.push({productId, productName, productPrice, unit, imageUrl, quantity: parseInt(quantity)});
+        const existQuantity = existingCart?.quantity || 0;
+        if (existQuantity + parseInt(quantity) > stock) {
+            alert('재고보다 많이 담을 수 없습니다. 최대 ' + stock + '개 까지 담을 수 있습니다.');
+            return;
+        }
+
+        if (existingCart) {
+            existingCart.quantity += parseInt(quantity); //이미 담겨있으면 수량만 증가
+        } else
+            cart.push({
+                productId,
+                productName,
+                productPrice,
+                unit,
+                imageUrl,
+                quantity: parseInt(quantity),
+            });
 
         //장바구니 저장
         sessionStorage.setItem('cart', JSON.stringify(cart));

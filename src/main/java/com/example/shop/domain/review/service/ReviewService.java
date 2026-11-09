@@ -68,7 +68,7 @@ public class ReviewService {
 
         productRepository.findById(productId).orElseThrow(() -> {
             log.warn("상품별 리뷰 목록 조회 - 존재하지 않는 상품 입니다. product id : {}", productId);
-            return new MfvException("상품 별 리뷰 목록 조회 - 존재하지 않는 상품입니다.");
+            return new MfvException("존재하지 않는 상품입니다.");
         });
 
         Page<Review> reviewList = reviewRepository.findByOrderDetail_Product_Id(productId, sortedPageable);

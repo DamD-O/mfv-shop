@@ -50,7 +50,7 @@ public class ReviewImageService {
     {
         ReviewImage reviewImage = reviewImageRepository.findById(imageId).orElseThrow(() -> {
             log.warn("리뷰 이미지 삭제 실패 - imageId: {}", imageId);
-            return new MfvException("리뷰 이미지 삭제 실패 - 존재하지 않는 이미지입니다. 다시 확인 부탁드립니다.");
+            return new MfvException("존재하지 않는 이미지입니다. 다시 확인 부탁드립니다.");
         });
 
         if (!reviewImage.getReview().getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰 이미지만 삭제할 수 있습니다.");

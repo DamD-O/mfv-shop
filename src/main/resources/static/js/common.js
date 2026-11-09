@@ -240,3 +240,13 @@ function isAllowedImage(file) {
 
     return ALLOWED_IMAGE_EXT.has(fileExt.toLowerCase());
 }
+
+const LOW_STOCK = 10;
+
+function renderStock(stock) {
+    return `
+    <p class="mt-3 fs-5 fw-bold ${stock == 0 ? 'text-secondary' : stock <= LOW_STOCK ? 'text-danger' : 'text-success'}">
+        ${stock == 0 ? '품절' : stock <= LOW_STOCK ? stock + '개 남음' : '재고 있음'}
+    </p>`;
+}
+

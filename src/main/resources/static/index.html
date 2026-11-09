@@ -118,13 +118,12 @@
                     const card = `
                 <div class="col-12 col-md-4 mb-4">
                 <a href="shop-single.html?productId=${product.productId}" class="text-decoration-none text-dark">
-                    <div class="card h-100 shadow-sm">
+                    <div class="card h-100 shadow-sm ${product.productStock === 0 ? 'opacity-50' : ''}">
                            ${imgTag}
                         <div class="card-body">
                             <h5>${escapeHtml(product.productName)}</h5>
                             <p>${escapeHtml(product.unit)} 당 ${product.productPrice}원</p>
-                            <p class="${product.productStock > 0 ? 'text-success' : 'text-danger'}">
-                                ${product.productStock > 0 ? '재고 있음' : '품절'}</p>
+                            ${renderStock(product.productStock)}
                         </div>
                     </div>
                 </a>
