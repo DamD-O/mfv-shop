@@ -668,9 +668,8 @@
         const newPwd = document.getElementById('info-new-password').value;
         const newConfirmPwd = document.getElementById('info-new-password-confirm').value;
         if (newPwd) {
-            const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])\S{8,}$/;
 
-            if (!passwordRegex.test(newPwd)) {
+            if (!PASSWORD_REGEX.test(newPwd)) {
                 alert('비밀번호는 영문, 숫자, 특수문자(!,@,#,$,%,^,&,*) 포함 8자 이상이며 공백은 사용할 수 없습니다.');
                 return false;
             }

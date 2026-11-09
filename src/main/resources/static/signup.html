@@ -139,8 +139,7 @@
             return;
         }
 
-        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])\S{8,}$/;
-        if (!passwordRegex.test(password)) {
+        if (!PASSWORD_REGEX.test(password)) {
             errorDiv.textContent = '비밀번호는 영문, 숫자, 특수문자(!,@,#,$,%,^,&,*) 포함 8자 이며 공백은 포함할 수 없습니다.';
             errorDiv.classList.remove('d-none');
             return;

@@ -1,3 +1,5 @@
+const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])\S{8,}$/;
+
 async function loadHeader() {
     const response = await fetch('components/header.html');
     const html = await response.text();
@@ -249,4 +251,3 @@ function renderStock(stock) {
         ${stock == 0 ? '품절' : stock <= LOW_STOCK ? stock + '개 남음' : '재고 있음'}
     </p>`;
 }
-
