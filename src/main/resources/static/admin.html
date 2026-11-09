@@ -26,24 +26,24 @@
     <div class="row">
         <div class="col-3">
             <h4>관리자</h4>
-            <ul class="list-unstyled">
+            <ul class="list-unstyled" id="admin-sidebar">
                 <li class="mb-3">
-                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item active" onclick="showSection('dashboard')" data-section="dashboard">대시보드</a>
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item active" data-section="dashboard">대시보드</a>
                 </li>
                 <li class="mb-3">
-                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" onclick="showSection('product')" data-section="product">상품 관리</a>
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" data-section="product">상품 관리</a>
                 </li>
                 <li class="mb-3">
-                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" onclick="showSection('customer')" data-section="customer">회원 관리</a>
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" data-section="customer">회원 관리</a>
                 </li>
                 <li class="mb-3">
-                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" onclick="showSection('order')" data-section="order">주문 관리</a>
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" data-section="order">주문 관리</a>
                 </li>
                 <li class="mb-3">
-                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" onclick="showSection('qna')" data-section="qna">Q&A 관리</a>
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" data-section="qna">Q&A 관리</a>
                 </li>
                 <li class="mb-3">
-                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" onclick="showSection('notice')" data-section="notice">공지사항 관리</a>
+                    <a href="javascript:void(0)" class="text-dark text-decoration-none sidebar-item" data-section="notice">공지사항 관리</a>
                 </li>
             </ul>
         </div>
@@ -97,7 +97,7 @@
             <div id="product" class="admin-section d-none">
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                     <h6 class="mb-0">상품 관리</h6>
-                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#product-modal" onclick="openProductForm()">상품 등록</button>
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#product-modal" id="product-add-btn">상품 등록</button>
                 </div>
                 <div class="d-flex flex-wrap gap-2 mb-3" id="product-filter">
                     <button type="button" class="btn btn-sm btn-success" data-value="">전체</button>
@@ -280,7 +280,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">취소</button>
-                <button type="button" class="btn btn-success btn-sm" id="product-save-btn" onclick="saveProduct()">저장</button>
+                <button type="button" class="btn btn-success btn-sm" id="product-save-btn">저장</button>
             </div>
         </div>
     </div>
@@ -390,12 +390,16 @@
             return;
         }
 
-        const hash = location.hash.replace('#', '');
-        if (hash) {
-            showSection(hash);
-        } else {
-            loadDashboard();
-        }
+        document.getElementById('admin-sidebar').addEventListener('click', e => {
+            const target = e.target.closest('[data-section]');
+            if (!target) return;
+
+            showSection(target.dataset.section);
+        });
+
+        openHashSection();
+        window.addEventListener('hashchange', openHashSection);
+
 
         initFilterGroup('#period-group', () => loadPeriodStats());
         initFilterGroup('#unit-group', () => loadOrderStats());
@@ -442,6 +446,9 @@
             }
         });
 
+        document.getElementById('product-add-btn').addEventListener('click', () => openProductForm());
+        document.getElementById('product-save-btn').addEventListener('click', () => saveProduct())
+
         document.getElementById('notice-create-btn').addEventListener('click', () => {
             openNoticeForm();
         });
@@ -459,6 +466,16 @@
         })
 
     });
+
+    function openHashSection() {
+        const hash = location.hash.replace('#', '');
+
+        if (hash && document.getElementById(hash)?.classList.contains('admin-section')) {
+            showSection(hash);
+        } else {
+            showSection('dashboard');
+        }
+    }
 
     function showSection(type) {
         document.querySelectorAll('.admin-section').forEach(s => s.classList.add('d-none'));
@@ -1035,7 +1052,7 @@
                     alert('지원되지 않는 확장자 파일입니다. \n jpg, jpeg, png, gif, bmp, webp 파일만 업로드 할 수 있습니다')
                     return;
                 }
-                
+
                 const tempNewImageId = tempImageId--;
                 newImages.set(tempNewImageId, file);
                 renderImagePreview(tempNewImageId, URL.createObjectURL(file));
