@@ -28,7 +28,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findByCategory(ProductCategory category, Pageable pageable);
 
-    List<Product> findByStatus(ProductStatus status);
+    List<Product> findByStatusAndStockGreaterThan(ProductStatus status, int stock);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Product> findWithLockByIdAndStatus(Long id, ProductStatus status);

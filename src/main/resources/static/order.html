@@ -151,6 +151,7 @@
         } else {
             const error = await response.json().catch(() => ({}));
             alert(error.message || '주문 상세 목록 조회 실패');
+            location.replace('orders.html');
         }
     }
 

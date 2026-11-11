@@ -33,9 +33,9 @@ public class RecipeService {
 
     public RecipeResponse questionToAi(RecipeRequest request)
     {
-        List<Product> products = productRepository.findByStatus(ProductStatus.ON_SALE);
+        List<Product> products = productRepository.findByStatusAndStockGreaterThan(ProductStatus.ON_SALE, 0);
 
-        if (products.isEmpty()) throw new MfvException("판매중인 상품이 존재하지 않습니다.");
+        if (products.isEmpty()) throw new MfvException("현재 구매 가능한 상품이 없습니다.");
 
         String product = products.stream().map(Product::getName).collect(Collectors.joining(","));
 

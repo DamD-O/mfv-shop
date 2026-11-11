@@ -20,4 +20,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByCustomer_CustomerId(String customerCustomerId, Pageable pageable);
 
     List<Review> findByOrderDetailIn(List<OrderDetail> details);
+
+    boolean existsByOrderDetail_Id(Long orderDetailId);
 }

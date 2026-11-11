@@ -110,7 +110,7 @@ public class ProductService {
 
     public List<Product> getRandomProducts()
     {
-        List<Product> allProducts = productRepository.findByStatus(ProductStatus.ON_SALE);
+        List<Product> allProducts = productRepository.findByStatusAndStockGreaterThan(ProductStatus.ON_SALE, 0);
         Collections.shuffle(allProducts);
         return allProducts.stream().limit(3).toList();
     }
