@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author madey
@@ -22,4 +23,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByOrderDetailIn(List<OrderDetail> details);
 
     boolean existsByOrderDetail_Id(Long orderDetailId);
+
+    Optional<Review> findByCustomer_CustomerIdAndId(String customerId, Long reviewId);
 }

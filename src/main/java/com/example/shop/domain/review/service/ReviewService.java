@@ -94,12 +94,10 @@ public class ReviewService {
     @Transactional
     public Review updateReview(String customerId, Long reviewId, ReviewRequest request)
     {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
+        Review review = reviewRepository.findByCustomer_CustomerIdAndId(customerId, reviewId).orElseThrow(() -> {
             log.warn("리뷰 수정 - 존재하지 않는 리뷰 reviewId : {}", reviewId);
-            return new MfvException("존재하지 않는 리뷰 입니다.");
+            return new MfvException("존재하지 않거나 접근 권한이 없는 리뷰입니다.");
         });
-
-        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰만 수정 가능합니다.");
 
         review.updateContent(request.getRating(), request.getContent());
 
@@ -110,12 +108,10 @@ public class ReviewService {
     @Transactional
     public void deleteReview(String customerId, Long reviewId)
     {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
+        Review review = reviewRepository.findByCustomer_CustomerIdAndId(customerId, reviewId).orElseThrow(() -> {
             log.warn("리뷰삭제 - 존재하지 않는 리뷰, reviewId : {}", reviewId);
-            return new MfvException("존재하지 않는 리뷰입니다.");
+            return new MfvException("존재하지 않거나 접근 권한이 없는 리뷰입니다.");
         });
-
-        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰만 삭제 가능합니다.");
 
         List<String> reviewImages = review.getReviewImages().stream().map(ReviewImage::getImagePath).toList();
         reviewRepository.delete(review);
@@ -136,13 +132,11 @@ public class ReviewService {
 
     public Review getReview(String customerId, Long reviewId)
     {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
+        Review review = reviewRepository.findByCustomer_CustomerIdAndId(customerId, reviewId).orElseThrow(() -> {
             log.warn("리뷰 단건 조회 - 존재하지 않는 리뷰, reviewId : {}", reviewId);
-            return new MfvException("존재하지 않는 리뷰입니다.");
+            return new MfvException("존재하지 않거나 접근 권한이 없는 리뷰입니다.");
         });
-
-        if (!review.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인이 작성한 리뷰만 조회 가능합니다.");
-
+        
         return review;
     }
 

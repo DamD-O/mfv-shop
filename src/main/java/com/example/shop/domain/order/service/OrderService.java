@@ -137,12 +137,10 @@ public class OrderService {
     //주문 상세조회
     public Orders getOrder(String customerId, Long orderId)
     {
-        Orders orders = ordersRepository.findById(orderId).orElseThrow(() -> {
+        Orders orders = ordersRepository.findByCustomer_CustomerIdAndId(customerId, orderId).orElseThrow(() -> {
             log.warn("주문 상세조회 - 존재하지 않는 orderId: {}", orderId);
-            return new MfvException("존재 하지 않는 주문으로 주문 상세조회 실패");
+            return new MfvException("존재하지 않거나 접근 권한이 없는 주문입니다.");
         });
-
-        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인의 주문만 조회 가능합니다.");
 
         return orders;
     }
@@ -188,12 +186,10 @@ public class OrderService {
     @Transactional
     public void cancelOrder(String customerId, Long orderId)
     {
-        Orders orders = ordersRepository.findById(orderId).orElseThrow(() -> {
+        Orders orders = ordersRepository.findByCustomer_CustomerIdAndId(customerId, orderId).orElseThrow(() -> {
             log.warn("주문 취소 - 존재하지 않는 orderId: {}", orderId);
-            return new MfvException("존재 하지 않는 주문으로 주문 취소 실패");
+            return new MfvException("존재하지 않거나 접근 권한이 없는 주문입니다.");
         });
-
-        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인의 주문만 취소할 수 있습니다.");
 
         //취소 가능상태 체크
         OrderStatus status = orders.getOrderStatus();
@@ -211,13 +207,11 @@ public class OrderService {
     @Transactional
     public Orders processPayment(String customerId, Long orderId)
     {
-        Orders orders = ordersRepository.findById(orderId).orElseThrow(() -> {
+        Orders orders = ordersRepository.findByCustomer_CustomerIdAndId(customerId, orderId).orElseThrow(() -> {
             log.warn("결제 실패 - 존재하지 않는 주문 : {}", orderId);
-            return new MfvException("결제 실패 - 존재하지 않는 주문입니다.");
+            return new MfvException("존재하지 않거나 접근 권한이 없는 주문입니다.");
         });
-
-        if (!orders.getCustomer().getCustomerId().equals(customerId)) throw new MfvException("본인의 주문만 결제할 수 있습니다.");
-
+        
         //결제대기만 결제 가능 그외 예외처리
         if (!orders.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING))
             throw new MfvException("결제 대기 상태의 주문만 결제 가능합니다. \n 주문 상태 : " + orders.getOrderStatus().getLabel());

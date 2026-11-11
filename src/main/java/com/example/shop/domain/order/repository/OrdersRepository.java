@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author madey
@@ -46,5 +47,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
             GROUP BY orderStatus
             """, nativeQuery = true)
     List<OrderCountProjection> findOrderStatusCountsByCustomerId(String customerId);
+
+    Optional<Orders> findByCustomer_CustomerIdAndId(String customerId, Long orderId);
 }
 
