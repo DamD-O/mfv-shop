@@ -234,13 +234,24 @@ async function initAiWidget() {
 }
 
 const ALLOWED_IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']);
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
 
-function isAllowedImage(file) {
+function validateImage(file) {
 
     const filename = file.name;
     const fileExt = filename.substring(filename.lastIndexOf('.') + 1);
+    const filesize = file.size;
 
-    return ALLOWED_IMAGE_EXT.has(fileExt.toLowerCase());
+
+    if (!ALLOWED_IMAGE_EXT.has(fileExt.toLowerCase())) {
+        return '지원되지 않는 확장자 파일입니다. \n jpg, jpeg, png, gif, bmp, webp 파일만 업로드 할 수 있습니다';
+    }
+
+    if (MAX_IMAGE_SIZE < filesize) {
+        return '이미지 용량(' + (filesize / 1024 / 1024).toFixed(1) + 'MB) 이 20MB를 초과하였습니다. 20MB이하의 이미지를 첨부해주세요.';
+    }
+
+    return null;
 }
 
 const LOW_STOCK = 10;
