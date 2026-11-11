@@ -44,7 +44,7 @@ public class Product extends BaseTimeEntity {
     @Column(name = "unit", nullable = false, length = 20)
     private String unit;
     // 원산지
-    @Column(name = "origin", length = 100)
+    @Column(name = "origin", nullable = false, length = 100)
     private String origin;
 
     // 보관방법

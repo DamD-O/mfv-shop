@@ -182,20 +182,22 @@
         if (response.ok) {
             const data = await response.json();
 
-            let name = data.productName;
-            let price = data.productPrice;
-            let unit = data.unit;
-            let image = data.productImageUrl;
-            let stock = data.productStock;
-            let status = data.productStatus;
+            const name = data.productName;
+            const price = data.productPrice;
+            const unit = data.unit;
+            const image = data.productImageUrl;
+            const stock = data.productStock;
+            const status = data.productStatus;
+            const storage = data.storageMethod;
+            const description = data.description;
 
             document.getElementById('product-detail').src = image || '';
             document.getElementById('product-detail').alt = name;
             document.getElementById('product-name').innerText = name;
             document.getElementById('product-price').innerText = unit + '당 \t' + price + '원';
             document.getElementById('product-origin').innerText = data.origin;
-            document.getElementById('product-storage').innerText = data.storageMethod;
-            document.getElementById('product-description').innerText = data.description;
+            document.getElementById('product-storage').innerText = storage ? storage : '-';
+            document.getElementById('product-description').innerText = description ? description : '-';
 
             if (status === 'STOPPED') {
                 document.getElementById('product-stock').innerHTML = '<p class="mt-3 fs-5 fw-bold text-danger">판매중지</p>';

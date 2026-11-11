@@ -826,6 +826,11 @@
             return;
         }
 
+        if (!productCategory) {
+            showProductError('카테고리를 선택해주세요.');
+            return;
+        }
+
         if (!productPrice) {
             showProductError('상품 가격을 입력해주세요.');
             return;
@@ -846,11 +851,6 @@
             return;
         }
 
-        if (!productCategory) {
-            showProductError('카테고리를 선택해주세요.');
-            return;
-        }
-
         if (!unit) {
             showProductError('판매단위를 입력해주세요.');
             return;
@@ -858,16 +858,6 @@
 
         if (!origin) {
             showProductError('원산지를 입력해주세요.');
-            return;
-        }
-
-        if (!storageMethod) {
-            showProductError('보관 방법을 입력해주세요.');
-            return;
-        }
-
-        if (!description) {
-            showProductError('상품 설명을 입력해주세요.');
             return;
         }
 

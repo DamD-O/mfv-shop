@@ -23,6 +23,9 @@ public class ProductRequest {
     @Length(max = 500, message = "상품명은 500자 이내로 입력해주세요.")
     private String productName;
 
+    @NotNull(message = "카테고리를 선택해주세요.")
+    private ProductCategory productCategory;
+
     @NotNull(message = "상품 가격을 입력해주세요.")
     @Positive(message = "가격은 0보다 커야 합니다.")
     private Integer productPrice;
@@ -30,9 +33,6 @@ public class ProductRequest {
     @NotNull(message = "재고를 입력해주세요.")
     @PositiveOrZero(message = "재고는 0 이상이어야 합니다.")
     private Integer productStock;
-
-    @NotNull(message = "카테고리를 선택해주세요.")
-    private ProductCategory productCategory;
 
     @NotBlank(message = "판매 단위를 입력해주세요.")
     @Length(max = 20, message = "단위는 20자 이내로 입력해주세요.")
@@ -42,11 +42,9 @@ public class ProductRequest {
     @Length(max = 100, message = "원산지는 100자 이내로 입력해주세요.")
     private String origin;
 
-    @NotBlank(message = "보관방법을 입력해주세요.")
     @Length(max = 200, message = "보관방법은 200자 이내로 입력해주세요.")
     private String storageMethod;
 
-    @NotBlank(message = "상품 설명을 입력해주세요.")
     @Length(max = 5000, message = "설명은 5000자 이내로 입력해주세요.")
     private String description;
 
