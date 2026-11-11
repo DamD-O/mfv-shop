@@ -194,7 +194,7 @@
             document.getElementById('product-detail').src = image || '';
             document.getElementById('product-detail').alt = name;
             document.getElementById('product-name').innerText = name;
-            document.getElementById('product-price').innerText = unit + '당 \t' + price + '원';
+            document.getElementById('product-price').innerText = unit + '당 \t' + price.toLocaleString() + '원';
             document.getElementById('product-origin').innerText = data.origin;
             document.getElementById('product-storage').innerText = storage ? storage : '-';
             document.getElementById('product-description').innerText = description ? description : '-';

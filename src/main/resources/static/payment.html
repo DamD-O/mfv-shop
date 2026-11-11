@@ -392,7 +392,7 @@
                        <div class="col-12 col-md-2 d-flex align-items-center">${img}</div>
                             <div class="col-12 col-md-6">
                                 <p class="fw-bold mb-0">${escapeHtml(item.productName)} </p>
-                                <p class="text-muted small mb-0">${escapeHtml(item.unit)} 당 ${item.productPrice}원</p>
+                                <p class="text-muted small mb-0">${escapeHtml(item.unit)} 당 ${item.productPrice.toLocaleString()}원</p>
                             </div>
                             <div class="col-12 col-md-4 text-end">
                                 <p class="fw-bold mb-0">${(item.productPrice * item.quantity).toLocaleString()}원</p>
