@@ -99,8 +99,8 @@
                             <div class="col-12 col-md-2">${img}</div>
                             <div class="col-12 col-md-5">
                                 <p>${escapeHtml(item.productName)} ${stopped ? '<span class="badge bg-danger">판매중지</span>' : ''}</p>
-                                <p>${escapeHtml(item.unit)}당 ${item.productPrice}원</p>
-                                <p class="product-total">총: ${item.productPrice * item.quantity}원</p>
+                                <p>${escapeHtml(item.unit)}당 ${item.productPrice.toLocaleString()}원</p>
+                                <p class="product-total">총: ${(item.productPrice * item.quantity).toLocaleString()}원</p>
                             </div>
                             <div class="col-12 col-md-3">
                                 <input type="number" value="${item.quantity}" min="1" class="form-control border-success" style="width: 80px;"
@@ -126,7 +126,7 @@
         if (item) {
             item.quantity = inputQuantity < 1 || isNaN(inputQuantity) ? 1 : parseInt(inputQuantity);
 
-            input.closest('.row').querySelector('.product-total').textContent = '총: ' + item.productPrice * item.quantity + '원';
+            input.closest('.row').querySelector('.product-total').textContent = '총: ' + (item.productPrice * item.quantity).toLocaleString() + '원';
 
             input.value = item.quantity;
         }
@@ -144,7 +144,7 @@
                 total += item.productPrice * item.quantity;
         });
 
-        document.getElementById('total-price').innerText = total + '원';
+        document.getElementById('total-price').innerText = total.toLocaleString() + '원';
     }
 
     function deleteSelected() {
