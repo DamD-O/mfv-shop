@@ -7,7 +7,6 @@ import com.example.shop.domain.address.repository.DeliveryAddressRepository;
 import com.example.shop.domain.customer.entity.Customer;
 import com.example.shop.domain.customer.repository.CustomerRepository;
 import com.example.shop.global.exception.MfvException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -54,7 +53,7 @@ public class DeliveryAddressService {
         DeliveryAddress address = deliveryAddressRepository.findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(customerId, deliveryId)
                                                            .orElseThrow(() -> {
                                                                log.warn("존재하지 않는 배송지 입니다. deliveryId : {}", deliveryId);
-                                                               return new MfvException("존재하지 않는 배송지 입니다. 다시 확인 부탁드립니다.");
+                                                               return new MfvException("존재하지 않거나 접근 권한이 없는 배송지입니다.");
                                                            });
 
         address.update(request.getAddressName(), request.getReceiver(), request.getContact(), request.getZipcode(), request.getRoadAddress(),
@@ -73,7 +72,7 @@ public class DeliveryAddressService {
     {
         //배송지 단건 조회
         DeliveryAddress address = deliveryAddressRepository.findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(customerId, deliveryId)
-                                                           .orElseThrow(() -> new EntityNotFoundException("배송지를 찾을 수 없습니다."));
+                                                           .orElseThrow(() -> new MfvException("존재하지 않거나 접근 권한이 없는 배송지입니다."));
 
         return new DeliveryAddressResponse(address);
     }
@@ -84,7 +83,7 @@ public class DeliveryAddressService {
         DeliveryAddress address = deliveryAddressRepository.findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(customerId, deliveryId)
                                                            .orElseThrow(() -> {
                                                                log.warn("존재하지 않는 배송지 입니다. deliveryId : {}", deliveryId);
-                                                               return new MfvException("존재하지 않는 배송지 입니다. 다시 확인 부탁드립니다.");
+                                                               return new MfvException("존재하지 않거나 접근 권한이 없는 배송지입니다.");
                                                            });
 
         if (address.isDefault()) throw new MfvException("기본 배송지는 삭제 할 수 없습니다.");
@@ -98,7 +97,7 @@ public class DeliveryAddressService {
         DeliveryAddress target = deliveryAddressRepository.findByCustomer_CustomerIdAndDeliveryIdAndDeletedAtIsNull(customerId, deliveryId)
                                                           .orElseThrow(() -> {
                                                               log.warn("존재하지 않는 배송지 - deliveryId: {}", deliveryId);
-                                                              return new MfvException("존재하지 않는 배송지 입니다.");
+                                                              return new MfvException("존재하지 않거나 접근 권한이 없는 배송지입니다.");
                                                           });
 
         //기존 설정된 기본 배송지 false로 변경

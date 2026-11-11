@@ -34,7 +34,7 @@ async function checkLoginStatus() {
             if (data.role === 'ROLE_ADMIN') {
                 document.getElementById('my-dropdown').innerHTML = `
                     <li><a class="dropdown-item" href="admin.html">관리자페이지</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="logout()">로그아웃</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="logout(); return false;">로그아웃</a></li>
                 `;
 
                 footerLoginLink.href = 'admin.html';
@@ -43,7 +43,7 @@ async function checkLoginStatus() {
                 document.getElementById('my-dropdown').innerHTML = `
                     <li><a class="dropdown-item" href="mypage.html">마이페이지</a></li>
                     <li><a class="dropdown-item" href="orders.html">주문내역</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="logout()">로그아웃</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="logout(); return false;">로그아웃</a></li>
                 `;
 
                 footerLoginLink.textContent = '마이페이지';

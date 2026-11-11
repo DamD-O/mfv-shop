@@ -10,7 +10,6 @@ import com.example.shop.domain.customer.repository.CustomerRepository;
 import com.example.shop.domain.order.entity.OrderStatus;
 import com.example.shop.domain.order.repository.OrdersRepository;
 import com.example.shop.global.exception.MfvException;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -97,7 +96,7 @@ public class CustomerService {
 
     public String getCustomerName(String customerId)
     {
-        return customerRepository.findOneByCustomerId(customerId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자 입니다.")).getName();
+        return customerRepository.findOneByCustomerId(customerId).orElseThrow(() -> new MfvException("존재하지 않는 사용자 입니다.")).getName();
     }
 
     public CustomerResponse getCustomerInfo(String customerId)

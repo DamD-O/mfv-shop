@@ -16,7 +16,6 @@ import com.example.shop.domain.order.repository.OrderDetailRepository;
 import com.example.shop.domain.order.repository.OrdersRepository;
 import com.example.shop.global.dto.PageResponse;
 import com.example.shop.global.exception.MfvException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -51,7 +50,7 @@ public class AdminService {
 
     public String getAdminName(String adminId)
     {
-        return adminRepository.findOneByAdminId(adminId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자 입니다.")).getName();
+        return adminRepository.findOneByAdminId(adminId).orElseThrow(() -> new MfvException("존재하지 않는 사용자 입니다.")).getName();
     }
 
     /**

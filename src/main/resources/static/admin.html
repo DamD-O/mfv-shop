@@ -542,6 +542,8 @@
 
         document.getElementById(paginationId).querySelector('ul').innerHTML = renderPagination(data);
         document.getElementById(paginationId).classList.toggle('d-none', data.totalPage < 2);
+
+        return data;
     }
 
     function loadDashboard() {
@@ -698,7 +700,7 @@
         const status = getActiveFilter('#order-filter');
         const url = status ? `/api/admin/orders?page=${page}&status=${status}` : `/api/admin/orders?page=${page}`;
 
-        await loadPageList({
+        const data = await loadPageList({
             url,
             listId: 'admin-order-list',
             emptyId: 'admin-order-empty',
@@ -706,6 +708,10 @@
             renderRow: renderOrderRow,
             errorMessage: '주문 목록 조회 실패'
         });
+
+        if (data && data.content.length === 0 && page > 0)
+            loadOrder(page - 1);
+
     }
 
     async function loadQna(page = 0) {
@@ -713,7 +719,7 @@
         const status = getActiveFilter('#qna-filter');
         const url = status ? `/api/admin/qna?page=${page}&status=${status}` : `/api/admin/qna?page=${page}`;
 
-        await loadPageList({
+        const data = await loadPageList({
             url,
             listId: 'admin-qna-list',
             emptyId: 'admin-qna-empty',
@@ -721,6 +727,9 @@
             renderRow: renderQnaRow,
             errorMessage: 'QnA 목록 조회 실패'
         });
+
+        if (data && data.content.length === 0 && page > 0)
+            loadQna(page - 1);
     }
 
     async function loadNotice(page = 0) {

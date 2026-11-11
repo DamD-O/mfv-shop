@@ -62,6 +62,8 @@ public class ReviewService {
 
         if (!orderDetail.getOrders().getOrderStatus().equals(OrderStatus.DELIVERED)) throw new MfvException("배송이 완료된 상품에 한해서 리뷰 작성 가능합니다.");
 
+        if (reviewRepository.existsByOrderDetail_Id(request.getOrderDetailId())) throw new MfvException("이미 작성된 리뷰가 있습니다. 중복으로 리뷰를 작성할 수 없습니다.");
+
         Review review = new Review(customer, orderDetail, request.getRating(), request.getContent());
         reviewRepository.save(review);
 
