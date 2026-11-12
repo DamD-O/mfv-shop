@@ -43,3 +43,5 @@ server:
   servlet:
     session:
       timeout: 18000
+
+app.demo-customer-id: ${DEMO_CUSTOMER_ID:}

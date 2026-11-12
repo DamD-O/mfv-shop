@@ -13,6 +13,7 @@ import com.example.shop.global.exception.MfvException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,9 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final OrdersRepository ordersRepository;
+
+    @Value("${app.demo-customer-id}")
+    private String demoCustomerId;
 
     //회원가입
     @Transactional
@@ -81,6 +85,8 @@ public class CustomerService {
             return new MfvException("탈퇴실패하였습니다. 사유 : 존재하지 않는 사용자 입니다.");
         });
 
+        if (customerId.equals(demoCustomerId)) throw new MfvException("데모계정은 탈퇴할 수 없습니다.");
+
         if (!passwordEncoder.matches(request.getPassword(), customer.getPassword()))
         {
             throw new MfvException("비밀번호가 일치하지 않습니다.");
@@ -116,6 +122,8 @@ public class CustomerService {
             log.warn("사용자 정보 수정 실패, customerId: {}", customerId);
             return new MfvException("사용자 정보 수정 - 존재하지 않는 사용자 입니다.");
         });
+
+        if (customerId.equals(demoCustomerId)) throw new MfvException("데모계정은 정보를 수정 할 수 없습니다.");
 
         if (!passwordEncoder.matches(request.getOldPassword(), customer.getPassword())) throw new MfvException("현재 비밀번호가 일치하지 않습니다.");
 
